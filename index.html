@@ -23,7 +23,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: middle; }
         th { background: #e9ecef; color: var(--primary); text-align: center; font-size: 16px;}
-        .input-cell { width: 100%; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; font-family: inherit; font-size: 15px; }
+        .input-cell { width: 100%; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s;}
         .hs-panel { background: #f8fbff; border: 1px solid #b8daff; padding: 12px; border-radius: 4px; }
         .hs-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;}
         .hs-ketqua { font-weight: bold; color: #d9534f; background: #fff; padding: 12px; border: 1px dashed #dc3545; white-space: pre-line; min-height: 25px; line-height: 1.8;}
@@ -31,6 +31,9 @@
         .live-rating { font-size: 24px; font-weight: bold; color: #dc3545; text-align: right;}
         #loading { display: none; color: var(--primary); font-style: italic; text-align: center; margin: 20px; font-size: 16px;}
         .hidden { display: none; }
+        
+        /* CSS cho ô bị khóa */
+        .locked-input { background-color: #e9ecef !important; cursor: not-allowed; color: #0056b3; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -74,7 +77,7 @@
         </table>
 
         <div class="live-result-box">
-            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tuân thủ nghiêm ngặt 8 mục tối thiểu và Luật 30% vượt)</i></div></div>
+            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Hệ thống tự động nội suy theo Quy chế)</i></div></div>
             <div class="live-rating" id="hienThiXepLoai">CHƯA HOÀN THÀNH NHIỆM VỤ<br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: 0đ)</span></div>
         </div>
 
@@ -85,6 +88,7 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let dinhDanhHienTai = "", tenHoSoHienTai = "", cauHinhDiemHienTai = {};
+    let ketQuaThangTuDong = ""; // Biến chứa dữ liệu cột D KHAIBAO
 
     async function thucHienTraCuu() {
         const thongTin = document.getElementById("dinhDanhInput").value.trim();
@@ -97,6 +101,8 @@
                 dinhDanhHienTai = thongTin;
                 tenHoSoHienTai = result.tenSheet;
                 cauHinhDiemHienTai = result.config;
+                ketQuaThangTuDong = result.ketQuaThang || ""; // Nhận dữ liệu từ máy chủ
+                
                 document.getElementById("userName").innerText = tenHoSoHienTai;
                 xayDungBang(result.data);
                 document.getElementById("lookupArea").classList.add("hidden");
@@ -114,8 +120,18 @@
             let tg = (item.thangGiaTri === "undefined" || !item.thangGiaTri) ? "" : item.thangGiaTri.toString().trim();
             let kq = item.ketQua || "";
             let html = "";
+            let isTieuDe = !tg && !item.tieuChi.toLowerCase().includes("phê bình");
+            
+            // CẢM BIẾN NHẬN DIỆN VÀ KHÓA Ô TỰ ĐỘNG LẤY TỪ KHAIBAO
+            let isAutoLoadField = item.tieuChi.toLowerCase().includes("xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
+            if (isAutoLoadField && ketQuaThangTuDong !== "") {
+                kq = ketQuaThangTuDong; // Ép giá trị từ KHAIBAO
+            }
 
-            if (tg === "THANHTICH_HS_DONG") {
+            if (isAutoLoadField) {
+                // Khóa input, làm nền xám
+                html = `<input type="text" class="input-cell locked-input trigger-calc" value="${kq}" readonly title="Được đồng bộ tự động từ hệ thống, không thể sửa">`;
+            } else if (tg === "THANHTICH_HS_DONG") {
                 html = `<div class="hs-panel"><div class="hs-controls"><select id="hs_cap_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="hs_giai_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="hs_loai_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="hs_sl_${index}" value="1" min="1" style="width: 50px;"><button class="btn btn-blue btn-small" onclick="congDiemHS(${index})">Thêm giải</button><button class="btn btn-red btn-small" onclick="xoaDiemHS(${index})">Xóa</button></div><div id="hs_hienthi_${index}" class="hs-ketqua">${kq ? kq.replace(/\\n/g, '<br>') : 'Chưa có dữ liệu...'}</div><input type="hidden" class="input-cell trigger-calc" id="hs_hidden_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 html = `<select class="input-cell trigger-calc">` + tg.split(",").map(opt => {
@@ -126,7 +142,6 @@
                 html = `<input type="text" class="input-cell trigger-calc" value="${kq}">`;
             }
 
-            let isTieuDe = !tg && !item.tieuChi.toLowerCase().includes("phê bình");
             body.insertAdjacentHTML('beforeend', `<tr style="${isTieuDe?'background:#f1f8ff;font-weight:bold;color:var(--primary);':''}"><td align="center">${isTieuDe?"":index+1}</td><td class="tieu-chi">${item.tieuChi}</td><td align="center">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td>${isTieuDe?"":html}</td></tr>`);
         });
         document.querySelectorAll(".trigger-calc").forEach(el => { el.addEventListener('change', tinhToanXepLoaiQuyChe); el.addEventListener('input', tinhToanXepLoaiQuyChe); });
@@ -147,7 +162,7 @@
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
     /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ: 8 MỤC GIÀNG BUỘC CỨNG & 30% VƯỢT MỨC
+     * BỘ MÁY SUY LUẬN QUY CHẾ
      * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
@@ -164,7 +179,6 @@
             return false;
         };
 
-        // 1. QUÉT TỪ KHÓA
         rows.forEach(row => {
             let tc = row.querySelector(".tieu-chi")?.innerText.toLowerCase(), inp = row.querySelector(".input-cell");
             if (!inp) return;
@@ -178,9 +192,18 @@
             }
 
             if (tc.includes("phê bình")) { p.pb = num; has.pb = true; }
+            
+            // Xử lý thông minh ô "Xếp loại hàng tháng" bị khóa
+            else if (tc.includes("xếp loại hàng tháng") || tc.includes("bình quân cả năm")) {
+                if (check(val, /xuất sắc/i)) { p.xs = 100; has.xs = true; }
+                else if (check(val, /tốt/i)) { p.t = 100; has.t = true; }
+                else if (check(val, /hoàn thành|ht/i)) { p.ht = 100; has.ht = true; }
+            }
+            
             else if (tc.includes("tháng") && tc.includes("xuất sắc")) { p.xs = num; has.xs = true; }
             else if (tc.includes("tháng") && tc.includes("tốt")) { p.t = num; has.t = true; }
             else if (tc.includes("tháng") && (tc.includes("hoàn thành") || tc.includes("ht")) && !tc.includes("tốt")) { p.ht = num; has.ht = true; }
+            
             else if (tc.includes("chuẩn")) { p.cnn = val; has.cnn = true; }
             else if (tc.includes("chuyên môn")) { p.cm = val; has.cm = true; }
             else if (tc.includes("chuyển biến")) { p.cb = val; has.cb = true; }
@@ -199,19 +222,18 @@
         let tongT = p.xs + p.t;
         let tongH = tongT + p.ht;
 
-        // 2. BỘ ĐẾM 30% VƯỢT MỨC CHO XUẤT SẮC
         const checkVuotMucXS = () => {
             let tong = 0; let vuot = 0;
             if (role === "giaovien") {
-                tong++; if (p.xs > 0) vuot++; // Vượt Tỷ lệ tháng
-                tong++; // Chuẩn NN kịch trần Tốt
-                tong++; // Chuyên môn kịch trần Giỏi
-                tong++; // Chuyển biến kịch trần Tốt
-                tong++; if (p.vs > 60) vuot++; // Vượt VSCĐ
-                tong++; if (check(p.gvdg, /xã|cụm|khu|tỉnh|quốc/i)) vuot++; // Vượt GVDG (sàn là Cấp trường)
-                tong++; if (check(p.gHS, /quốc|tỉnh.*(nhất|nhì)|nhất.*(cụm|khu)/i)) vuot++; // Vượt Giải HS
-                tong++; if (p.hsXS > 20 || p.hsTot > 25) vuot++; // Vượt Tỷ lệ HS
-                tong++; // Kiêm nhiệm kịch trần Tốt
+                tong++; if (p.xs > 0) vuot++; 
+                tong++; 
+                tong++; 
+                tong++; 
+                tong++; if (p.vs > 60) vuot++; 
+                tong++; if (check(p.gvdg, /xã|cụm|khu|tỉnh|quốc/i)) vuot++; 
+                tong++; if (check(p.gHS, /quốc|tỉnh.*(nhất|nhì)|nhất.*(cụm|khu)/i)) vuot++; 
+                tong++; if (p.hsXS > 20 || p.hsTot > 25) vuot++; 
+                tong++; 
             } else {
                 tong++; if (p.xs > 0) vuot++;
                 tong++; if (check(p.sk, /tỉnh|quốc/i)) vuot++;
@@ -221,56 +243,44 @@
             return (vuot / tong) >= 0.3;
         };
 
-        // 3. ĐÁNH GIÁ (BẮT BUỘC ĐỦ 8 MỤC ĐỐI VỚI GIÁO VIÊN XUẤT SẮC)
         let xl = "CHƯA HOÀN THÀNH NHIỆM VỤ", c = "#dc3545";
         let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (role === "giaovien") {
             let gXS_San = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)|quốc/i);
             
-            // XUẤT SẮC: Các mục has.* phải TRUE (bắt buộc phải có trong hồ sơ) và thỏa mãn tối thiểu
-            gv_XS = (has.pb && p.pb === 0) && 
-                    (tongT >= 100) &&
-                    (has.cnn && check(p.cnn, /tốt/i)) && 
-                    (has.cm && check(p.cm, /giỏi/i)) && 
-                    (has.cb && check(p.cb, /tốt/i)) && 
-                    (has.vs && p.vs >= 60) && 
-                    (has.gvdg && check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
-                    (has.gHS && p.gHS.trim() !== "" && gXS_San) && 
-                    (has.hsHT && p.hsHT >= 100) && (has.hsXS && p.hsXS >= 20) && (has.hsTot && p.hsTot >= 25) &&
-                    (has.kn && passKN(p.kn, 'XS')) && 
-                    checkVuotMucXS(); // Phải có 30% vượt mức
+            gv_XS = (!has.pb || p.pb === 0) && tongT >= 100 &&
+                    (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && 
+                    (!has.cnn || check(p.cnn, /tốt/i)) && (!has.cm || check(p.cm, /giỏi/i)) && 
+                    (!has.cb || check(p.cb, /tốt/i)) && (!has.vs || p.vs >= 60) && 
+                    (!has.gvdg || check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
+                    (!has.gHS || (p.gHS.trim() !== "" && gXS_San)) && 
+                    (!has.hsHT || p.hsHT >= 100) && (!has.hsXS || p.hsXS >= 20) && (!has.hsTot || p.hsTot >= 25) &&
+                    passKN(p.kn, 'XS') && checkVuotMucXS(); 
 
-            // TỐT: Không bắt buộc có GVDG và Giải HS
-            gv_Tot = (tongT >= 100) &&
-                     (has.cnn && check(p.cnn, /khá|tốt/i)) && 
-                     (has.cm && check(p.cm, /khá|giỏi/i)) && 
-                     (has.cb && check(p.cb, /khá|tốt/i)) && 
-                     (has.vs && p.vs >= 40) && 
-                     (has.hsHT && p.hsHT >= 95) && (has.hsXS && p.hsXS >= 15) && (has.hsTot && p.hsTot >= 25) &&
-                     (has.kn && passKN(p.kn, 'Tốt'));
+            gv_Tot = tongT >= 100 &&
+                     (!has.cnn || check(p.cnn, /khá|tốt/i)) && (!has.cm || check(p.cm, /khá|giỏi/i)) && 
+                     (!has.cb || check(p.cb, /khá|tốt/i)) && (!has.vs || p.vs >= 40) && 
+                     (!has.hsHT || p.hsHT >= 95) && (!has.hsXS || p.hsXS >= 15) && (!has.hsTot || p.hsTot >= 25) &&
+                     passKN(p.kn, 'Tốt');
 
-            // HOÀN THÀNH: Không bắt buộc VSCĐ, Chuyển biến
-            gv_HT = (tongH >= 100) &&
-                    (has.cnn && !check(p.cnn, /chưa đạt/i)) && 
-                    (has.cm && !check(p.cm, /yếu|kém/i)) &&
-                    (has.hsHT && p.hsHT >= 90) && (has.hsXS && p.hsXS >= 10) && (has.hsTot && p.hsTot >= 20) &&
-                    (has.kn && passKN(p.kn, 'HT'));
+            gv_HT = tongH >= 100 &&
+                    (!has.cnn || !check(p.cnn, /chưa đạt/i)) && (!has.cm || !check(p.cm, /yếu|kém/i)) &&
+                    (!has.hsHT || p.hsHT >= 90) && (!has.hsXS || p.hsXS >= 10) && (!has.hsTot || p.hsTot >= 20) &&
+                    passKN(p.kn, 'HT');
 
             if (gv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
             else if (gv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
             else if (gv_HT) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
             
         } else {
-            // NHÂN VIÊN XUẤT SẮC
-            nv_XS = tongT >= 100 && (has.pb && p.pb === 0) &&
-                    (has.sk && check(p.sk, /xã|tỉnh|quốc/i)) && 
-                    (has.kn && passKN(p.kn, 'XS')) && 
-                    checkVuotMucXS();
+            nv_XS = tongT >= 100 && (!has.pb || p.pb === 0) &&
+                    (!has.sk || (p.sk.trim() !== "" && check(p.sk, /xã|tỉnh|quốc/i))) && 
+                    passKN(p.kn, 'XS') && checkVuotMucXS();
 
-            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && (!has.kn || passKN(p.kn, 'Tốt'));
+            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && passKN(p.kn, 'Tốt');
 
-            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && (!has.kn || passKN(p.kn, 'HT'));
+            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && passKN(p.kn, 'HT');
 
             if (nv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
             else if (nv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
