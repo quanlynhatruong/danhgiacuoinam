@@ -92,7 +92,7 @@
             </div>
             <div class="live-rating" id="hienThiXepLoai">
                 CHƯA HOÀN THÀNH NHIỆM VỤ<br>
-                <span style="font-size: 18px; color: #0056b3;">(Tổng điểm thành tích: 0đ)</span>
+                <span style="font-size: 18px; color: #0056b3;">(Tổng điểm phần 2: 0đ)</span>
             </div>
         </div>
 
@@ -101,7 +101,7 @@
 </div>
 
 <script>
-    // ĐƯỜNG DẪN WEB APP CỦA ĐỒNG CHÍ
+    // ĐƯỜNG DẪN WEB APP CHÍNH THỨC
     const API_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let dinhDanhHienTai = "";
     let tenHoSoHienTai = "";
@@ -127,7 +127,7 @@
                 document.getElementById("lookupArea").classList.add("hidden");
                 document.getElementById("mainArea").classList.remove("hidden");
                 
-                // Kích hoạt tính toán xếp loại và tổng điểm ngay lần tải đầu tiên
+                // Kích hoạt tính toán xếp loại ngay khi tải xong
                 tinhToanXepLoaiQuyChe();
             } else { alert(result.message); }
         } catch (err) { alert("Đường truyền gián đoạn. Vui lòng kiểm tra mạng nội bộ."); }
@@ -165,7 +165,7 @@
                 options.forEach(opt => {
                     let parts = opt.split("|");
                     let tenOption = parts[0] ? parts[0].trim() : "";
-                    let diemOption = parts[1] ? parts[1].trim() : "0"; // Trích xuất điểm ẩn để tính toán
+                    let diemOption = parts[1] ? parts[1].trim() : "0"; // Lưu điểm ẩn để tính toán tự động
                     let trangThai = ketQuaLuu.includes(tenOption) ? "selected" : "";
                     htmlNhapLieu += `<option value="${tenOption}" data-point="${diemOption}" ${trangThai}>${tenOption} (${diemOption} điểm)</option>`;
                 });
@@ -186,7 +186,7 @@
             body.insertAdjacentHTML('beforeend', row);
         });
 
-        // Kích hoạt bộ cảm biến Live-Update
+        // Kích hoạt bộ cảm biến sự kiện: Bất kỳ thay đổi nào cũng gọi tính toán lại
         document.querySelectorAll(".trigger-calc").forEach(el => {
             el.addEventListener('input', tinhToanXepLoaiQuyChe);
             el.addEventListener('change', tinhToanXepLoaiQuyChe);
@@ -229,7 +229,7 @@
     }
 
     /**
-     * BỘ MÁY TÍNH TOÁN CỘNG ĐIỂM VÀ SUY LUẬN XẾP LOẠI ĐÃ ĐƯỢC NÂNG CẤP
+     * BỘ MÁY TÍNH TOÁN CỘNG ĐIỂM VÀ SUY LUẬN XẾP LOẠI (BẢN VÁ LỖI CHÍNH XÁC 100% THEO PDF)
      */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr");
@@ -243,6 +243,8 @@
         };
         
         let tongDiem = 0; // Biến cộng dồn tổng điểm phần 2
+        let isGiaoVien = false;
+        let isNhanVien = false;
 
         rows.forEach(row => {
             let tcObj = row.querySelector(".tieu-chi");
@@ -262,86 +264,90 @@
                 tongDiem += (so * 0.1);
             } else if (tc.includes("thành tích") || (row.querySelector(".thang-gia-tri") && row.querySelector(".thang-gia-tri").innerText === 'Quy chế T.Tích')) {
                 let matches = inputObj.value.match(/=\s*([\d\.]+)\s*điểm/g);
-                if (matches) {
-                    matches.forEach(m => {
-                        tongDiem += parseFloat(m.replace(/[^\d\.]/g, '')) || 0;
-                    });
-                }
-            } else if (tc.includes("phần 1") && tc.includes("điểm")) {
-                tongDiem += so; // Hỗ trợ cộng dồn nếu nhà trường thêm dòng điểm P1
+                if (matches) { matches.forEach(m => { tongDiem += parseFloat(m.replace(/[^\d\.]/g, '')) || 0; }); }
             }
 
-            // === B. ĐỌC TỪ KHÓA ĐỂ ĐỐI CHIẾU QUY CHẾ ===
+            // === B. ĐỌC TỪ KHÓA ĐỂ ĐỐI CHIẾU QUY CHẾ VÀ PHÂN LOẠI NGẠCH ===
             if(tc.includes("phê bình")) p.pheBinh = so;
             else if(tc.includes("tháng") && tc.includes("xuất sắc")) p.thangXS = so;
-            else if(tc.includes("tháng") && (tc.includes("tốt") || tc.includes("ht tốt"))) p.thangTot = so;
+            else if(tc.includes("tháng") && tc.includes("tốt")) p.thangTot = so;
             else if(tc.includes("tháng") && tc.includes("hoàn thành") && !tc.includes("tốt")) p.thangHT = so;
             
-            else if(tc.includes("chuẩn nghề nghiệp")) p.chuanNN = kq; 
-            else if(tc.includes("chuyên môn")) p.chuyenMon = kq; 
+            else if(tc.includes("chuẩn nghề nghiệp")) { p.chuanNN = kq; isGiaoVien = true; }
+            else if(tc.includes("chuyên môn")) { p.chuyenMon = kq; isGiaoVien = true; }
             else if(tc.includes("chuyển biến")) p.chuyenBien = kq;
             else if(tc.includes("vở sạch")) p.vsCD = so;
             else if(tc.includes("giáo viên giỏi") || tc.includes("gvdg")) p.gvdg = kq;
-            else if(tc.includes("kiêm nhiệm")) p.kiemNhiem = kq;
-            else if(tc.includes("sáng kiến")) p.sangKien = kq;
-            
-            else if(tc.includes("thành tích") || (row.querySelector(".thang-gia-tri") && row.querySelector(".thang-gia-tri").innerText === 'Quy chế T.Tích')) {
-                p.giaiHS = inputObj.value; 
-            }
             else if(tc.includes("học sinh") || tc.includes("hs")) {
+                isGiaoVien = true;
                 if(tc.includes("xuất sắc")) p.hsXS = so;
                 else if(tc.includes("tốt")) p.hsTot = so;
                 else if(tc.includes("hoàn thành") && !tc.includes("tốt") && !tc.includes("xuất sắc")) p.hsHT = so;
             }
+            else if(tc.includes("thành tích") || (row.querySelector(".thang-gia-tri") && row.querySelector(".thang-gia-tri").innerText === 'Quy chế T.Tích')) {
+                p.giaiHS = inputObj.value; 
+            }
+            
+            else if(tc.includes("sáng kiến")) { p.sangKien = kq; isNhanVien = true; }
+            else if(tc.includes("kiêm nhiệm")) p.kiemNhiem = kq;
         });
 
-        // === C. ĐÁNH GIÁ CHÉO (Lấy mức cao nhất giữa chuẩn Giáo viên và Nhân viên) ===
+        // BẢN VÁ LỖI LOGIC: Nội suy tỷ lệ phần trăm (Đạt XS 100% thì tự động coi Tốt và HT cũng là 100%)
+        p.thangTot = Math.max(p.thangTot, p.thangXS);
+        p.thangHT = Math.max(p.thangHT, p.thangTot);
+
+        // === C. SUY LUẬN XẾP LOẠI SONG SONG (Bám sát PDF) ===
         let gvLevel = 1; // 1: CHT, 2: HT, 3: Tốt, 4: XS
         let nvLevel = 1;
         
-        // Điều kiện Giáo Viên
-        let datGiaiXS = /nhất.*xã|nhất.*cụm|nhất.*khu|nhất.*tỉnh|nhất.*quốc|nhì.*cụm|nhì.*khu|nhì.*tỉnh|nhì.*quốc|ba.*tỉnh|ba.*quốc/i.test(p.giaiHS);
-        
-        if (p.pheBinh === 0 && p.thangXS >= 30 &&
-            p.chuanNN.includes("tốt") && p.chuyenMon.includes("giỏi") && p.chuyenBien.includes("tốt") &&
-            p.vsCD >= 60 && 
-            (p.gvdg.includes("trường") || p.gvdg.includes("xã") || p.gvdg.includes("cụm") || p.gvdg.includes("tỉnh") || p.gvdg.includes("quốc")) &&
-            datGiaiXS && p.hsHT >= 100 && p.hsXS >= 20 && p.hsTot >= 25 &&
-            (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"))) {
-            gvLevel = 4;
-        } 
-        else if (p.thangTot >= 100 &&
-                 (p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) && 
-                 (p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
-                 (p.chuyenBien.includes("khá") || p.chuyenBien.includes("tốt")) &&
-                 p.vsCD >= 40 && p.hsHT >= 95 && p.hsXS >= 15 && p.hsTot >= 25 &&
-                 (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"))) {
-            gvLevel = 3;
-        }
-        else if (p.thangHT >= 100 &&
-                 (p.chuanNN.includes("đạt") || p.chuanNN.includes("trung bình") || p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) &&
-                 (p.chuyenMon.includes("tb") || p.chuyenMon.includes("trung bình") || p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
-                 p.hsHT >= 90 && p.hsXS >= 10 && p.hsTot >= 20 &&
-                 (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"))) {
-            gvLevel = 2;
+        // --- 1. XÉT DUYỆT CHUẨN GIÁO VIÊN ---
+        if (isGiaoVien) {
+            // Biểu thức Regex kiểm tra giải thưởng khắt khe: Nhất xã, Nhì Cụm/Khu, Ba Tỉnh... trở lên
+            let datGiaiXS = /(nhất.*(xã|cụm|khu|tỉnh|quốc))|(nhì.*(cụm|khu|tỉnh|quốc))|(ba.*(tỉnh|quốc))/i.test(p.giaiHS);
+            
+            let gv_XS = p.pheBinh === 0 && p.thangXS >= 30 && p.thangTot >= 100 &&
+                        p.chuanNN.includes("tốt") && p.chuyenMon.includes("giỏi") && p.chuyenBien.includes("tốt") &&
+                        p.vsCD >= 60 && 
+                        (p.gvdg.includes("trường") || p.gvdg.includes("xã") || p.gvdg.includes("cụm") || p.gvdg.includes("tỉnh") || p.gvdg.includes("quốc")) &&
+                        datGiaiXS && p.hsHT >= 100 && p.hsXS >= 20 && p.hsTot >= 25 &&
+                        (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+
+            let gv_Tot = p.thangTot >= 100 &&
+                         (p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) && 
+                         (p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
+                         (p.chuyenBien.includes("khá") || p.chuyenBien.includes("tốt")) &&
+                         p.vsCD >= 40 && p.hsHT >= 95 && p.hsXS >= 15 && p.hsTot >= 25 &&
+                         (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+
+            let gv_HT = p.thangHT >= 100 &&
+                        (p.chuanNN.includes("đạt") || p.chuanNN.includes("trung bình") || p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) &&
+                        (p.chuyenMon.includes("tb") || p.chuyenMon.includes("trung bình") || p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
+                        p.hsHT >= 90 && p.hsXS >= 10 && p.hsTot >= 20 &&
+                        (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
+
+            if (gv_XS) gvLevel = 4;
+            else if (gv_Tot) gvLevel = 3;
+            else if (gv_HT) gvLevel = 2;
         }
 
-        // Điều kiện Nhân Viên
-        if (p.thangXS >= 30 && p.pheBinh === 0 && 
-            (p.sangKien.includes("xã") || p.sangKien.includes("tỉnh") || p.sangKien.includes("quốc")) &&
-            (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"))) {
-            nvLevel = 4;
-        }
-        else if (p.thangTot >= 100 && p.pheBinh === 0 &&
-                 (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"))) {
-            nvLevel = 3;
-        }
-        else if (p.thangHT >= 100 && p.pheBinh <= 2 &&
-                 (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"))) {
-            nvLevel = 2;
+        // --- 2. XÉT DUYỆT CHUẨN NHÂN VIÊN ---
+        if (isNhanVien || !isGiaoVien) { 
+            let nv_XS = p.thangXS >= 30 && p.thangTot >= 100 && p.pheBinh === 0 && 
+                        (p.sangKien.includes("xã") || p.sangKien.includes("tỉnh") || p.sangKien.includes("quốc")) &&
+                        (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+
+            let nv_Tot = p.thangTot >= 100 && p.pheBinh === 0 &&
+                         (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+
+            let nv_HT = p.thangHT >= 100 && p.pheBinh <= 2 &&
+                        (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
+
+            if (nv_XS) nvLevel = 4;
+            else if (nv_Tot) nvLevel = 3;
+            else if (nv_HT) nvLevel = 2;
         }
 
-        // Chốt mức xếp loại cao nhất
+        // Chốt mức xếp loại dựa trên đối tượng phù hợp nhất
         let finalLevel = Math.max(gvLevel, nvLevel);
         let textXepLoai = "CHƯA HOÀN THÀNH NHIỆM VỤ";
         let color = "#dc3545"; // Đỏ
@@ -350,9 +356,9 @@
         if (finalLevel === 3) { textXepLoai = "HOÀN THÀNH TỐT NHIỆM VỤ"; color = "#007bff"; } // Xanh dương
         if (finalLevel === 2) { textXepLoai = "HOÀN THÀNH NHIỆM VỤ"; color = "#fd7e14"; } // Cam
 
-        // Hiển thị trực quan Xếp loại và Tổng điểm
+        // Hiển thị kết quả Trực quan (Bao gồm Xếp loại và Tổng điểm)
         const elXepLoai = document.getElementById("hienThiXepLoai");
-        elXepLoai.innerHTML = `<span style="text-transform: uppercase;">${textXepLoai}</span> <br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm đạt được: ${tongDiem.toFixed(1)} điểm)</span>`;
+        elXepLoai.innerHTML = `<span style="text-transform: uppercase;">${textXepLoai}</span> <br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm phần 2: ${tongDiem.toFixed(1)} điểm)</span>`;
         elXepLoai.style.color = color;
     }
 
