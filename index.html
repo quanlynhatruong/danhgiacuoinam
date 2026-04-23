@@ -86,6 +86,7 @@
 </div>
 
 <script>
+    // ĐƯỜNG DẪN WEB APP CHÍNH THỨC
     const API_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let dinhDanhHienTai = "", tenHoSoHienTai = "", cauHinhDiemHienTai = {};
     let ketQuaThangTuDong = ""; 
@@ -116,25 +117,32 @@
     function xayDungBang(data) {
         const body = document.getElementById("tableBody");
         body.innerHTML = "";
+        
+        // 1. Tự động tìm vị trí của dòng bị khoanh đỏ cũ để lấy mốc
+        let dongKhoanhDo = data.findIndex(item => item.tieuChi.toLowerCase().includes("kết quả xếp loại hàng tháng") || item.tieuChi.toLowerCase().includes("bình quân cả năm"));
+        
+        // 2. Dịch mục tiêu lên dòng liền kề phía trên (index - 1)
+        let dongMucTieu = dongKhoanhDo > 0 ? dongKhoanhDo - 1 : -1;
+
         data.forEach((item, index) => {
             let tg = (item.thangGiaTri === "undefined" || !item.thangGiaTri) ? "" : item.thangGiaTri.toString().trim();
             let kq = item.ketQua || "";
             let html = "";
             let isTieuDe = !tg && !item.tieuChi.toLowerCase().includes("phê bình");
 
-            // BỘ LỌC CẢM BIẾN TỰ ĐỘNG KHÓA VÀ GÁN DỮ LIỆU
-            let isAutoLoadField = item.tieuChi.toLowerCase().includes("kết quả xếp loại hàng tháng") || item.tieuChi.toLowerCase().includes("bình quân cả năm");
+            // KIỂM TRA: NẾU ĐÚNG LÀ DÒNG LIỀN KỀ TRÊN THÌ LOAD DỮ LIỆU
+            let isAutoLoadField = (index === dongMucTieu);
 
             if (isAutoLoadField) {
-                // Ép buộc ghi đè bằng dữ liệu mới nhất từ Cột D KHAIBAO
                 kq = ketQuaThangTuDong !== "" ? ketQuaThangTuDong : kq;
                 
-                // BẢN VÁ LỖI HIỂN THỊ: Tự động chèn 1 dấu cách nếu chữ và số dính liền nhau
-                // VD: "Hoàn thành tốt171.1" -> "Hoàn thành tốt 171.1"
-                kq = kq.replace(/([^\s\d])(\d)/g, '$1 $2');
+                // Tách chữ và số bằng biểu thức chính quy (Thêm dấu cách)
+                if (kq) kq = kq.toString().replace(/([^\s\d])(\d)/g, '$1 $2');
                 
-                html = `<input type="text" class="input-cell locked-input trigger-calc" value="${kq}" readonly title="Dữ liệu đồng bộ từ máy chủ, không thể chỉnh sửa">`;
-            } else if (tg === "THANHTICH_HS_DONG") {
+                // Gắn class 'auto-loaded-data' để máy tính nhận diện khóa logic
+                html = `<input type="text" class="input-cell locked-input auto-loaded-data trigger-calc" value="${kq}" readonly title="Dữ liệu đồng bộ từ máy chủ, không thể chỉnh sửa">`;
+            } 
+            else if (tg === "THANHTICH_HS_DONG") {
                 html = `<div class="hs-panel"><div class="hs-controls"><select id="hs_cap_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="hs_giai_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="hs_loai_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="hs_sl_${index}" value="1" min="1" style="width: 50px;"><button class="btn btn-blue btn-small" onclick="congDiemHS(${index})">Thêm giải</button><button class="btn btn-red btn-small" onclick="xoaDiemHS(${index})">Xóa</button></div><div id="hs_hienthi_${index}" class="hs-ketqua">${kq ? kq.replace(/\\n/g, '<br>') : 'Chưa có dữ liệu...'}</div><input type="hidden" class="input-cell trigger-calc" id="hs_hidden_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 html = `<select class="input-cell trigger-calc">` + tg.split(",").map(opt => {
@@ -165,7 +173,7 @@
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
     /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ
+     * BỘ MÁY SUY LUẬN QUY CHẾ 
      * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
@@ -182,8 +190,13 @@
             return false;
         };
 
+        // QUÉT TỪ GIAO DIỆN
         rows.forEach(row => {
-            let tc = row.querySelector(".tieu-chi")?.innerText.toLowerCase(), inp = row.querySelector(".input-cell");
+            let tcObj = row.querySelector(".tieu-chi");
+            if (!tcObj) return;
+            let tc = tcObj.innerText.toLowerCase();
+            
+            let inp = row.querySelector(".input-cell");
             if (!inp) return;
             let val = inp.value.toLowerCase(), num = parseFloat(val.replace(/[^\d\.]/g, '')) || 0;
 
@@ -194,14 +207,17 @@
                 if (ms) ms.forEach(m => d2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
-            if (tc.includes("phê bình")) { p.pb = num; has.pb = true; }
-            
-            else if (tc.includes("kết quả xếp loại hàng tháng") || tc.includes("bình quân cả năm")) {
+            // ĐỌC DỮ LIỆU TỪ Ô ĐƯỢC LOAD (Tránh nhầm lẫn với ô phê bình)
+            let isAutoLoaded = row.querySelector(".auto-loaded-data") !== null;
+
+            if (isAutoLoaded) {
                 if (check(val, /xuất sắc/i)) { p.xs = 100; has.xs = true; }
                 else if (check(val, /tốt/i)) { p.t = 100; has.t = true; }
                 else if (check(val, /hoàn thành|ht/i)) { p.ht = 100; has.ht = true; }
+                return; // Xong ô này thì chuyển dòng khác, không đọc từ khóa bên dưới
             }
-            
+
+            if (tc.includes("phê bình")) { p.pb = num; has.pb = true; }
             else if (tc.includes("tháng") && tc.includes("xuất sắc")) { p.xs = num; has.xs = true; }
             else if (tc.includes("tháng") && tc.includes("tốt")) { p.t = num; has.t = true; }
             else if (tc.includes("tháng") && (tc.includes("hoàn thành") || tc.includes("ht")) && !tc.includes("tốt") && !tc.includes("xuất sắc")) { p.ht = num; has.ht = true; }
