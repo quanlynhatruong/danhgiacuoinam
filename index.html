@@ -101,7 +101,7 @@
                 dinhDanhHienTai = thongTin;
                 tenHoSoHienTai = result.tenSheet;
                 cauHinhDiemHienTai = result.config;
-                ketQuaThangTuDong = result.ketQuaThang || ""; // Nhận dữ liệu Cột D
+                ketQuaThangTuDong = result.ketQuaThang || ""; 
                 
                 document.getElementById("userName").innerText = tenHoSoHienTai;
                 xayDungBang(result.data);
@@ -117,6 +117,9 @@
         const body = document.getElementById("tableBody");
         body.innerHTML = "";
         
+        let dongKhoanhDo = data.findIndex(item => item.tieuChi.toLowerCase().includes("kết quả xếp loại hàng tháng") || item.tieuChi.toLowerCase().includes("bình quân cả năm"));
+        let dongMucTieu = dongKhoanhDo > 0 ? dongKhoanhDo - 1 : -1;
+
         let sttCounter = 1;
 
         data.forEach((item, index) => {
@@ -125,13 +128,14 @@
             let html = "";
             let isTieuDe = !tg && !item.tieuChi.toLowerCase().includes("phê bình");
 
-            // NẠP DỮ LIỆU CỘT D VÀO ĐÚNG DÒNG "Kết quả xếp loại hàng tháng"
-            let isAutoLoadField = item.tieuChi.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
+            let isAutoLoadField = (index === dongMucTieu);
 
             if (isAutoLoadField) {
                 kq = ketQuaThangTuDong !== "" ? ketQuaThangTuDong : kq;
-                // Thêm dấu cách giữa chữ và số
-                if (kq) kq = kq.toString().replace(/([^\s\d])(\d)/g, '$1 $2');
+                
+                // BẢN VÁ LỖI: Chỉ chèn dấu cách nếu trước số KHÔNG PHẢI là dấu chấm (.) hoặc dấu phẩy (,)
+                // VD: "tốt171.1" -> "tốt 171.1" (Bảo toàn số thập phân)
+                if (kq) kq = kq.toString().replace(/([^\s\d.,])(\d)/g, '$1 $2');
                 
                 html = `<input type="text" class="input-cell locked-input auto-loaded-data trigger-calc" value="${kq}" readonly title="Dữ liệu đồng bộ từ máy chủ, không thể chỉnh sửa">`;
             } 
@@ -146,7 +150,6 @@
                 html = `<input type="text" class="input-cell trigger-calc" value="${kq}">`;
             }
 
-            // STT liên tục
             let hienThiSTT = "";
             if (!isTieuDe && item.tieuChi.trim() !== "") {
                 hienThiSTT = sttCounter;
@@ -206,7 +209,6 @@
                 if (ms) ms.forEach(m => d2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
-            // XỬ LÝ Ô ĐƯỢC LOAD TỰ ĐỘNG
             let isAutoLoaded = row.querySelector(".auto-loaded-data") !== null;
             if (isAutoLoaded) {
                 if (check(val, /xuất sắc/i)) { p.xs = 100; has.xs = true; }
@@ -297,13 +299,12 @@
             
         } else {
             nv_XS = tongT >= 100 && (!has.pb || p.pb === 0) &&
-                    (has.sk && check(p.sk, /xã|tỉnh|quốc/i)) && 
-                    (has.kn && passKN(p.kn, 'XS')) && 
-                    checkVuotMucXS();
+                    (has.sk && (p.sk.trim() !== "" && check(p.sk, /xã|tỉnh|quốc/i))) && 
+                    passKN(p.kn, 'XS') && checkVuotMucXS();
 
-            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && (!has.kn || passKN(p.kn, 'Tốt'));
+            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && passKN(p.kn, 'Tốt');
 
-            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && (!has.kn || passKN(p.kn, 'HT'));
+            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && passKN(p.kn, 'HT');
 
             if (nv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
             else if (nv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
