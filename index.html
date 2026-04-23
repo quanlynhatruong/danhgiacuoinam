@@ -74,7 +74,7 @@
         </table>
 
         <div class="live-result-box">
-            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tuân thủ nghiêm ngặt điều kiện tối thiểu)</i></div></div>
+            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tích hợp Bộ quét 30% vượt mức Xuất sắc)</i></div></div>
             <div class="live-rating" id="hienThiXepLoai">CHƯA HOÀN THÀNH NHIỆM VỤ<br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: 0đ)</span></div>
         </div>
 
@@ -147,8 +147,7 @@
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
     /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ: KHÓA CỨNG ĐIỀU KIỆN TỐI THIỂU
-     * Đã khóa chặt điều kiện "Học sinh đạt giải" ở mức Xuất Sắc
+     * BỘ MÁY SUY LUẬN QUY CHẾ: VÁ LỖI CẬP NHẬT 30% VƯỢT MỨC & KHÓA CHẶT TỐI THIỂU
      * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
@@ -165,7 +164,7 @@
             return false;
         };
 
-        // 1. Quét dữ liệu
+        // 1. QUÉT DỮ LIỆU
         rows.forEach(row => {
             let tc = row.querySelector(".tieu-chi")?.innerText.toLowerCase(), inp = row.querySelector(".input-cell");
             if (!inp) return;
@@ -197,35 +196,58 @@
             else if (tc.includes("kiêm nhiệm")) { p.kn = val; has.kn = true; }
         });
 
-        // 2. Logic cộng dồn tỷ lệ bao hàm
+        // 2. TỔNG HỢP TỶ LỆ BAO HÀM
         let tongT = p.xs + p.t;
         let tongH = tongT + p.ht;
 
-        // 3. ĐÁNH GIÁ THEO ĐIỀU KIỆN GIÀNG BUỘC CỨNG (STRICT)
+        // 3. HÀM QUÉT 30% VƯỢT MỨC ĐỐI VỚI MỨC XUẤT SẮC
+        const checkVuotMucXS = () => {
+            let tong = 0; let vuot = 0;
+            // Tỷ lệ tháng: Sàn là Tốt. Vượt là có tháng Xuất sắc.
+            if (has.t || has.xs) { tong++; if (p.xs > 0) vuot++; }
+            if (has.cnn) tong++; // Tốt là kịch trần (không thể vượt)
+            if (has.cm) tong++; // Giỏi là kịch trần
+            if (has.cb) tong++; // Tốt là kịch trần
+            
+            if (role === "giaovien") {
+                if (has.vs) { tong++; if (p.vs > 60) vuot++; } // Sàn 60%
+                if (has.gvdg) { tong++; if (check(p.gvdg, /xã|cụm|khu|tỉnh|quốc/i)) vuot++; } // Sàn Cấp trường
+                if (has.gHS) { tong++; if (check(p.gHS, /quốc|tỉnh.*(nhất|nhì)|nhất.*(cụm|khu)/i)) vuot++; } // Sàn Nhất Xã/Nhì Cụm/Ba Tỉnh
+                if (has.hsHT) { tong++; } // Kịch trần 100%
+                if (has.hsXS) { tong++; if (p.hsXS > 20) vuot++; } // Sàn 20%
+                if (has.hsTot) { tong++; if (p.hsTot > 25) vuot++; } // Sàn 25%
+            }
+            if (has.sk) { tong++; if (check(p.sk, /tỉnh|quốc/i)) vuot++; } // Sàn Cấp xã
+            if (has.kn) tong++; // Tốt là kịch trần
+
+            if (tong === 0) return true;
+            return (vuot / tong) >= 0.3; // Yêu cầu đạt tỷ lệ 30% vượt mức
+        };
+
+        // 4. KIỂM TRA ĐIỀU KIỆN (KHÓA CHẶT MINIMUM & ÁP LUẬT 30% CHO XS)
         let xl = "CHƯA HOÀN THÀNH NHIỆM VỤ", c = "#dc3545";
         let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (role === "giaovien") {
             let gXS = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)/i);
             
-            // XUẤT SẮC: Yêu cầu gXS bắt buộc (KHÔNG cho phép bỏ trống)
+            // XUẤT SẮC: Bỏ ràng buộc 30% tháng XS -> Thay bằng 100% tháng Tốt trở lên (tongT >= 100)
+            // Khóa chặt: Học sinh đạt giải (gXS phải TRUE), và 30% tiêu chí vượt mức (checkVuotMucXS).
             gv_XS = (!has.pb || p.pb === 0) && tongT >= 100 &&
                     (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && 
                     (!has.cnn || check(p.cnn, /tốt/i)) && (!has.cm || check(p.cm, /giỏi/i)) && 
                     (!has.cb || check(p.cb, /tốt/i)) && (!has.vs || p.vs >= 60) && 
                     (!has.gvdg || check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
-                    (!has.gHS || gXS) && // <-- Đã khóa chặt: Phải có giải hợp lệ
+                    (!has.gHS || gXS) && // <-- PHẢI CÓ GIẢI HỌC SINH MỚI QUA
                     (!has.hsHT || p.hsHT >= 100) && (!has.hsXS || p.hsXS >= 20) && (!has.hsTot || p.hsTot >= 25) &&
-                    passKN(p.kn, 'XS');
+                    passKN(p.kn, 'XS') && checkVuotMucXS(); // <-- LUẬT 30% VƯỢT MỨC
 
-            // TỐT
             gv_Tot = tongT >= 100 &&
                      (!has.cnn || check(p.cnn, /khá|tốt/i)) && (!has.cm || check(p.cm, /khá|giỏi/i)) && 
                      (!has.cb || check(p.cb, /khá|tốt/i)) && (!has.vs || p.vs >= 40) && 
                      (!has.hsHT || p.hsHT >= 95) && (!has.hsXS || p.hsXS >= 15) && (!has.hsTot || p.hsTot >= 25) &&
                      passKN(p.kn, 'Tốt');
 
-            // HOÀN THÀNH
             gv_HT = tongH >= 100 &&
                     (!has.cnn || !check(p.cnn, /chưa đạt/i)) && (!has.cm || !check(p.cm, /yếu|kém/i)) &&
                     (!has.hsHT || p.hsHT >= 90) && (!has.hsXS || p.hsXS >= 10) && (!has.hsTot || p.hsTot >= 20) &&
@@ -236,14 +258,12 @@
             else if (gv_HT) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
             
         } else {
-            // XUẤT SẮC NHÂN VIÊN
+            // NHÂN VIÊN XUẤT SẮC
             nv_XS = tongT >= 100 && (!has.pb || p.pb === 0) &&
-                    (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && passKN(p.kn, 'XS');
+                    (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && passKN(p.kn, 'XS') && checkVuotMucXS();
 
-            // TỐT
             nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && passKN(p.kn, 'Tốt');
 
-            // HOÀN THÀNH
             nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && passKN(p.kn, 'HT');
 
             if (nv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
