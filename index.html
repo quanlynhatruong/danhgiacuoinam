@@ -78,8 +78,8 @@
 </div>
 
 <script>
-    // ĐƯỜNG DẪN WEB APP SAU KHI TRIỂN KHAI
-    const API_URL = "DÁN_URL_WEB_APP_CỦA_ĐỒNG_CHÍ_VÀO_ĐÂY";
+    // ĐƯỜNG DẪN WEB APP CHÍNH THỨC
+    const API_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let currentUserEmail = "";
 
     /**
@@ -104,7 +104,7 @@
                 alert(result.message);
             }
         } catch (err) {
-            alert("Lỗi kết nối hệ thống.");
+            alert("Lỗi kết nối hệ thống. Vui lòng kiểm tra lại mạng hoặc quyền truy cập Web App.");
         }
         toggleLoading(false);
     }
