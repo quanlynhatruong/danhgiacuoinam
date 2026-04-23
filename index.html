@@ -32,8 +32,11 @@
         #loading { display: none; color: var(--primary); font-style: italic; text-align: center; margin: 20px; font-size: 16px;}
         .hidden { display: none; }
         
-        /* CSS cho ô khóa dữ liệu Cột D */
+        /* CSS CHUYÊN DỤNG CHO Ô BỊ KHÓA TỪ KHAIBAO */
         .locked-input { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
+        
+        /* Căn giữa tuyệt đối cho cột STT và Thang giá trị */
+        #tableBody td:nth-child(1), #tableBody td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
     </style>
 </head>
 <body>
@@ -130,13 +133,8 @@
             let isAutoLoadField = item.tieuChi.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
 
             if (isAutoLoadField) {
-                // Ưu tiên nạp dữ liệu Cột D, nếu Cột D trống thì giữ giá trị cũ
                 kq = ketQuaThangTuDong !== "" ? ketQuaThangTuDong : kq;
-                
-                // Thuật toán tách chữ và số, bảo toàn dấu thập phân
                 if (kq) kq = kq.toString().replace(/([^\s\d.,])(\d)/g, '$1 $2');
-                
-                // Khóa cứng ô với class auto-loaded-data
                 html = `<input type="text" class="input-cell locked-input auto-loaded-data trigger-calc" value="${kq}" readonly title="Dữ liệu đồng bộ từ máy chủ, không thể chỉnh sửa">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
@@ -157,7 +155,8 @@
                 sttCounter++;
             }
 
-            body.insertAdjacentHTML('beforeend', `<tr style="${isTieuDe?'background:#f1f8ff;font-weight:bold;color:var(--primary);':''}"><td align="center">${isTieuDe?"":hienThiSTT}</td><td class="tieu-chi">${item.tieuChi}</td><td align="center">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td>${isTieuDe?"":html}</td></tr>`);
+            // Cập nhật thẻ td ép buộc thuộc tính css căn giữa
+            body.insertAdjacentHTML('beforeend', `<tr style="${isTieuDe?'background:#f1f8ff;font-weight:bold;color:var(--primary);':''}"><td style="text-align: center; vertical-align: middle;">${isTieuDe?"":hienThiSTT}</td><td class="tieu-chi" style="vertical-align: middle;">${item.tieuChi}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${isTieuDe?"":html}</td></tr>`);
         });
         document.querySelectorAll(".trigger-calc").forEach(el => { el.addEventListener('change', tinhToanXepLoaiQuyChe); el.addEventListener('input', tinhToanXepLoaiQuyChe); });
     }
