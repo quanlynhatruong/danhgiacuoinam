@@ -147,8 +147,8 @@
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
     /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ: GIÀNG BUỘC CỨNG THEO TIÊU CHUẨN TỐI THIỂU
-     * Đã bỏ điều kiện 30% Xuất sắc, giữ nguyên mọi thứ khác + Sáng kiến
+     * BỘ MÁY SUY LUẬN QUY CHẾ: KHÓA CỨNG ĐIỀU KIỆN TỐI THIỂU
+     * Đã khóa chặt điều kiện "Học sinh đạt giải" ở mức Xuất Sắc
      * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
@@ -197,7 +197,7 @@
             else if (tc.includes("kiêm nhiệm")) { p.kn = val; has.kn = true; }
         });
 
-        // 2. Logic cộng dồn tỷ lệ bao hàm (Đạt XS cũng là đạt Tốt/HT)
+        // 2. Logic cộng dồn tỷ lệ bao hàm
         let tongT = p.xs + p.t;
         let tongH = tongT + p.ht;
 
@@ -208,13 +208,13 @@
         if (role === "giaovien") {
             let gXS = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)/i);
             
-            // XUẤT SẮC: Bỏ p.xs >= 30, yêu cầu tongT >= 100, bổ sung Sáng kiến (cấp xã trở lên)
+            // XUẤT SẮC: Yêu cầu gXS bắt buộc (KHÔNG cho phép bỏ trống)
             gv_XS = (!has.pb || p.pb === 0) && tongT >= 100 &&
                     (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && 
                     (!has.cnn || check(p.cnn, /tốt/i)) && (!has.cm || check(p.cm, /giỏi/i)) && 
                     (!has.cb || check(p.cb, /tốt/i)) && (!has.vs || p.vs >= 60) && 
                     (!has.gvdg || check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
-                    (!has.gHS || p.gHS.trim() === "" || gXS) && 
+                    (!has.gHS || gXS) && // <-- Đã khóa chặt: Phải có giải hợp lệ
                     (!has.hsHT || p.hsHT >= 100) && (!has.hsXS || p.hsXS >= 20) && (!has.hsTot || p.hsTot >= 25) &&
                     passKN(p.kn, 'XS');
 
@@ -236,7 +236,7 @@
             else if (gv_HT) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
             
         } else {
-            // XUẤT SẮC NHÂN VIÊN: Bỏ p.xs >= 30, yêu cầu tongT >= 100
+            // XUẤT SẮC NHÂN VIÊN
             nv_XS = tongT >= 100 && (!has.pb || p.pb === 0) &&
                     (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && passKN(p.kn, 'XS');
 
