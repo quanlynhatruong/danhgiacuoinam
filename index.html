@@ -101,7 +101,6 @@
 </div>
 
 <script>
-    // ĐƯỜNG DẪN WEB APP CHÍNH THỨC
     const API_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let dinhDanhHienTai = "";
     let tenHoSoHienTai = "";
@@ -127,7 +126,7 @@
                 document.getElementById("lookupArea").classList.add("hidden");
                 document.getElementById("mainArea").classList.remove("hidden");
                 
-                // Kích hoạt tính toán xếp loại ngay khi tải xong
+                // Kích hoạt tính toán ngay khi tải xong
                 tinhToanXepLoaiQuyChe();
             } else { alert(result.message); }
         } catch (err) { alert("Đường truyền gián đoạn. Vui lòng kiểm tra mạng nội bộ."); }
@@ -165,7 +164,7 @@
                 options.forEach(opt => {
                     let parts = opt.split("|");
                     let tenOption = parts[0] ? parts[0].trim() : "";
-                    let diemOption = parts[1] ? parts[1].trim() : "0"; // Lưu điểm ẩn để tính toán tự động
+                    let diemOption = parts[1] ? parts[1].trim() : "0"; 
                     let trangThai = ketQuaLuu.includes(tenOption) ? "selected" : "";
                     htmlNhapLieu += `<option value="${tenOption}" data-point="${diemOption}" ${trangThai}>${tenOption} (${diemOption} điểm)</option>`;
                 });
@@ -229,12 +228,12 @@
     }
 
     /**
-     * BỘ MÁY TÍNH TOÁN CỘNG ĐIỂM VÀ SUY LUẬN XẾP LOẠI (BẢN VÁ LỖI CHÍNH XÁC 100% THEO PDF)
+     * BỘ MÁY TÍNH TOÁN CỘNG ĐIỂM VÀ SUY LUẬN XẾP LOẠI 
+     * (BẢN VÁ LỖI CHÍNH XÁC 100% THEO FILE QUY CHẾ)
      */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr");
         
-        // Kho chứa các thông số so sánh
         let p = {
             pheBinh: 0, thangXS: 0, thangTot: 0, thangHT: 0,
             chuanNN: '', chuyenMon: '', chuyenBien: '', vsCD: 0, 
@@ -242,7 +241,8 @@
             hsHT: 0, hsXS: 0, hsTot: 0
         };
         
-        let tongDiem = 0; // Biến cộng dồn tổng điểm phần 2
+        let has = {}; // Bộ dò tìm sự tồn tại của tiêu chí
+        let tongDiem = 0; 
         let isGiaoVien = false;
         let isNhanVien = false;
 
@@ -267,34 +267,36 @@
                 if (matches) { matches.forEach(m => { tongDiem += parseFloat(m.replace(/[^\d\.]/g, '')) || 0; }); }
             }
 
-            // === B. ĐỌC TỪ KHÓA ĐỂ ĐỐI CHIẾU QUY CHẾ VÀ PHÂN LOẠI NGẠCH ===
-            if(tc.includes("phê bình")) p.pheBinh = so;
-            else if(tc.includes("tháng") && tc.includes("xuất sắc")) p.thangXS = so;
-            else if(tc.includes("tháng") && tc.includes("tốt")) p.thangTot = so;
-            else if(tc.includes("tháng") && tc.includes("hoàn thành") && !tc.includes("tốt")) p.thangHT = so;
+            // === B. ĐỌC TỪ KHÓA ĐỂ ĐỐI CHIẾU QUY CHẾ ===
+            if(tc.includes("phê bình")) { p.pheBinh = so; has.pheBinh = true; }
+            else if(tc.includes("tháng") && tc.includes("xuất sắc")) { p.thangXS = so; has.thangXS = true; }
+            else if(tc.includes("tháng") && tc.includes("tốt")) { p.thangTot = so; has.thangTot = true; }
+            else if(tc.includes("tháng") && (tc.includes("hoàn thành") || tc.includes("ht")) && !tc.includes("tốt") && !tc.includes("xuất sắc")) { p.thangHT = so; has.thangHT = true; }
             
-            else if(tc.includes("chuẩn nghề nghiệp")) { p.chuanNN = kq; isGiaoVien = true; }
-            else if(tc.includes("chuyên môn")) { p.chuyenMon = kq; isGiaoVien = true; }
-            else if(tc.includes("chuyển biến")) p.chuyenBien = kq;
-            else if(tc.includes("vở sạch")) p.vsCD = so;
-            else if(tc.includes("giáo viên giỏi") || tc.includes("gvdg")) p.gvdg = kq;
-            else if(tc.includes("học sinh") || tc.includes("hs")) {
+            // Đã mở rộng từ khóa: "Chuẩn NN" hay "Chuẩn nghề nghiệp" đều nhận
+            else if(tc.includes("chuẩn")) { p.chuanNN = kq; isGiaoVien = true; has.chuanNN = true; }
+            else if(tc.includes("chuyên môn")) { p.chuyenMon = kq; isGiaoVien = true; has.chuyenMon = true; }
+            else if(tc.includes("chuyển biến")) { p.chuyenBien = kq; has.chuyenBien = true; }
+            else if(tc.includes("vở sạch")) { p.vsCD = so; has.vsCD = true; }
+            else if(tc.includes("giáo viên giỏi") || tc.includes("gvdg")) { p.gvdg = kq; has.gvdg = true; }
+            
+            else if(tc.includes("học sinh") || tc.includes("hs") || tc.includes("tỷ lệ hs")) {
                 isGiaoVien = true;
-                if(tc.includes("xuất sắc")) p.hsXS = so;
-                else if(tc.includes("tốt")) p.hsTot = so;
-                else if(tc.includes("hoàn thành") && !tc.includes("tốt") && !tc.includes("xuất sắc")) p.hsHT = so;
+                if(tc.includes("xuất sắc")) { p.hsXS = so; has.hsXS = true; }
+                else if(tc.includes("tốt")) { p.hsTot = so; has.hsTot = true; }
+                else if(tc.includes("hoàn thành") || tc.includes("ht")) { p.hsHT = so; has.hsHT = true; }
             }
             else if(tc.includes("thành tích") || (row.querySelector(".thang-gia-tri") && row.querySelector(".thang-gia-tri").innerText === 'Quy chế T.Tích')) {
-                p.giaiHS = inputObj.value; 
+                p.giaiHS = inputObj.value; has.giaiHS = true;
             }
             
-            else if(tc.includes("sáng kiến")) { p.sangKien = kq; isNhanVien = true; }
-            else if(tc.includes("kiêm nhiệm")) p.kiemNhiem = kq;
+            else if(tc.includes("sáng kiến")) { p.sangKien = kq; isNhanVien = true; has.sangKien = true; }
+            else if(tc.includes("kiêm nhiệm")) { p.kiemNhiem = kq; has.kiemNhiem = true; }
         });
 
-        // BẢN VÁ LỖI LOGIC: Nội suy tỷ lệ phần trăm (Đạt XS 100% thì tự động coi Tốt và HT cũng là 100%)
-        p.thangTot = Math.max(p.thangTot, p.thangXS);
-        p.thangHT = Math.max(p.thangHT, p.thangTot);
+        // BẢN VÁ LỖI LOGIC: Tự động dồn phần trăm (Đạt XS thì coi như đạt Tốt)
+        p.thangTot = p.thangTot + p.thangXS; 
+        p.thangHT = p.thangHT + p.thangTot; 
 
         // === C. SUY LUẬN XẾP LOẠI SONG SONG (Bám sát PDF) ===
         let gvLevel = 1; // 1: CHT, 2: HT, 3: Tốt, 4: XS
@@ -302,28 +304,39 @@
         
         // --- 1. XÉT DUYỆT CHUẨN GIÁO VIÊN ---
         if (isGiaoVien) {
-            // Biểu thức Regex kiểm tra giải thưởng khắt khe: Nhất xã, Nhì Cụm/Khu, Ba Tỉnh... trở lên
             let datGiaiXS = /(nhất.*(xã|cụm|khu|tỉnh|quốc))|(nhì.*(cụm|khu|tỉnh|quốc))|(ba.*(tỉnh|quốc))/i.test(p.giaiHS);
             
-            let gv_XS = p.pheBinh === 0 && p.thangXS >= 30 && p.thangTot >= 100 &&
-                        p.chuanNN.includes("tốt") && p.chuyenMon.includes("giỏi") && p.chuyenBien.includes("tốt") &&
-                        p.vsCD >= 60 && 
-                        (p.gvdg.includes("trường") || p.gvdg.includes("xã") || p.gvdg.includes("cụm") || p.gvdg.includes("tỉnh") || p.gvdg.includes("quốc")) &&
-                        datGiaiXS && p.hsHT >= 100 && p.hsXS >= 20 && p.hsTot >= 25 &&
-                        (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+            let gv_XS = (!has.pheBinh || p.pheBinh === 0) && 
+                        (!has.thangXS || p.thangXS >= 30) && 
+                        (!has.thangTot || p.thangTot >= 100) &&
+                        (!has.chuanNN || p.chuanNN.includes("tốt")) && 
+                        (!has.chuyenMon || p.chuyenMon.includes("giỏi")) && 
+                        (!has.chuyenBien || p.chuyenBien.includes("tốt")) &&
+                        (!has.vsCD || p.vsCD >= 60) && 
+                        (!has.gvdg || p.gvdg.includes("trường") || p.gvdg.includes("xã") || p.gvdg.includes("cụm") || p.gvdg.includes("tỉnh") || p.gvdg.includes("quốc")) &&
+                        (!has.giaiHS || datGiaiXS) && 
+                        (!has.hsHT || p.hsHT >= 100) && 
+                        (!has.hsXS || p.hsXS >= 20) && 
+                        (!has.hsTot || p.hsTot >= 25) &&
+                        (!has.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
 
-            let gv_Tot = p.thangTot >= 100 &&
-                         (p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) && 
-                         (p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
-                         (p.chuyenBien.includes("khá") || p.chuyenBien.includes("tốt")) &&
-                         p.vsCD >= 40 && p.hsHT >= 95 && p.hsXS >= 15 && p.hsTot >= 25 &&
-                         (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+            let gv_Tot = (!has.thangTot || p.thangTot >= 100) &&
+                         (!has.chuanNN || p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) && 
+                         (!has.chuyenMon || p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
+                         (!has.chuyenBien || p.chuyenBien.includes("khá") || p.chuyenBien.includes("tốt")) &&
+                         (!has.vsCD || p.vsCD >= 40) && 
+                         (!has.hsHT || p.hsHT >= 95) && 
+                         (!has.hsXS || p.hsXS >= 15) && 
+                         (!has.hsTot || p.hsTot >= 25) &&
+                         (!has.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
 
-            let gv_HT = p.thangHT >= 100 &&
-                        (p.chuanNN.includes("đạt") || p.chuanNN.includes("trung bình") || p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) &&
-                        (p.chuyenMon.includes("tb") || p.chuyenMon.includes("trung bình") || p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
-                        p.hsHT >= 90 && p.hsXS >= 10 && p.hsTot >= 20 &&
-                        (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
+            let gv_HT = (!has.thangHT || p.thangHT >= 100) &&
+                        (!has.chuanNN || p.chuanNN.includes("đạt") || p.chuanNN.includes("trung bình") || p.chuanNN.includes("khá") || p.chuanNN.includes("tốt")) &&
+                        (!has.chuyenMon || p.chuyenMon.includes("tb") || p.chuyenMon.includes("trung bình") || p.chuyenMon.includes("khá") || p.chuyenMon.includes("giỏi")) &&
+                        (!has.hsHT || p.hsHT >= 90) && 
+                        (!has.hsXS || p.hsXS >= 10) && 
+                        (!has.hsTot || p.hsTot >= 20) &&
+                        (!has.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
 
             if (gv_XS) gvLevel = 4;
             else if (gv_Tot) gvLevel = 3;
@@ -332,22 +345,26 @@
 
         // --- 2. XÉT DUYỆT CHUẨN NHÂN VIÊN ---
         if (isNhanVien || !isGiaoVien) { 
-            let nv_XS = p.thangXS >= 30 && p.thangTot >= 100 && p.pheBinh === 0 && 
-                        (p.sangKien.includes("xã") || p.sangKien.includes("tỉnh") || p.sangKien.includes("quốc")) &&
-                        (!p.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+            let nv_XS = (!has.thangXS || p.thangXS >= 30) && 
+                        (!has.thangTot || p.thangTot >= 100) && 
+                        (!has.pheBinh || p.pheBinh === 0) && 
+                        (!has.sangKien || p.sangKien.includes("xã") || p.sangKien.includes("tỉnh") || p.sangKien.includes("quốc")) &&
+                        (!has.kiemNhiem || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
 
-            let nv_Tot = p.thangTot >= 100 && p.pheBinh === 0 &&
-                         (!p.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
+            let nv_Tot = (!has.thangTot || p.thangTot >= 100) && 
+                         (!has.pheBinh || p.pheBinh === 0) &&
+                         (!has.kiemNhiem || p.kiemNhiem.includes("khá") || p.kiemNhiem.includes("tốt") || p.kiemNhiem.includes("không"));
 
-            let nv_HT = p.thangHT >= 100 && p.pheBinh <= 2 &&
-                        (!p.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
+            let nv_HT = (!has.thangHT || p.thangHT >= 100) && 
+                        (!has.pheBinh || p.pheBinh <= 2) &&
+                        (!has.kiemNhiem || !p.kiemNhiem.includes("chưa hoàn thành"));
 
             if (nv_XS) nvLevel = 4;
             else if (nv_Tot) nvLevel = 3;
             else if (nv_HT) nvLevel = 2;
         }
 
-        // Chốt mức xếp loại dựa trên đối tượng phù hợp nhất
+        // Chốt mức xếp loại cao nhất
         let finalLevel = Math.max(gvLevel, nvLevel);
         let textXepLoai = "CHƯA HOÀN THÀNH NHIỆM VỤ";
         let color = "#dc3545"; // Đỏ
@@ -356,7 +373,7 @@
         if (finalLevel === 3) { textXepLoai = "HOÀN THÀNH TỐT NHIỆM VỤ"; color = "#007bff"; } // Xanh dương
         if (finalLevel === 2) { textXepLoai = "HOÀN THÀNH NHIỆM VỤ"; color = "#fd7e14"; } // Cam
 
-        // Hiển thị kết quả Trực quan (Bao gồm Xếp loại và Tổng điểm)
+        // Hiển thị trực quan Xếp loại và Tổng điểm
         const elXepLoai = document.getElementById("hienThiXepLoai");
         elXepLoai.innerHTML = `<span style="text-transform: uppercase;">${textXepLoai}</span> <br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm phần 2: ${tongDiem.toFixed(1)} điểm)</span>`;
         elXepLoai.style.color = color;
