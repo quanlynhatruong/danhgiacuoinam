@@ -150,11 +150,23 @@
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
         let p = { pb: 0, xs: 0, t: 0, ht: 0, cnn: '', cm: '', cb: '', vs: 0, gvdg: '', kn: '', sk: '', gHS: '', hsHT: 0, hsXS: 0, hsT: 0 }, d2 = 0;
 
+        // Hàm kiểm tra từ khóa an toàn
+        const check = (val, pattern) => new RegExp(pattern, 'i').test(val);
+        // Hàm đánh giá riêng cho Kiêm nhiệm (Cho phép "Không có" mặc định qua ải)
+        const passKN = (val, level) => {
+            if (!val || check(val, /không/i)) return true; 
+            if (level === 'XS') return check(val, /tốt/i);
+            if (level === 'Tốt') return check(val, /khá|tốt/i);
+            if (level === 'HT') return !check(val, /chưa hoàn thành/i);
+            return false;
+        };
+
         rows.forEach(row => {
             let tc = row.querySelector(".tieu-chi")?.innerText.toLowerCase(), inp = row.querySelector(".input-cell");
             if (!inp) return;
             let val = inp.value.toLowerCase(), num = parseFloat(val.replace(/[^\d\.]/g, '')) || 0;
 
+            // Xử lý cộng dồn tổng điểm
             if (row.querySelector("select.input-cell")) d2 += parseFloat(row.querySelector("select.input-cell").options[row.querySelector("select.input-cell").selectedIndex].getAttribute("data-point")) || 0;
             else if (tc.includes("vở sạch")) d2 += (num * 0.1);
             else if (tc.includes("thành tích") || row.cells[2].innerText === 'Quy chế') {
@@ -162,6 +174,7 @@
                 if (ms) ms.forEach(m => d2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
+            // Gán giá trị vào biến
             if (tc.includes("phê bình")) p.pb = num;
             else if (tc.includes("tháng") && tc.includes("xuất sắc")) p.xs = num;
             else if (tc.includes("tháng") && tc.includes("tốt")) p.t = num;
@@ -181,17 +194,40 @@
             else if (tc.includes("kiêm nhiệm")) p.kn = val;
         });
 
-        let tT = p.xs + p.t, tH = tT + p.ht, xl = "CHƯA HOÀN THÀNH NHIỆM VỤ", c = "#dc3545";
+        let tongT = p.xs + p.t, tongH = tongT + p.ht, xl = "CHƯA HOÀN THÀNH NHIỆM VỤ", c = "#dc3545";
+        let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (role === "giaovien") {
-            let gXS = /(nhất.*(xã|cụm|khu|tỉnh|quốc))|(nhì.*(cụm|khu|tỉnh|quốc))|(ba.*(tỉnh|quốc))/i.test(p.gHS);
-            if (p.pb === 0 && p.xs >= 30 && tT >= 100 && p.cnn.includes("tốt") && p.cm.includes("giỏi") && p.cb.includes("tốt") && p.vs >= 60 && (p.gvdg.match(/trường|xã|cụm|khu|tỉnh|quốc/i)) && gXS && p.hsHT >= 100 && p.hsXS >= 20 && p.hsT >= 25 && (!p.kn || p.kn.includes("tốt"))) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
-            else if (tT >= 100 && (p.cnn.match(/khá|tốt/i)) && (p.cm.match(/khá|giỏi/i)) && (p.cb.match(/khá|tốt/i)) && p.vs >= 40 && p.hsHT >= 95 && p.hsXS >= 15 && p.hsT >= 25 && (!p.kn || p.kn.match(/khá|tốt/i))) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
-            else if (tH >= 100 && (p.cnn.match(/đạt|tb|khá|tốt/i)) && (p.cm.match(/tb|khá|giỏi/i)) && p.hsHT >= 90 && p.hsXS >= 10 && p.hsT >= 20 && (!p.kn || !p.kn.includes("chưa hoàn thành"))) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
+            let gXS = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)/i);
+            
+            gv_XS = p.pb === 0 && p.xs >= 30 && tongT >= 100 &&
+                    check(p.cnn, /tốt/i) && check(p.cm, /giỏi/i) && check(p.cb, /tốt/i) && p.vs >= 60 &&
+                    check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i) && gXS &&
+                    p.hsHT >= 100 && p.hsXS >= 20 && p.hsT >= 25 && passKN(p.kn, 'XS');
+
+            gv_Tot = tongT >= 100 &&
+                     check(p.cnn, /khá|tốt/i) && check(p.cm, /khá|giỏi/i) && check(p.cb, /khá|tốt/i) && p.vs >= 40 &&
+                     p.hsHT >= 95 && p.hsXS >= 15 && p.hsT >= 25 && passKN(p.kn, 'Tốt');
+
+            gv_HT = tongH >= 100 &&
+                    check(p.cnn, /đạt|tb|trung bình|khá|tốt/i) && check(p.cm, /tb|trung bình|khá|giỏi/i) &&
+                    p.hsHT >= 90 && p.hsXS >= 10 && p.hsT >= 20 && passKN(p.kn, 'HT');
+
+            if (gv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
+            else if (gv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
+            else if (gv_HT) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
+            
         } else {
-            if (p.xs >= 30 && tT >= 100 && p.pb === 0 && (p.sk.match(/xã|tỉnh|quốc/i)) && (!p.kn || p.kn.includes("tốt"))) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
-            else if (tT >= 100 && p.pb === 0 && (!p.kn || p.kn.match(/khá|tốt/i))) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
-            else if (tH >= 100 && p.pb <= 2 && (!p.kn || !p.kn.includes("chưa hoàn thành"))) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
+            nv_XS = p.xs >= 30 && tongT >= 100 && p.pb === 0 &&
+                    check(p.sk, /xã|tỉnh|quốc/i) && passKN(p.kn, 'XS');
+
+            nv_Tot = tongT >= 100 && p.pb === 0 && passKN(p.kn, 'Tốt');
+
+            nv_HT = tongH >= 100 && p.pb <= 2 && passKN(p.kn, 'HT');
+
+            if (nv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
+            else if (nv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
+            else if (nv_HT) { xl = "HOÀN THÀNH NHIỆM VỤ"; c = "#fd7e14"; }
         }
 
         const el = document.getElementById("hienThiXepLoai");
