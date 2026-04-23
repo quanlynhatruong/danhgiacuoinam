@@ -74,7 +74,7 @@
         </table>
 
         <div class="live-result-box">
-            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tích hợp Bộ quét 30% vượt mức Xuất sắc)</i></div></div>
+            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tuân thủ nghiêm ngặt 8 mục tối thiểu và Luật 30% vượt)</i></div></div>
             <div class="live-rating" id="hienThiXepLoai">CHƯA HOÀN THÀNH NHIỆM VỤ<br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: 0đ)</span></div>
         </div>
 
@@ -147,7 +147,7 @@
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
     /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ: VÁ LỖI CẬP NHẬT 30% VƯỢT MỨC & KHÓA CHẶT TỐI THIỂU
+     * BỘ MÁY SUY LUẬN QUY CHẾ: 8 MỤC GIÀNG BUỘC CỨNG & 30% VƯỢT MỨC
      * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const rows = document.querySelectorAll("#tableBody tr"), role = document.getElementById("doiTuongSelect").value;
@@ -164,7 +164,7 @@
             return false;
         };
 
-        // 1. QUÉT DỮ LIỆU
+        // 1. QUÉT TỪ KHÓA
         rows.forEach(row => {
             let tc = row.querySelector(".tieu-chi")?.innerText.toLowerCase(), inp = row.querySelector(".input-cell");
             if (!inp) return;
@@ -186,72 +186,76 @@
             else if (tc.includes("chuyển biến")) { p.cb = val; has.cb = true; }
             else if (tc.includes("vở sạch")) { p.vs = num; has.vs = true; }
             else if (tc.includes("giáo viên giỏi") || tc.includes("gvdg")) { p.gvdg = val; has.gvdg = true; }
-            else if (tc.includes("học sinh") || tc.includes("hs")) {
+            else if (tc.includes("học sinh") || tc.includes("hs") || tc.includes("tỷ lệ hs")) {
                 if (tc.includes("xuất sắc")) { p.hsXS = num; has.hsXS = true; }
                 else if (tc.includes("tốt")) { p.hsTot = num; has.hsTot = true; }
-                else if (tc.includes("hoàn thành") || tc.includes("ht")) { p.hsHT = num; has.hsHT = true; }
+                else if ((tc.includes("hoàn thành") || tc.includes("ht")) && !tc.includes("tốt") && !tc.includes("xuất sắc")) { p.hsHT = num; has.hsHT = true; }
             }
-            else if (tc.includes("thành tích") || row.cells[2].innerText === 'Quy chế') { p.gHS = inp.value; has.gHS = true; }
+            else if (tc.includes("thành tích") || row.cells[2].innerText === 'Quy chế T.Tích' || row.cells[2].innerText === 'Quy chế') { p.gHS = inp.value; has.gHS = true; }
             else if (tc.includes("sáng kiến")) { p.sk = val; has.sk = true; }
             else if (tc.includes("kiêm nhiệm")) { p.kn = val; has.kn = true; }
         });
 
-        // 2. TỔNG HỢP TỶ LỆ BAO HÀM
         let tongT = p.xs + p.t;
         let tongH = tongT + p.ht;
 
-        // 3. HÀM QUÉT 30% VƯỢT MỨC ĐỐI VỚI MỨC XUẤT SẮC
+        // 2. BỘ ĐẾM 30% VƯỢT MỨC CHO XUẤT SẮC
         const checkVuotMucXS = () => {
             let tong = 0; let vuot = 0;
-            // Tỷ lệ tháng: Sàn là Tốt. Vượt là có tháng Xuất sắc.
-            if (has.t || has.xs) { tong++; if (p.xs > 0) vuot++; }
-            if (has.cnn) tong++; // Tốt là kịch trần (không thể vượt)
-            if (has.cm) tong++; // Giỏi là kịch trần
-            if (has.cb) tong++; // Tốt là kịch trần
-            
             if (role === "giaovien") {
-                if (has.vs) { tong++; if (p.vs > 60) vuot++; } // Sàn 60%
-                if (has.gvdg) { tong++; if (check(p.gvdg, /xã|cụm|khu|tỉnh|quốc/i)) vuot++; } // Sàn Cấp trường
-                if (has.gHS) { tong++; if (check(p.gHS, /quốc|tỉnh.*(nhất|nhì)|nhất.*(cụm|khu)/i)) vuot++; } // Sàn Nhất Xã/Nhì Cụm/Ba Tỉnh
-                if (has.hsHT) { tong++; } // Kịch trần 100%
-                if (has.hsXS) { tong++; if (p.hsXS > 20) vuot++; } // Sàn 20%
-                if (has.hsTot) { tong++; if (p.hsTot > 25) vuot++; } // Sàn 25%
+                tong++; if (p.xs > 0) vuot++; // Vượt Tỷ lệ tháng
+                tong++; // Chuẩn NN kịch trần Tốt
+                tong++; // Chuyên môn kịch trần Giỏi
+                tong++; // Chuyển biến kịch trần Tốt
+                tong++; if (p.vs > 60) vuot++; // Vượt VSCĐ
+                tong++; if (check(p.gvdg, /xã|cụm|khu|tỉnh|quốc/i)) vuot++; // Vượt GVDG (sàn là Cấp trường)
+                tong++; if (check(p.gHS, /quốc|tỉnh.*(nhất|nhì)|nhất.*(cụm|khu)/i)) vuot++; // Vượt Giải HS
+                tong++; if (p.hsXS > 20 || p.hsTot > 25) vuot++; // Vượt Tỷ lệ HS
+                tong++; // Kiêm nhiệm kịch trần Tốt
+            } else {
+                tong++; if (p.xs > 0) vuot++;
+                tong++; if (check(p.sk, /tỉnh|quốc/i)) vuot++;
+                tong++;
             }
-            if (has.sk) { tong++; if (check(p.sk, /tỉnh|quốc/i)) vuot++; } // Sàn Cấp xã
-            if (has.kn) tong++; // Tốt là kịch trần
-
             if (tong === 0) return true;
-            return (vuot / tong) >= 0.3; // Yêu cầu đạt tỷ lệ 30% vượt mức
+            return (vuot / tong) >= 0.3;
         };
 
-        // 4. KIỂM TRA ĐIỀU KIỆN (KHÓA CHẶT MINIMUM & ÁP LUẬT 30% CHO XS)
+        // 3. ĐÁNH GIÁ (BẮT BUỘC ĐỦ 8 MỤC ĐỐI VỚI GIÁO VIÊN XUẤT SẮC)
         let xl = "CHƯA HOÀN THÀNH NHIỆM VỤ", c = "#dc3545";
         let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (role === "giaovien") {
-            let gXS = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)/i);
+            let gXS_San = check(p.gHS, /nhất.*(xã|cụm|khu|tỉnh|quốc)|nhì.*(cụm|khu|tỉnh|quốc)|ba.*(tỉnh|quốc)|quốc/i);
             
-            // XUẤT SẮC: Bỏ ràng buộc 30% tháng XS -> Thay bằng 100% tháng Tốt trở lên (tongT >= 100)
-            // Khóa chặt: Học sinh đạt giải (gXS phải TRUE), và 30% tiêu chí vượt mức (checkVuotMucXS).
-            gv_XS = (!has.pb || p.pb === 0) && tongT >= 100 &&
-                    (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && 
-                    (!has.cnn || check(p.cnn, /tốt/i)) && (!has.cm || check(p.cm, /giỏi/i)) && 
-                    (!has.cb || check(p.cb, /tốt/i)) && (!has.vs || p.vs >= 60) && 
-                    (!has.gvdg || check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
-                    (!has.gHS || gXS) && // <-- PHẢI CÓ GIẢI HỌC SINH MỚI QUA
-                    (!has.hsHT || p.hsHT >= 100) && (!has.hsXS || p.hsXS >= 20) && (!has.hsTot || p.hsTot >= 25) &&
-                    passKN(p.kn, 'XS') && checkVuotMucXS(); // <-- LUẬT 30% VƯỢT MỨC
+            // XUẤT SẮC: Các mục has.* phải TRUE (bắt buộc phải có trong hồ sơ) và thỏa mãn tối thiểu
+            gv_XS = (has.pb && p.pb === 0) && 
+                    (tongT >= 100) &&
+                    (has.cnn && check(p.cnn, /tốt/i)) && 
+                    (has.cm && check(p.cm, /giỏi/i)) && 
+                    (has.cb && check(p.cb, /tốt/i)) && 
+                    (has.vs && p.vs >= 60) && 
+                    (has.gvdg && check(p.gvdg, /trường|xã|cụm|khu|tỉnh|quốc/i)) &&
+                    (has.gHS && p.gHS.trim() !== "" && gXS_San) && 
+                    (has.hsHT && p.hsHT >= 100) && (has.hsXS && p.hsXS >= 20) && (has.hsTot && p.hsTot >= 25) &&
+                    (has.kn && passKN(p.kn, 'XS')) && 
+                    checkVuotMucXS(); // Phải có 30% vượt mức
 
-            gv_Tot = tongT >= 100 &&
-                     (!has.cnn || check(p.cnn, /khá|tốt/i)) && (!has.cm || check(p.cm, /khá|giỏi/i)) && 
-                     (!has.cb || check(p.cb, /khá|tốt/i)) && (!has.vs || p.vs >= 40) && 
-                     (!has.hsHT || p.hsHT >= 95) && (!has.hsXS || p.hsXS >= 15) && (!has.hsTot || p.hsTot >= 25) &&
-                     passKN(p.kn, 'Tốt');
+            // TỐT: Không bắt buộc có GVDG và Giải HS
+            gv_Tot = (tongT >= 100) &&
+                     (has.cnn && check(p.cnn, /khá|tốt/i)) && 
+                     (has.cm && check(p.cm, /khá|giỏi/i)) && 
+                     (has.cb && check(p.cb, /khá|tốt/i)) && 
+                     (has.vs && p.vs >= 40) && 
+                     (has.hsHT && p.hsHT >= 95) && (has.hsXS && p.hsXS >= 15) && (has.hsTot && p.hsTot >= 25) &&
+                     (has.kn && passKN(p.kn, 'Tốt'));
 
-            gv_HT = tongH >= 100 &&
-                    (!has.cnn || !check(p.cnn, /chưa đạt/i)) && (!has.cm || !check(p.cm, /yếu|kém/i)) &&
-                    (!has.hsHT || p.hsHT >= 90) && (!has.hsXS || p.hsXS >= 10) && (!has.hsTot || p.hsTot >= 20) &&
-                    passKN(p.kn, 'HT');
+            // HOÀN THÀNH: Không bắt buộc VSCĐ, Chuyển biến
+            gv_HT = (tongH >= 100) &&
+                    (has.cnn && !check(p.cnn, /chưa đạt/i)) && 
+                    (has.cm && !check(p.cm, /yếu|kém/i)) &&
+                    (has.hsHT && p.hsHT >= 90) && (has.hsXS && p.hsXS >= 10) && (has.hsTot && p.hsTot >= 20) &&
+                    (has.kn && passKN(p.kn, 'HT'));
 
             if (gv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
             else if (gv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
@@ -259,12 +263,14 @@
             
         } else {
             // NHÂN VIÊN XUẤT SẮC
-            nv_XS = tongT >= 100 && (!has.pb || p.pb === 0) &&
-                    (!has.sk || check(p.sk, /xã|tỉnh|quốc/i)) && passKN(p.kn, 'XS') && checkVuotMucXS();
+            nv_XS = tongT >= 100 && (has.pb && p.pb === 0) &&
+                    (has.sk && check(p.sk, /xã|tỉnh|quốc/i)) && 
+                    (has.kn && passKN(p.kn, 'XS')) && 
+                    checkVuotMucXS();
 
-            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && passKN(p.kn, 'Tốt');
+            nv_Tot = tongT >= 100 && (!has.pb || p.pb === 0) && (!has.kn || passKN(p.kn, 'Tốt'));
 
-            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && passKN(p.kn, 'HT');
+            nv_HT = tongH >= 100 && (!has.pb || p.pb <= 2) && (!has.kn || passKN(p.kn, 'HT'));
 
             if (nv_XS) { xl = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; c = "#28a745"; }
             else if (nv_Tot) { xl = "HOÀN THÀNH TỐT NHIỆM VỤ"; c = "#007bff"; }
