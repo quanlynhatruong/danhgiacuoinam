@@ -1,37 +1,37 @@
 <script>
-function hXetDuyetN(mKhoiA, mKhoiB, bXanhL, bXanhD) {
-    const hKiemLieuN = () => {
-        let vSo = 0;
-        if (hKiemTraChuoiM(mKhoiA.kH, /huyện|tỉnh|quốc/i)) vSo++;
-        if (hKiemTraChuoiM(mKhoiA.kG, /xuất sắc/i)) vSo++;
-        return vSo >= (3 * 0.3); 
+function f_x_m(m_k_a, m_k_b, b_x_l, b_x_d) {
+    const h_k_l_n = () => {
+        let v_s = 0;
+        if (f_x_a(m_k_a.h, /huyện|tỉnh|quốc/i)) v_s++;
+        if (f_x_a(m_k_a.g, /xuất sắc/i)) v_s++;
+        return v_s >= (3 * 0.3); 
     };
 
-    const hCoChuoiG = (chuoi) => chuoi && chuoi.trim() !== "";
+    const h_c_c_n = (c_h) => c_h && c_h.trim() !== "";
 
-    let cMucA = bXanhL && (!mKhoiB.tA || mKhoiA.kA === 0) &&
-            (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /tốt/i)) && 
-            (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /giỏi/i)) && 
-            (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /tốt/i)) && 
-            (mKhoiB.tH && mKhoiA.kH.trim() !== "" && hKiemTraChuoiM(mKhoiA.kH, /xã|huyện|cụm|tỉnh|quốc/i)) && 
-            hXetChuoiN(mKhoiA.kG, 'XS') && hKiemLieuN();
+    let c_m_a = b_x_l && (!m_k_b.a || m_k_a.a === 0) &&
+            (m_k_b.b && f_x_a(m_k_a.b, /tốt/i)) && 
+            (m_k_b.c && f_x_a(m_k_a.c, /giỏi/i)) && 
+            (m_k_b.d && f_x_a(m_k_a.d, /tốt/i)) && 
+            (m_k_b.h && m_k_a.h.trim() !== "" && f_x_a(m_k_a.h, /xã|huyện|cụm|tỉnh|quốc/i)) && 
+            f_x_b(m_k_a.g, 'XS') && h_k_l_n();
 
-    let cMucB = bXanhL && (!mKhoiB.tA || mKhoiA.kA === 0) && 
-             (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /khá|tốt/i)) && 
-             (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /khá|giỏi/i)) && 
-             (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /khá|tốt/i)) && 
-             hXetChuoiN(mKhoiA.kG, 'Tốt');
+    let c_m_b = b_x_l && (!m_k_b.a || m_k_a.a === 0) && 
+             (m_k_b.b && f_x_a(m_k_a.b, /khá|tốt/i)) && 
+             (m_k_b.c && f_x_a(m_k_a.c, /khá|giỏi/i)) && 
+             (m_k_b.d && f_x_a(m_k_a.d, /khá|tốt/i)) && 
+             f_x_b(m_k_a.g, 'Tốt');
 
-    let cMucC = bXanhD && (!mKhoiB.tA || mKhoiA.kA <= 2) && 
-            (mKhoiB.tB && hCoChuoiG(mKhoiA.kB) && !hKiemTraChuoiM(mKhoiA.kB, /chưa đạt|kém/i)) && 
-            (mKhoiB.tC && hCoChuoiG(mKhoiA.kC) && !hKiemTraChuoiM(mKhoiA.kC, /yếu|kém/i)) &&
-            (mKhoiB.tD && hCoChuoiG(mKhoiA.kD) && !hKiemTraChuoiM(mKhoiA.kD, /chưa đạt|kém/i)) &&
-            hXetChuoiN(mKhoiA.kG, 'HT');
+    let c_m_c = b_x_d && (!m_k_b.a || m_k_a.a <= 2) && 
+            (m_k_b.b && h_c_c_n(m_k_a.b) && !f_x_a(m_k_a.b, /chưa đạt|kém/i)) && 
+            (m_k_b.c && h_c_c_n(m_k_a.c) && !f_x_a(m_k_a.c, /yếu|kém/i)) &&
+            (m_k_b.d && h_c_c_n(m_k_a.d) && !f_x_a(m_k_a.d, /chưa đạt|kém/i)) &&
+            f_x_b(m_k_a.g, 'HT');
 
-    if (cMucA) return { kTra: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", kMau: "#28a745" };
-    if (cMucB) return { kTra: "HOÀN THÀNH TỐT NHIỆM VỤ", kMau: "#007bff" };
-    if (cMucC) return { kTra: "HOÀN THÀNH NHIỆM VỤ", kMau: "#fd7e14" };
+    if (c_m_a) return { k_t: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", k_m: "#28a745" };
+    if (c_m_b) return { k_t: "HOÀN THÀNH TỐT NHIỆM VỤ", k_m: "#007bff" };
+    if (c_m_c) return { k_t: "HOÀN THÀNH NHIỆM VỤ", k_m: "#fd7e14" };
     
-    return { kTra: "CHƯA HOÀN THÀNH NHIỆM VỤ", kMau: "#dc3545" };
+    return { k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 }
 </script>
