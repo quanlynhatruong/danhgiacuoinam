@@ -1,48 +1,48 @@
 <script>
-function hXetDuyetG(mKhoiA, mKhoiB, bXanhL, bXanhD) {
-    const hKiemLieuG = () => {
-        let vSo = 0;
-        if (mKhoiA.kE > 60) vSo++; 
-        if (hKiemTraChuoiM(mKhoiA.kF, /xã|huyện|cụm|khu|tỉnh|quốc/i)) vSo++; 
-        if (hKiemTraChuoiM(mKhoiA.kI, /quốc|tỉnh|nhất.*(cụm|khu|huyện|xã)/i)) vSo++; 
-        if (mKhoiA.kK > 20 || mKhoiA.kL > 25) vSo++; 
-        return vSo >= (8 * 0.3); 
+function f_x_l(m_k_a, m_k_b, b_x_l, b_x_d) {
+    const h_k_l_g = () => {
+        let v_s = 0;
+        if (m_k_a.e > 60) v_s++; 
+        if (f_x_a(m_k_a.f, /xã|huyện|cụm|khu|tỉnh|quốc/i)) v_s++; 
+        if (f_x_a(m_k_a.i, /quốc|tỉnh|nhất.*(cụm|khu|huyện|xã)/i)) v_s++; 
+        if (m_k_a.k > 20 || m_k_a.l > 25) v_s++; 
+        return v_s >= (8 * 0.3); 
     };
 
-    const hCoChuoiG = (chuoi) => chuoi && chuoi.trim() !== "";
-    let bDatK = hKiemTraChuoiM(mKhoiA.kI, /quốc|tỉnh|nhất.*(xã|cụm|khu|huyện)|nhì.*(cụm|khu|huyện)/i);
+    const h_c_c_g = (c_h) => c_h && c_h.trim() !== "";
+    let b_d_k = f_x_a(m_k_a.i, /quốc|tỉnh|nhất.*(xã|cụm|khu|huyện)|nhì.*(cụm|khu|huyện)/i);
     
-    let cMucA = (!mKhoiB.tA || mKhoiA.kA === 0) && 
-            bXanhL &&
-            (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /tốt/i)) && 
-            (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /giỏi/i)) && 
-            (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /tốt/i)) && 
-            (mKhoiB.tE && mKhoiA.kE >= 60) && 
-            (mKhoiB.tF && hKiemTraChuoiM(mKhoiA.kF, /trường|xã|huyện|cụm|khu|tỉnh|quốc/i)) &&
-            (mKhoiB.tI && mKhoiA.kI.trim() !== "" && bDatK) && 
-            (mKhoiB.tJ && mKhoiA.kJ >= 100) && (mKhoiB.tK && mKhoiA.kK >= 20) && (mKhoiB.tL && mKhoiA.kL >= 25) &&
-            (mKhoiB.tG && hXetChuoiN(mKhoiA.kG, 'XS')) && 
-            hKiemLieuG(); 
+    let c_m_a = (!m_k_b.a || m_k_a.a === 0) && 
+            b_x_l &&
+            (m_k_b.b && f_x_a(m_k_a.b, /tốt/i)) && 
+            (m_k_b.c && f_x_a(m_k_a.c, /giỏi/i)) && 
+            (m_k_b.d && f_x_a(m_k_a.d, /tốt/i)) && 
+            (m_k_b.e && m_k_a.e >= 60) && 
+            (m_k_b.f && f_x_a(m_k_a.f, /trường|xã|huyện|cụm|khu|tỉnh|quốc/i)) &&
+            (m_k_b.i && m_k_a.i.trim() !== "" && b_d_k) && 
+            (m_k_b.j && m_k_a.j >= 100) && (m_k_b.k && m_k_a.k >= 20) && (m_k_b.l && m_k_a.l >= 25) &&
+            (m_k_b.g && f_x_b(m_k_a.g, 'XS')) && 
+            h_k_l_g(); 
 
-    let cMucB = bXanhL &&
-             (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /khá|tốt/i)) && 
-             (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /khá|giỏi/i)) && 
-             (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /khá|tốt/i)) && 
-             (mKhoiB.tE && mKhoiA.kE >= 40) && 
-             (mKhoiB.tJ && mKhoiA.kJ >= 95) && (mKhoiB.tK && mKhoiA.kK >= 15) && (mKhoiB.tL && mKhoiA.kL >= 25) &&
-             (mKhoiB.tG && hXetChuoiN(mKhoiA.kG, 'Tốt'));
+    let c_m_b = b_x_l &&
+             (m_k_b.b && f_x_a(m_k_a.b, /khá|tốt/i)) && 
+             (m_k_b.c && f_x_a(m_k_a.c, /khá|giỏi/i)) && 
+             (m_k_b.d && f_x_a(m_k_a.d, /khá|tốt/i)) && 
+             (m_k_b.e && m_k_a.e >= 40) && 
+             (m_k_b.j && m_k_a.j >= 95) && (m_k_b.k && m_k_a.k >= 15) && (m_k_b.l && m_k_a.l >= 25) &&
+             (m_k_b.g && f_x_b(m_k_a.g, 'Tốt'));
 
-    let cMucC = bXanhD && 
-            (mKhoiB.tB && hCoChuoiG(mKhoiA.kB) && !hKiemTraChuoiM(mKhoiA.kB, /chưa đạt|kém/i)) && 
-            (mKhoiB.tC && hCoChuoiG(mKhoiA.kC) && !hKiemTraChuoiM(mKhoiA.kC, /yếu|kém/i)) &&
-            (mKhoiB.tD && hCoChuoiG(mKhoiA.kD) && !hKiemTraChuoiM(mKhoiA.kD, /chưa đạt|kém/i)) &&
-            (mKhoiB.tJ && mKhoiA.kJ >= 90) && (mKhoiB.tK && mKhoiA.kK >= 10) && (mKhoiB.tL && mKhoiA.kL >= 20) &&
-            (mKhoiB.tG && hXetChuoiN(mKhoiA.kG, 'HT'));
+    let c_m_c = b_x_d && 
+            (m_k_b.b && h_c_c_g(m_k_a.b) && !f_x_a(m_k_a.b, /chưa đạt|kém/i)) && 
+            (m_k_b.c && h_c_c_g(m_k_a.c) && !f_x_a(m_k_a.c, /yếu|kém/i)) &&
+            (m_k_b.d && h_c_c_g(m_k_a.d) && !f_x_a(m_k_a.d, /chưa đạt|kém/i)) &&
+            (m_k_b.j && m_k_a.j >= 90) && (m_k_b.k && m_k_a.k >= 10) && (m_k_b.l && m_k_a.l >= 20) &&
+            (m_k_b.g && f_x_b(m_k_a.g, 'HT'));
 
-    if (cMucA) return { kTra: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", kMau: "#28a745" };
-    if (cMucB) return { kTra: "HOÀN THÀNH TỐT NHIỆM VỤ", kMau: "#007bff" };
-    if (cMucC) return { kTra: "HOÀN THÀNH NHIỆM VỤ", kMau: "#fd7e14" };
+    if (c_m_a) return { k_t: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", k_m: "#28a745" };
+    if (c_m_b) return { k_t: "HOÀN THÀNH TỐT NHIỆM VỤ", k_m: "#007bff" };
+    if (c_m_c) return { k_t: "HOÀN THÀNH NHIỆM VỤ", k_m: "#fd7e14" };
     
-    return { kTra: "CHƯA HOÀN THÀNH NHIỆM VỤ", kMau: "#dc3545" };
+    return { k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 }
 </script>
