@@ -79,9 +79,22 @@
             <tbody id="tableBody"></tbody>
         </table>
 
-        <div class="live-result-box">
-            <div><h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3><div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tích hợp 8 mục tối thiểu, 30% vượt mức & Đồng bộ Cột D)</i></div></div>
-            <div class="live-rating" id="hienThiXepLoai">CHƯA HOÀN THÀNH NHIỆM VỤ<br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: 0đ)</span></div>
+        <div class="live-result-box" style="align-items: flex-start;">
+            <div style="flex: 1;">
+                <h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3>
+                <div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tích hợp 8 mục tối thiểu, 30% vượt mức & Đồng bộ Cột D)</i></div>
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 15px; color: #d9534f; font-size: 18px;">
+                <div id="hienThiDiemP1">Tổng điểm phần 1: </div>
+                <div id="hienThiDiemP2">Tổng điểm phần 2: </div>
+            </div>
+            
+            <div class="live-rating" id="hienThiXepLoai" style="flex: 1;">
+                CHƯA HOÀN THÀNH NHIỆM VỤ<br>
+                <span style="font-size: 16px; color: #d9534f; font-weight: normal;">Tổng điểm năm học:</span><br>
+                <span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: 0đ)</span>
+            </div>
         </div>
 
         <button class="btn btn-green" onclick="thucHienGhiNhan()">LƯU KẾT QUẢ ĐÁNH GIÁ</button>
@@ -157,28 +170,48 @@
         document.querySelectorAll(".trigger-calc").forEach(el => { el.addEventListener('change', tinhToanXepLoaiQuyChe); el.addEventListener('input', tinhToanXepLoaiQuyChe); });
     }
 
+    // HÀM TÍNH ĐIỂM ĐÃ ĐƯỢC CHUẨN HOÁ THEO YÊU CẦU LẦN TRƯỚC
     function congDiemHS(idx) {
-        const cap = document.getElementById(`hs_cap_${idx}`).value, chiSo = parseInt(document.getElementById(`hs_giai_${idx}`).value), heSo = parseFloat(document.getElementById(`hs_loai_${idx}`).value), sl = parseInt(document.getElementById(`hs_sl_${idx}`).value) || 1;
-        const mangDiem = cauHinhDiemHienTai[`DIEM_HS_${cap}`] ? cauHinhDiemHienTai[`DIEM_HS_${cap}`].split(',') : [0,0,0,0];
-        let dMotGiai = parseFloat(mangDiem[chiSo].trim()) * heSo, dTong = dMotGiai * sl;
-        let tenCap = document.getElementById(`hs_cap_${idx}`).options[document.getElementById(`hs_cap_${idx}`).selectedIndex].text, tenGiai = document.getElementById(`hs_giai_${idx}`).options[document.getElementById(`hs_giai_${idx}`).selectedIndex].text;
-        let dong = `+ ${sl} HS đạt ${tenGiai} ${tenCap} (${heSo>1?'Tập thể':'Cá nhân'}: ${dMotGiai}đ/giải) = ${dTong} điểm\n`;
+        const cap = document.getElementById(`hs_cap_${idx}`).value;
+        const chiSo = parseInt(document.getElementById(`hs_giai_${idx}`).value);
+        const heSo = parseFloat(document.getElementById(`hs_loai_${idx}`).value);
+        const sl = parseInt(document.getElementById(`hs_sl_${idx}`).value) || 1;
+
+        const thangDiemChuan = {
+            'QUOCGIA': [18, 16, 14, 12], 
+            'TINH': [12, 10, 8, 6],
+            'XA': [6, 4, 2, 1]
+        };
+
+        let mangDiem;
+        if (cauHinhDiemHienTai[`DIEM_HS_${cap}`]) {
+            let diemSheet = cauHinhDiemHienTai[`DIEM_HS_${cap}`].split(',');
+            mangDiem = (diemSheet.length >= 4) ? diemSheet : thangDiemChuan[cap];
+        } else {
+            mangDiem = thangDiemChuan[cap];
+        }
+
+        let dMotGiai = parseFloat(mangDiem[chiSo].toString().trim()) * heSo;
+        let dTong = dMotGiai * sl;
+        
+        let tenCap = document.getElementById(`hs_cap_${idx}`).options[document.getElementById(`hs_cap_${idx}`).selectedIndex].text;
+        let tenGiai = document.getElementById(`hs_giai_${idx}`).options[document.getElementById(`hs_giai_${idx}`).selectedIndex].text;
+        
+        let dong = `+ ${sl} HS đạt ${tenGiai} ${tenCap} (${heSo > 1 ? 'Tập thể' : 'Cá nhân'}: ${dMotGiai}đ/giải) = ${dTong} điểm\n`;
         let hid = document.getElementById(`hs_hidden_${idx}`);
+        
         hid.value = (hid.value.includes("Chưa có") ? "" : hid.value) + dong;
         document.getElementById(`hs_hienthi_${idx}`).innerHTML = hid.value.replace(/\n/g, '<br>');
+        
         tinhToanXepLoaiQuyChe();
     }
 
     function xoaDiemHS(idx) { document.getElementById(`hs_hidden_${idx}`).value = ""; document.getElementById(`hs_hienthi_${idx}`).innerHTML = "Chưa có dữ liệu..."; tinhToanXepLoaiQuyChe(); }
 
-    /* ====================================================================
-     * BỘ MÁY SUY LUẬN QUY CHẾ - CẬP NHẬT CHUẨN XÁC THEO VĂN BẢN
-     * ==================================================================== */
     function tinhToanXepLoaiQuyChe() {
         const danhSachDong = document.querySelectorAll("#tableBody tr");
         const nhomDoiTuong = document.getElementById("doiTuongSelect").value;
         
-        // Các biến thu thập tham số
         let thamSo = { phBinh: 0, thXS: 0, thTot: 0, thHT: 0, chNghiep: '', chMon: '', chBien: '', vSach: 0, gvDG: '', kNhiem: '', sKien: '', hsGiai: '', hsHT: 0, hsXS: 0, hsTot: 0 };
         let tongDiemP2 = 0;
         let tonTai = { phBinh: false, thXS: false, thTot: false, thHT: false, chNghiep: false, chMon: false, chBien: false, vSach: false, gvDG: false, kNhiem: false, sKien: false, hsGiai: false, hsHT: false, hsXS: false, hsTot: false };
@@ -201,7 +234,6 @@
             if (!theNhap) return;
             let gTri = theNhap.value.toLowerCase(), soLieu = parseFloat(gTri.replace(/[^\d\.]/g, '')) || 0;
 
-            // Xử lý điểm phần 2
             if (dongKiemTra.querySelector("select.input-cell")) {
                 tongDiemP2 += parseFloat(dongKiemTra.querySelector("select.input-cell").options[dongKiemTra.querySelector("select.input-cell").selectedIndex].getAttribute("data-point")) || 0;
             } else if (tenTC.includes("vở sạch")) {
@@ -211,7 +243,6 @@
                 if (mangDiem) mangDiem.forEach(m => tongDiemP2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
-            // Nhận diện dữ liệu tự động nạp (Tháng)
             let laAutoLoad = dongKiemTra.querySelector(".auto-loaded-data") !== null;
             if (laAutoLoad) {
                 if (kiemTraChuoi(gTri, /xuất sắc/i)) { thamSo.thXS = 100; tonTai.thXS = true; }
@@ -220,7 +251,6 @@
                 return; 
             }
 
-            // Phân loại tham số
             if (tenTC.includes("phê bình")) { thamSo.phBinh = soLieu; tonTai.phBinh = true; }
             else if (tenTC.includes("tháng") && tenTC.includes("xuất sắc")) { thamSo.thXS = soLieu; tonTai.thXS = true; }
             else if (tenTC.includes("tháng") && tenTC.includes("tốt")) { thamSo.thTot = soLieu; tonTai.thTot = true; }
@@ -244,7 +274,6 @@
         let mucDoT = thamSo.thXS + thamSo.thTot;
         let mucDoH = mucDoT + thamSo.thHT;
 
-        // Xác minh vượt mức 30%
         const kiemTraVuotMuc = () => {
             let mauSo = 0; let tuSo = 0;
             if (nhomDoiTuong === "giaovien") {
@@ -266,7 +295,6 @@
         let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (nhomDoiTuong === "giaovien") {
-            // Điều kiện giải thưởng tối thiểu cho GV Xuất Sắc
             let chuanGiai = kiemTraChuoi(thamSo.hsGiai, /nhất.*(xã|cụm|khu|huyện|tỉnh|quốc)|nhì.*(cụm|khu|huyện|tỉnh|quốc)|ba.*(tỉnh|quốc)|quốc/i);
             
             gv_XS = (!tonTai.phBinh || thamSo.phBinh === 0) && 
@@ -313,9 +341,16 @@
             else if (nv_HT) { kqThanhLieu = "HOÀN THÀNH NHIỆM VỤ"; mauHienThi = "#fd7e14"; }
         }
 
+        // CẬP NHẬT DỮ LIỆU VÀO BỐ CỤC MỚI THEO YÊU CẦU CỦA ẢNH
+        document.getElementById("hienThiDiemP1").innerText = `Tổng điểm phần 1: ${mucDoH}`;
+        document.getElementById("hienThiDiemP2").innerText = `Tổng điểm phần 2: ${tongDiemP2.toFixed(1)}`;
+        
         const khuVucHT = document.getElementById("hienThiXepLoai");
-        khuVucHT.innerHTML = `<span style="text-transform: uppercase;">${kqThanhLieu}</span> <br><span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: ${tongDiemP2.toFixed(1)} điểm)</span>`;
-        khuVucHT.style.color = mauHienThi;
+        khuVucHT.innerHTML = `
+            <span style="text-transform: uppercase; color: ${mauHienThi};">${kqThanhLieu}</span><br>
+            <span style="font-size: 16px; color: #d9534f; font-weight: normal;">Tổng điểm năm học:</span><br>
+            <span style="font-size: 18px; color: #0056b3;">(Tổng điểm Phần 2: ${tongDiemP2.toFixed(1)} điểm)</span>
+        `;
     }
 
     async function thucHienGhiNhan() {
