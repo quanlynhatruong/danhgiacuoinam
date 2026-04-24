@@ -118,11 +118,14 @@
             const result = await res.json();
             if (result.status === 'success') {
                 dinhDanhHienTai = thongTin;
-                tenHoSoHienTai = result.tenSheet;
+                // Vẫn giữ tên Cột A làm định danh hồ sơ lưu trữ ngầm
+                tenHoSoHienTai = result.tenSheet; 
                 cauHinhDiemHienTai = result.config;
                 ketQuaThangTuDong = result.ketQuaThang || ""; 
                 
-                document.getElementById("userName").innerText = tenHoSoHienTai;
+                // CẬP NHẬT: Chỉ đổi tên hiển thị giao diện sang biến tenHienThi (Cột C)
+                document.getElementById("userName").innerText = result.tenHienThi || tenHoSoHienTai;
+                
                 xayDungBang(result.data);
                 document.getElementById("lookupArea").classList.add("hidden");
                 document.getElementById("mainArea").classList.remove("hidden");
