@@ -212,9 +212,14 @@
         const danhSachDong = document.querySelectorAll("#tableBody tr");
         const nhomDoiTuong = document.getElementById("doiTuongSelect").value;
         
-        let thamSo = { phBinh: 0, thXS: 0, thTot: 0, thHT: 0, chNghiep: '', chMon: '', chBien: '', vSach: 0, gvDG: '', kNhiem: '', sKien: '', hsGiai: '', hsHT: 0, hsXS: 0, hsTot: 0, diemPhan1: 0, hasAutoLoad: false };
+        let thamSo = { phBinh: 0, chNghiep: '', chMon: '', chBien: '', vSach: 0, gvDG: '', kNhiem: '', sKien: '', hsGiai: '', hsHT: 0, hsXS: 0, hsTot: 0, diemPhan1: 0, hasAutoLoad: false };
+        let tonTai = { phBinh: false, chNghiep: false, chMon: false, chBien: false, vSach: false, gvDG: false, kNhiem: false, sKien: false, hsGiai: false, hsHT: false, hsXS: false, hsTot: false };
         let tongDiemP2 = 0;
-        let tonTai = { phBinh: false, thXS: false, thTot: false, thHT: false, chNghiep: false, chMon: false, chBien: false, vSach: false, gvDG: false, kNhiem: false, sKien: false, hsGiai: false, hsHT: false, hsXS: false, hsTot: false };
+        
+        // ĐÃ SỬA LỖI TRÍCH XUẤT ĐIỂM GÂY TRƯỢT KẾT QUẢ
+        // Biến cờ này sẽ xác định "Có chữ Hoàn thành tốt hoặc Xuất sắc hay không" hoàn toàn độc lập với con số.
+        let passThangTot = false;
+        let passThangHT = false;
 
         const kiemTraChuoi = (chuoi, bThuc) => new RegExp(bThuc, 'i').test(chuoi);
         const xetKiemNhiem = (chuoiKN, mucDo) => {
@@ -243,37 +248,37 @@
                 if (mangDiem) mangDiem.forEach(m => tongDiemP2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
+            // KIỂM TRA DÒNG KẾT QUẢ THÁNG (Loại bỏ ảnh hưởng của điểm số đến kết quả pass/fail)
             let laAutoLoad = dongKiemTra.querySelector(".auto-loaded-data") !== null;
-            if (laAutoLoad) {
+            if (laAutoLoad || tenTC.includes("tháng")) {
                 let numMatch = gTri.match(/\d+([.,]\d+)?/);
                 let diemCoSan = numMatch ? parseFloat(numMatch[0].replace(',', '.')) : 0;
 
                 if (kiemTraChuoi(gTri, /xuất sắc/i)) { 
-                    thamSo.thXS = 100; tonTai.thXS = true; 
-                    thamSo.diemPhan1 = 100 + diemCoSan;
+                    passThangTot = true; passThangHT = true; 
+                    if (laAutoLoad) thamSo.diemPhan1 = 100 + diemCoSan;
                 }
                 else if (kiemTraChuoi(gTri, /tốt/i)) { 
-                    thamSo.thTot = 100; tonTai.thTot = true; 
-                    thamSo.diemPhan1 = 80 + diemCoSan;
+                    passThangTot = true; passThangHT = true; 
+                    if (laAutoLoad) thamSo.diemPhan1 = 80 + diemCoSan;
                 }
                 else if (kiemTraChuoi(gTri, /chưa hoàn thành|không hoàn thành|cht/i)) { 
-                    thamSo.diemPhan1 = 0 + diemCoSan;
+                    passThangTot = false; passThangHT = false; 
+                    if (laAutoLoad) thamSo.diemPhan1 = 0 + diemCoSan;
                 }
                 else if (kiemTraChuoi(gTri, /hoàn thành|ht/i)) { 
-                    thamSo.thHT = 100; tonTai.thHT = true; 
-                    thamSo.diemPhan1 = 60 + diemCoSan;
+                    passThangTot = false; passThangHT = true; 
+                    if (laAutoLoad) thamSo.diemPhan1 = 60 + diemCoSan;
                 } else {
-                    thamSo.diemPhan1 = diemCoSan;
+                    if (laAutoLoad) thamSo.diemPhan1 = diemCoSan;
                 }
-                thamSo.hasAutoLoad = true;
-                return; 
+                
+                if (laAutoLoad) thamSo.hasAutoLoad = true;
+                return; // Xử lý xong dòng Tháng thì bỏ qua các bước kiểm tra Tên TC khác
             }
 
+            // Xử lý các dòng còn lại
             if (tenTC.includes("phê bình")) { thamSo.phBinh = soLieu; tonTai.phBinh = true; }
-            else if (tenTC.includes("tháng") && tenTC.includes("xuất sắc")) { thamSo.thXS = soLieu; tonTai.thXS = true; }
-            else if (tenTC.includes("tháng") && tenTC.includes("tốt")) { thamSo.thTot = soLieu; tonTai.thTot = true; }
-            else if (tenTC.includes("tháng") && (tenTC.includes("hoàn thành") || tenTC.includes("ht")) && !tenTC.includes("tốt") && !tenTC.includes("xuất sắc")) { thamSo.thHT = soLieu; tonTai.thHT = true; }
-            
             else if (tenTC.includes("chuẩn")) { thamSo.chNghiep = gTri; tonTai.chNghiep = true; }
             else if (tenTC.includes("chuyên môn")) { thamSo.chMon = gTri; tonTai.chMon = true; }
             else if (tenTC.includes("chuyển biến")) { thamSo.chBien = gTri; tonTai.chBien = true; }
@@ -289,28 +294,19 @@
             else if (tenTC.includes("kiêm nhiệm")) { thamSo.kNhiem = gTri; tonTai.kNhiem = true; }
         });
 
-        let mucDoT = thamSo.thXS + thamSo.thTot;
-        let mucDoH = mucDoT + thamSo.thHT;
-
-        // ĐÃ CHUẨN HÓA LẠI TÍNH TOÁN VƯỢT MỨC VÀ KIỂM TRA ĐIỀU KIỆN
         const kiemTraVuotMuc = () => {
             let mauSo = 0; let tuSo = 0;
             if (nhomDoiTuong === "giaovien") {
                 mauSo = 8;
-                // Tiêu chí 4: VSCĐ > 60%
                 if (thamSo.vSach > 60) tuSo++; 
-                // Tiêu chí 5: GVDG đạt xã, cụm, khu, huyện, tỉnh, quốc gia
                 if (kiemTraChuoi(thamSo.gvDG, /xã|huyện|cụm|khu|tỉnh|quốc/i)) tuSo++; 
-                // Tiêu chí 6: Giải HS. Bất kỳ giải Tỉnh/Quốc gia (kể cả KK) hoặc Nhất Cụm/Huyện/Xã
                 if (kiemTraChuoi(thamSo.hsGiai, /quốc|tỉnh|nhất.*(cụm|khu|huyện|xã)/i)) tuSo++; 
-                // Tiêu chí 7: HS Xuất sắc > 20% HOẶC HS Tốt > 25%
                 if (thamSo.hsXS > 20 || thamSo.hsTot > 25) tuSo++; 
             } else {
                 mauSo = 3;
                 if (kiemTraChuoi(thamSo.sKien, /huyện|tỉnh|quốc/i)) tuSo++;
                 if (kiemTraChuoi(thamSo.kNhiem, /xuất sắc/i)) tuSo++;
             }
-            // 30% của 8 chỉ tiêu tương đương yêu cầu tuSo >= 2.4 
             return mauSo === 0 ? true : tuSo >= (mauSo * 0.3); 
         };
 
@@ -318,11 +314,11 @@
         let gv_XS = false, gv_Tot = false, gv_HT = false, nv_XS = false, nv_Tot = false, nv_HT = false;
         
         if (nhomDoiTuong === "giaovien") {
-            // Mở rộng chuẩn giải để chấp nhận cả giải KK cấp Tỉnh
             let chuanGiai = kiemTraChuoi(thamSo.hsGiai, /quốc|tỉnh|nhất.*(xã|cụm|khu|huyện)|nhì.*(cụm|khu|huyện)/i);
             
+            // THAY THẾ TOÀN BỘ ĐIỀU KIỆN (mucDoT >= 100) BẰNG CỜ passThangTot / passThangHT
             gv_XS = (!tonTai.phBinh || thamSo.phBinh === 0) && 
-                    (mucDoT >= 100) &&
+                    passThangTot &&
                     (tonTai.chNghiep && kiemTraChuoi(thamSo.chNghiep, /tốt/i)) && 
                     (tonTai.chMon && kiemTraChuoi(thamSo.chMon, /giỏi/i)) && 
                     (tonTai.chBien && kiemTraChuoi(thamSo.chBien, /tốt/i)) && 
@@ -333,7 +329,7 @@
                     (tonTai.kNhiem && xetKiemNhiem(thamSo.kNhiem, 'XS')) && 
                     kiemTraVuotMuc(); 
 
-            gv_Tot = (mucDoT >= 100) &&
+            gv_Tot = passThangTot &&
                      (tonTai.chNghiep && kiemTraChuoi(thamSo.chNghiep, /khá|tốt/i)) && 
                      (tonTai.chMon && kiemTraChuoi(thamSo.chMon, /khá|giỏi/i)) && 
                      (tonTai.chBien && kiemTraChuoi(thamSo.chBien, /khá|tốt/i)) && 
@@ -341,7 +337,7 @@
                      (tonTai.hsHT && thamSo.hsHT >= 95) && (tonTai.hsXS && thamSo.hsXS >= 15) && (tonTai.hsTot && thamSo.hsTot >= 25) &&
                      (tonTai.kNhiem && xetKiemNhiem(thamSo.kNhiem, 'Tốt'));
 
-            gv_HT = (mucDoT >= 100) && 
+            gv_HT = passThangTot && 
                     (tonTai.chNghiep && !kiemTraChuoi(thamSo.chNghiep, /chưa đạt|kém/i)) && 
                     (tonTai.chMon && !kiemTraChuoi(thamSo.chMon, /yếu|kém/i)) &&
                     (tonTai.hsHT && thamSo.hsHT >= 90) && (tonTai.hsXS && thamSo.hsXS >= 10) && (tonTai.hsTot && thamSo.hsTot >= 20) &&
@@ -352,20 +348,21 @@
             else if (gv_HT) { kqThanhLieu = "HOÀN THÀNH NHIỆM VỤ"; mauHienThi = "#fd7e14"; }
             
         } else {
-            nv_XS = (mucDoT >= 100) && (!tonTai.phBinh || thamSo.phBinh === 0) &&
+            nv_XS = passThangTot && (!tonTai.phBinh || thamSo.phBinh === 0) &&
                     (tonTai.sKien && thamSo.sKien.trim() !== "" && kiemTraChuoi(thamSo.sKien, /xã|huyện|cụm|tỉnh|quốc/i)) && 
                     xetKiemNhiem(thamSo.kNhiem, 'XS') && kiemTraVuotMuc();
 
-            nv_Tot = (mucDoT >= 100) && (!tonTai.phBinh || thamSo.phBinh === 0) && xetKiemNhiem(thamSo.kNhiem, 'Tốt');
+            nv_Tot = passThangTot && (!tonTai.phBinh || thamSo.phBinh === 0) && xetKiemNhiem(thamSo.kNhiem, 'Tốt');
 
-            nv_HT = (mucDoH >= 100) && (!tonTai.phBinh || thamSo.phBinh <= 2) && xetKiemNhiem(thamSo.kNhiem, 'HT');
+            nv_HT = passThangHT && (!tonTai.phBinh || thamSo.phBinh <= 2) && xetKiemNhiem(thamSo.kNhiem, 'HT');
 
             if (nv_XS) { kqThanhLieu = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; mauHienThi = "#28a745"; }
             else if (nv_Tot) { kqThanhLieu = "HOÀN THÀNH TỐT NHIỆM VỤ"; mauHienThi = "#007bff"; }
             else if (nv_HT) { kqThanhLieu = "HOÀN THÀNH NHIỆM VỤ"; mauHienThi = "#fd7e14"; }
         }
 
-        let diemP1HienThi = thamSo.hasAutoLoad ? thamSo.diemPhan1 : mucDoH;
+        // Dự phòng tính điểm Phần 1 nếu không phải dòng lấy từ API về
+        let diemP1HienThi = thamSo.hasAutoLoad ? thamSo.diemPhan1 : (passThangTot ? 100 : (passThangHT ? 60 : 0));
         let diemNamHoc = diemP1HienThi + tongDiemP2;
 
         let strDiemP1 = diemP1HienThi % 1 === 0 ? diemP1HienThi : diemP1HienThi.toFixed(1);
