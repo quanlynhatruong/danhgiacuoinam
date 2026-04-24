@@ -45,22 +45,22 @@
     </div>
 
     <div id="vungThuNhat">
-        <div class="h-chu-dam"><b>Cam kết bảo mật:</b> Hệ thống hoạt động trên phiên an toàn. Tuyệt đối không thu thập hay lưu trữ thông tin cá nhân.</div>
+        <div class="h-chu-dam"><i>Ghi chú: Vui lòng nhập đúng mã dữ liệu để xem.</i></div>
         <div class="v-nut-bam">
-            <input type="text" class="o-n-chuoi" id="oNhapChinh" placeholder="Nhập mã tham chiếu..." required>
-            <select id="oChonNhom" class="o-c-kieu" onchange="hDoiTuyChon()">
+            <input type="text" class="o-n-chuoi" id="oNhapChinh" placeholder="Nhập mã..." required>
+            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
                 <option value="giaovien">Đối tượng: GIÁO VIÊN</option>
                 <option value="nhanvien">Đối tượng: NHÂN VIÊN</option>
             </select>
-            <button class="n-bam n-xanh-b" onclick="hGoiHanhDong()">TRUY CẬP HỒ SƠ</button>
+            <button class="n-bam n-xanh-b" onclick="f_x_d()">XEM DỮ LIỆU</button>
         </div>
     </div>
 
-    <div id="h-dang-tai">Hệ thống đang đồng bộ dữ liệu nội bộ, vui lòng đợi...</div>
+    <div id="h-dang-tai">Đang tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
         <h3 style="color: var(--mau-c); border-bottom: 2px solid #ccc; padding-bottom: 10px;">
-            Hồ sơ đánh giá: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
+            Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
         </h3>
         
         <table>
@@ -92,81 +92,81 @@
             </div>
         </div>
 
-        <button class="n-bam n-xanh-l" onclick="hDayDuLieu()">LƯU KẾT QUẢ ĐÁNH GIÁ</button>
+        <button class="n-bam n-xanh-l" onclick="f_x_i()">LƯU KẾT QUẢ</button>
     </div>
 </div>
 
 <script>
-    const DIA_CHI_TIEP_NHAN = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
-    let gLuuA = "", gLuuB = "", gLuuC = {};
-    let gLuuD = "", gLuuE = "", gLuuF = "";
+    const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
+    let v_l_a = "", v_l_b = "", v_l_c = {};
+    let v_l_d = "", v_l_e = "", v_l_f = "";
 
-    const hKiemTraChuoiM = (chuoi, bThuc) => new RegExp(bThuc, 'i').test(chuoi);
-    const hXetChuoiN = (chuoiKN, mucDo) => {
-        if (!chuoiKN || hKiemTraChuoiM(chuoiKN, /không có|không kiêm|khong co|khong kiem/i)) return true; 
-        if (mucDo === 'XS') return hKiemTraChuoiM(chuoiKN, /tốt|xuất sắc|tot|xuat sac/i);
-        if (mucDo === 'Tốt') return hKiemTraChuoiM(chuoiKN, /khá|tốt|xuất sắc|kha|tot|xuat sac/i);
-        if (mucDo === 'HT') return !hKiemTraChuoiM(chuoiKN, /chưa|không hoàn|yếu|kém|chua|khong hoan|yeu|kem/i);
+    const f_x_a = (chuoi, bThuc) => new RegExp(bThuc, 'i').test(chuoi);
+    const f_x_b = (chuoiKN, mucDo) => {
+        if (!chuoiKN || f_x_a(chuoiKN, /không có|không kiêm|khong co|khong kiem/i)) return true; 
+        if (mucDo === 'XS') return f_x_a(chuoiKN, /tốt|xuất sắc|tot|xuat sac/i);
+        if (mucDo === 'Tốt') return f_x_a(chuoiKN, /khá|tốt|xuất sắc|kha|tot|xuat sac/i);
+        if (mucDo === 'HT') return !f_x_a(chuoiKN, /chưa|không hoàn|yếu|kém|chua|khong hoan|yeu|kem/i);
         return false;
     };
 
-    function hDoiTuyChon() {
+    function f_x_c() {
         if (!document.getElementById("vungThuHai").classList.contains("a-di")) {
-            hGoiHanhDong(); 
+            f_x_d(); 
         } else {
-            hGomGiaTri();
+            f_x_h();
         }
     }
 
-    async function hGoiHanhDong() {
-        const pChuoi = document.getElementById("oNhapChinh").value.trim();
-        const pNhom = document.getElementById("oChonNhom").value; 
+    async function f_x_d() {
+        const p_c = document.getElementById("oNhapChinh").value.trim();
+        const p_n = document.getElementById("oChonNhom").value; 
         
-        if (!pChuoi) return alert("Bắt buộc nhập chuỗi tham chiếu!");
-        hHienTai(true);
+        if (!p_c) return alert("Nhập mã!");
+        f_x_j(true);
         try {
-            const res = await fetch(`${DIA_CHI_TIEP_NHAN}?kLenh=gKiemTra&kChuoi=${encodeURIComponent(pChuoi)}&kNhom=${pNhom}`);
-            const tKet = await res.json();
-            if (tKet.status === 'success') {
-                gLuuA = pChuoi;
-                gLuuB = tKet.kA; 
-                gLuuC = tKet.kE;
-                gLuuD = tKet.kC || ""; 
+            const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`);
+            const t_k = await res.json();
+            if (t_k.status === 'success') {
+                v_l_a = p_c;
+                v_l_b = t_k.y_a; 
+                v_l_c = t_k.y_e;
+                v_l_d = t_k.y_c || ""; 
                 
-                document.getElementById("theHienChinh").innerText = tKet.kB || gLuuB;
+                document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
                 
-                hVeKhungBang(tKet.kD);
+                f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
-                hGomGiaTri();
-            } else { alert(tKet.message); }
-        } catch (err) { alert("Lỗi mạng 08."); }
-        hHienTai(false);
+                f_x_h();
+            } else { alert(t_k.message); }
+        } catch (err) { alert("Loi"); }
+        f_x_j(false);
     }
 
-    function hVeKhungBang(mNhan) {
-        const kBang = document.getElementById("t-b-g");
-        kBang.innerHTML = "";
-        let demDong = 1;
+    function f_x_e(m_n) {
+        const k_b = document.getElementById("t-b-g");
+        k_b.innerHTML = "";
+        let d_d = 1;
 
-        mNhan.forEach((item, index) => {
-            let tg = (item.tHai === "undefined" || !item.tHai) ? "" : item.tHai.toString().trim();
-            let kq = item.tBa || "";
+        m_n.forEach((item, index) => {
+            let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
+            let kq = item.x_c || "";
             let html = "";
-            let laPhanDau = !tg && !item.tMot.toLowerCase().includes("phê bình");
+            let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
 
-            let laMucK = item.tMot.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
+            let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
 
-            if (laMucK) {
-                kq = gLuuD !== "" ? gLuuD : kq;
+            if (l_m) {
+                kq = v_l_d !== "" ? v_l_d : kq;
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
                 html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
-                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="hThemDongCon(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="hBoDongCon(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
+                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
-                let tuyChonD = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
-                html = `<select class="o-n-bang k-hoat-t">` + tuyChonD + tg.split(",").map(opt => {
+                let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
+                html = `<select class="o-n-bang k-hoat-t">` + t_c + tg.split(",").map(opt => {
                     let [n, d] = opt.split("|");
                     return `<option value="${n.trim()}" data-p="${d.trim()}" ${kq.includes(n.trim())?'selected':''}>${n.trim()} (${d.trim()}đ)</option>`;
                 }).join("") + `</select>`;
@@ -174,179 +174,179 @@
                 html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
             }
 
-            let hienSo = "";
-            if (!laPhanDau && item.tMot.trim() !== "") {
-                hienSo = demDong;
-                demDong++;
+            let h_s = "";
+            if (!l_p && item.x_a.trim() !== "") {
+                h_s = d_d;
+                d_d++;
             }
 
-            kBang.insertAdjacentHTML('beforeend', `<tr style="${laPhanDau?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${laPhanDau?"":hienSo}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.tMot}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${laPhanDau?"":html}</td></tr>`);
+            k_b.insertAdjacentHTML('beforeend', `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`);
         });
-        document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', hGomGiaTri); el.addEventListener('input', hGomGiaTri); });
+        document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', f_x_h); el.addEventListener('input', f_x_h); });
     }
 
-    function hThemDongCon(idx) {
-        const vC = document.getElementById(`h_c_${idx}`).value;
-        const vS = parseInt(document.getElementById(`h_g_${idx}`).value);
-        const vH = parseFloat(document.getElementById(`h_l_${idx}`).value);
-        const vL = parseInt(document.getElementById(`h_s_${idx}`).value) || 1;
+    function f_x_f(idx) {
+        const v_c = document.getElementById(`h_c_${idx}`).value;
+        const v_s = parseInt(document.getElementById(`h_g_${idx}`).value);
+        const v_h = parseFloat(document.getElementById(`h_l_${idx}`).value);
+        const v_l = parseInt(document.getElementById(`h_s_${idx}`).value) || 1;
 
-        const mChuan = { 'QUOCGIA': [18, 16, 14, 12], 'TINH': [12, 10, 8, 6], 'XA': [6, 4, 2, 1] };
+        const m_c = { 'QUOCGIA': [18, 16, 14, 12], 'TINH': [12, 10, 8, 6], 'XA': [6, 4, 2, 1] };
 
-        let mGoc;
-        if (gLuuC[`DIEM_HS_${vC}`]) {
-            let mTam = gLuuC[`DIEM_HS_${vC}`].split(',');
-            mGoc = (mTam.length >= 4) ? mTam : mChuan[vC];
+        let m_g;
+        if (v_l_c[`DIEM_HS_${v_c}`]) {
+            let m_t = v_l_c[`DIEM_HS_${v_c}`].split(',');
+            m_g = (m_t.length >= 4) ? m_t : m_c[v_c];
         } else {
-            mGoc = mChuan[vC];
+            m_g = m_c[v_c];
         }
 
-        let dMot = parseFloat(mGoc[vS].toString().trim()) * vH;
-        let dTong = dMot * vL;
+        let d_1 = parseFloat(m_g[v_s].toString().trim()) * v_h;
+        let d_t = d_1 * v_l;
         
-        let cT = document.getElementById(`h_c_${idx}`).options[document.getElementById(`h_c_${idx}`).selectedIndex].text;
-        let cG = document.getElementById(`h_g_${idx}`).options[document.getElementById(`h_g_${idx}`).selectedIndex].text;
+        let c_t = document.getElementById(`h_c_${idx}`).options[document.getElementById(`h_c_${idx}`).selectedIndex].text;
+        let c_g = document.getElementById(`h_g_${idx}`).options[document.getElementById(`h_g_${idx}`).selectedIndex].text;
         
-        let cDong = `+ ${vL} HS đạt ${cG} ${cT} (${vH > 1 ? 'Tập thể' : 'Cá nhân'}: ${dMot}đ/giải) = ${dTong} điểm\n`;
-        let cAn = document.getElementById(`h_a_${idx}`);
+        let c_d = `+ ${v_l} HS đạt ${c_g} ${c_t} (${v_h > 1 ? 'Tập thể' : 'Cá nhân'}: ${d_1}đ/giải) = ${d_t} điểm\n`;
+        let c_a = document.getElementById(`h_a_${idx}`);
         
-        cAn.value = (cAn.value.includes("...") ? "" : cAn.value) + cDong;
-        document.getElementById(`h_t_${idx}`).innerHTML = cAn.value.replace(/\n/g, '<br>');
+        c_a.value = (c_a.value.includes("...") ? "" : c_a.value) + c_d;
+        document.getElementById(`h_t_${idx}`).innerHTML = c_a.value.replace(/\n/g, '<br>');
         
-        hGomGiaTri();
+        f_x_h();
     }
 
-    function hBoDongCon(idx) { document.getElementById(`h_a_${idx}`).value = ""; document.getElementById(`h_t_${idx}`).innerHTML = "..."; hGomGiaTri(); }
+    function f_x_g(idx) { document.getElementById(`h_a_${idx}`).value = ""; document.getElementById(`h_t_${idx}`).innerHTML = "..."; f_x_h(); }
 
-    function hGomGiaTri() {
-        const mDoc = document.querySelectorAll("#t-b-g tr");
-        const cNhom = document.getElementById("oChonNhom").value;
+    function f_x_h() {
+        const m_d = document.querySelectorAll("#t-b-g tr");
+        const c_n = document.getElementById("oChonNhom").value;
         
-        let mKhoiA = { kA: 0, kB: '', kC: '', kD: '', kE: 0, kF: '', kG: '', kH: '', kI: '', kJ: 0, kK: 0, kL: 0, kM: 0, kN: false };
-        let mKhoiB = { tA: false, tB: false, tC: false, tD: false, tE: false, tF: false, tG: false, tH: false, tI: false, tJ: false, tK: false, tL: false };
-        let kTongC = 0;
+        let m_k_a = { a: 0, b: '', c: '', d: '', e: 0, f: '', g: '', h: '', i: '', j: 0, k: 0, l: 0, m: 0, n: false };
+        let m_k_b = { a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false, i: false, j: false, k: false, l: false };
+        let k_t_c = 0;
         
-        let bXanhL = false;
-        let bXanhD = false;
+        let b_x_l = false;
+        let b_x_d = false;
 
-        mDoc.forEach(dKiem => {
-            let cX1 = dKiem.querySelector(".m-cot-mot");
-            if (!cX1) return;
-            let cT1 = cX1.innerText.toLowerCase();
+        m_d.forEach(d_k => {
+            let c_x_1 = d_k.querySelector(".m-cot-mot");
+            if (!c_x_1) return;
+            let c_t_1 = c_x_1.innerText.toLowerCase();
             
-            let cX2 = dKiem.querySelector(".o-n-bang");
-            if (!cX2) return;
-            let cG1 = cX2.value.toLowerCase(), cS1 = parseFloat(cG1.replace(/[^\d\.]/g, '')) || 0;
+            let c_x_2 = d_k.querySelector(".o-n-bang");
+            if (!c_x_2) return;
+            let c_g_1 = c_x_2.value.toLowerCase(), c_s_1 = parseFloat(c_g_1.replace(/[^\d\.]/g, '')) || 0;
 
-            if (dKiem.querySelector("select.o-n-bang")) {
-                let elS = dKiem.querySelector("select.o-n-bang");
-                kTongC += parseFloat(elS.options[elS.selectedIndex].getAttribute("data-p")) || 0;
-            } else if (cT1.includes("vở sạch")) {
-                kTongC += (cS1 * 0.1);
-            } else if (cT1.includes("thành tích") || dKiem.cells[2].innerText === 'Quy chế T.Tích' || dKiem.cells[2].innerText === 'Quy chế') {
-                let mDiem = cG1.match(/=\s*([\d\.]+)\s*điểm/g);
-                if (mDiem) mDiem.forEach(m => kTongC += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
+            if (d_k.querySelector("select.o-n-bang")) {
+                let e_s = d_k.querySelector("select.o-n-bang");
+                k_t_c += parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0;
+            } else if (c_t_1.includes("vở sạch")) {
+                k_t_c += (c_s_1 * 0.1);
+            } else if (c_t_1.includes("thành tích") || d_k.cells[2].innerText === 'Quy chế T.Tích' || d_k.cells[2].innerText === 'Quy chế') {
+                let m_d_1 = c_g_1.match(/=\s*([\d\.]+)\s*điểm/g);
+                if (m_d_1) m_d_1.forEach(m => k_t_c += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
             }
 
-            let cDongBo = dKiem.querySelector(".h-dong-bo") !== null;
-            if (cDongBo || cT1.includes("tháng")) {
-                let cN1 = cG1.match(/\d+([.,]\d+)?/);
-                let cD1 = cN1 ? parseFloat(cN1[0].replace(',', '.')) : 0;
+            let c_d_b = d_k.querySelector(".h-dong-bo") !== null;
+            if (c_d_b || c_t_1.includes("tháng")) {
+                let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
+                let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
 
-                if (hKiemTraChuoiM(cG1, /xuất sắc/i)) { bXanhL = true; bXanhD = true; if (cDongBo) mKhoiA.kM = 100 + cD1; }
-                else if (hKiemTraChuoiM(cG1, /tốt/i)) { bXanhL = true; bXanhD = true; if (cDongBo) mKhoiA.kM = 80 + cD1; }
-                else if (hKiemTraChuoiM(cG1, /chưa hoàn thành|không hoàn thành|cht/i)) { bXanhL = false; bXanhD = false; if (cDongBo) mKhoiA.kM = 0 + cD1; }
-                else if (hKiemTraChuoiM(cG1, /hoàn thành|ht/i)) { bXanhL = false; bXanhD = true; if (cDongBo) mKhoiA.kM = 60 + cD1; } 
-                else { if (cDongBo) mKhoiA.kM = cD1; }
+                if (f_x_a(c_g_1, /xuất sắc/i)) { b_x_l = true; b_x_d = true; if (c_d_b) m_k_a.m = 100 + c_d_1; }
+                else if (f_x_a(c_g_1, /tốt/i)) { b_x_l = true; b_x_d = true; if (c_d_b) m_k_a.m = 80 + c_d_1; }
+                else if (f_x_a(c_g_1, /chưa hoàn thành|không hoàn thành|cht/i)) { b_x_l = false; b_x_d = false; if (c_d_b) m_k_a.m = 0 + c_d_1; }
+                else if (f_x_a(c_g_1, /hoàn thành|ht/i)) { b_x_l = false; b_x_d = true; if (c_d_b) m_k_a.m = 60 + c_d_1; } 
+                else { if (c_d_b) m_k_a.m = c_d_1; }
                 
-                if (cDongBo) mKhoiA.kN = true;
+                if (c_d_b) m_k_a.n = true;
                 return; 
             }
 
-            if (cT1.includes("phê bình")) { mKhoiA.kA = cS1; mKhoiB.tA = true; }
-            else if (cT1.includes("chuẩn")) { mKhoiA.kB = cG1; mKhoiB.tB = true; }
-            else if (cT1.includes("chuyên môn")) { mKhoiA.kC = cG1; mKhoiB.tC = true; }
-            else if (cT1.includes("chuyển biến")) { mKhoiA.kD = cG1; mKhoiB.tD = true; }
-            else if (cT1.includes("vở sạch")) { mKhoiA.kE = cS1; mKhoiB.tE = true; }
-            else if (cT1.includes("giáo viên giỏi") || cT1.includes("gvdg")) { mKhoiA.kF = cG1; mKhoiB.tF = true; }
-            else if (cT1.includes("thành tích") || dKiem.cells[2].innerText === 'Quy chế T.Tích' || dKiem.cells[2].innerText === 'Quy chế') { mKhoiA.kI = cG1; mKhoiB.tI = true; }
-            else if (cT1.includes("học sinh") || cT1.includes("hs") || cT1.includes("tỷ lệ hs")) {
-                if (cT1.includes("xuất sắc")) { mKhoiA.kK = cS1; mKhoiB.tK = true; }
-                else if (cT1.includes("tốt")) { mKhoiA.kL = cS1; mKhoiB.tL = true; }
-                else if ((cT1.includes("hoàn thành") || cT1.includes("ht")) && !cT1.includes("tốt") && !cT1.includes("xuất sắc")) { mKhoiA.kJ = cS1; mKhoiB.tJ = true; }
+            if (c_t_1.includes("phê bình")) { m_k_a.a = c_s_1; m_k_b.a = true; }
+            else if (c_t_1.includes("chuẩn")) { m_k_a.b = c_g_1; m_k_b.b = true; }
+            else if (c_t_1.includes("chuyên môn")) { m_k_a.c = c_g_1; m_k_b.c = true; }
+            else if (c_t_1.includes("chuyển biến")) { m_k_a.d = c_g_1; m_k_b.d = true; }
+            else if (c_t_1.includes("vở sạch")) { m_k_a.e = c_s_1; m_k_b.e = true; }
+            else if (c_t_1.includes("giáo viên giỏi") || c_t_1.includes("gvdg")) { m_k_a.f = c_g_1; m_k_b.f = true; }
+            else if (c_t_1.includes("thành tích") || d_k.cells[2].innerText === 'Quy chế T.Tích' || d_k.cells[2].innerText === 'Quy chế') { m_k_a.i = c_g_1; m_k_b.i = true; }
+            else if (c_t_1.includes("học sinh") || c_t_1.includes("hs") || c_t_1.includes("tỷ lệ hs")) {
+                if (c_t_1.includes("xuất sắc")) { m_k_a.k = c_s_1; m_k_b.k = true; }
+                else if (c_t_1.includes("tốt")) { m_k_a.l = c_s_1; m_k_b.l = true; }
+                else if ((c_t_1.includes("hoàn thành") || c_t_1.includes("ht")) && !c_t_1.includes("tốt") && !c_t_1.includes("xuất sắc")) { m_k_a.j = c_s_1; m_k_b.j = true; }
             }
-            else if (cT1.includes("sáng kiến")) { mKhoiA.kH = cG1; mKhoiB.tH = true; }
-            else if (cT1.includes("kiêm nhiệm")) { mKhoiA.kG = cG1; mKhoiB.tG = true; }
+            else if (c_t_1.includes("sáng kiến")) { m_k_a.h = c_g_1; m_k_b.h = true; }
+            else if (c_t_1.includes("kiêm nhiệm")) { m_k_a.g = c_g_1; m_k_b.g = true; }
         });
 
-        let gKet = { kTra: "CHƯA HOÀN THÀNH NHIỆM VỤ", kMau: "#dc3545" };
+        let g_k = { k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 
-        if (cNhom === "giaovien") {
-            if (typeof hXetDuyetG === "function") gKet = hXetDuyetG(mKhoiA, mKhoiB, bXanhL, bXanhD);
+        if (c_n === "giaovien") {
+            if (typeof f_x_l === "function") g_k = f_x_l(m_k_a, m_k_b, b_x_l, b_x_d);
         } else {
-            if (typeof hXetDuyetN === "function") gKet = hXetDuyetN(mKhoiA, mKhoiB, bXanhL, bXanhD);
+            if (typeof f_x_m === "function") g_k = f_x_m(m_k_a, m_k_b, b_x_l, b_x_d);
         }
 
-        let kTra = gKet.kTra;
-        let kMau = gKet.kMau;
+        let k_t = g_k.k_t;
+        let k_m = g_k.k_m;
 
-        let kTongA = mKhoiA.kN ? mKhoiA.kM : (bXanhL ? 100 : (bXanhD ? 60 : 0));
-        let kTongT = kTongA + kTongC;
+        let k_t_a = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
+        let k_t_t = k_t_a + k_t_c;
 
-        let cS_A = kTongA % 1 === 0 ? kTongA : kTongA.toFixed(1);
-        let cS_C = kTongC % 1 === 0 ? kTongC : kTongC.toFixed(1);
-        let cS_T = kTongT % 1 === 0 ? kTongT : kTongT.toFixed(1);
+        let c_s_a = k_t_a % 1 === 0 ? k_t_a : k_t_a.toFixed(1);
+        let c_s_c = k_t_c % 1 === 0 ? k_t_c : k_t_c.toFixed(1);
+        let c_s_t = k_t_t % 1 === 0 ? k_t_t : k_t_t.toFixed(1);
 
-        gLuuE = kTra;
-        gLuuF = cS_T;
+        v_l_e = k_t;
+        v_l_f = c_s_t;
 
-        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${cS_A}`;
-        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${cS_C}`;
+        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${c_s_a}`;
+        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${c_s_c}`;
         
         document.getElementById("vHT3").innerHTML = `
-            <div style="font-size: 24px; font-weight: bold; color: ${kMau}; text-transform: uppercase; white-space: nowrap;">${kTra}</div>
-            <div style="font-size: 20px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${cS_T}</div>
+            <div style="font-size: 24px; font-weight: bold; color: ${k_m}; text-transform: uppercase; white-space: nowrap;">${k_t}</div>
+            <div style="font-size: 20px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${c_s_t}</div>
         `;
     }
 
-    async function hDayDuLieu() {
-        const mDoc = document.querySelectorAll("#t-b-g tr"), mKho = [];
-        mDoc.forEach(dKiem => {
-            const vC1 = dKiem.querySelector(".m-cot-mot"), vC2 = dKiem.cells[2], vC3 = dKiem.querySelector(".o-n-bang");
-            if (vC1 && vC2 && vC3) mKho.push({ tMot: vC1.innerText, tHai: vC2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : vC2.innerText, tBa: vC3.value });
+    async function f_x_i() {
+        const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
+        m_d.forEach(d_k => {
+            const v_c_1 = d_k.querySelector(".m-cot-mot"), v_c_2 = d_k.cells[2], v_c_3 = d_k.querySelector(".o-n-bang");
+            if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
         });
-        hHienTai(true);
+        f_x_j(true);
         try {
-            await fetch(DIA_CHI_TIEP_NHAN, { 
+            await fetch(z_y_a, { 
                 method: 'POST', 
                 mode: 'no-cors', 
                 body: JSON.stringify({ 
-                    qMot: gLuuA, 
-                    qHai: gLuuB, 
-                    qBa: mKho,
-                    qBon: gLuuE,
-                    qNam: gLuuF
+                    w_a: v_l_a, 
+                    w_b: v_l_b, 
+                    w_c: m_k,
+                    w_d: v_l_e,
+                    w_e: v_l_f
                 }) 
             });
             alert("Đã lưu kết quả thành công!");
         } catch (err) { alert("Lỗi mạng 09."); }
-        hHienTai(false);
+        f_x_j(false);
     }
-    function hHienTai(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
+    function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
-    async function hKeoTepNhung(cTenTep) {
+    async function f_x_k(c_t_t) {
         try {
-            const rNhan = await fetch(cTenTep);
-            if (!rNhan.ok) throw new Error("Loi " + cTenTep);
-            const cLoi = await rNhan.text();
+            const r_n = await fetch(c_t_t);
+            if (!r_n.ok) throw new Error("Loi " + c_t_t);
+            const c_l = await r_n.text();
             
-            const cQuy = /<script>([\s\S]*?)<\/script>/i;
-            const mQu = cLoi.match(cQuy);
+            const c_q = /<script>([\s\S]*?)<\/script>/i;
+            const m_q = c_l.match(c_q);
             
-            if (mQu && mQu[1]) {
-                const kThe = document.createElement('script');
-                kThe.textContent = mQu[1];
-                document.body.appendChild(kThe);
+            if (m_q && m_q[1]) {
+                const k_t = document.createElement('script');
+                k_t.textContent = m_q[1];
+                document.body.appendChild(k_t);
             }
         } catch (loi) {
             console.error(loi);
@@ -354,8 +354,8 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        hKeoTepNhung('tieuchigv.html');
-        hKeoTepNhung('tieuchinhanvien.html');
+        f_x_k('tieuchigv.html');
+        f_x_k('tieuchinhanvien.html');
     });
 </script>
 
