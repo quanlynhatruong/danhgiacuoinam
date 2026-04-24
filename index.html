@@ -52,7 +52,7 @@
         <div class="security-box"><b>Cam kết bảo mật:</b> Hệ thống hoạt động trên phiên an toàn. Tuyệt đối không thu thập hay lưu trữ thông tin cá nhân.</div>
         <div class="action-form">
             <input type="text" class="id-input" id="dinhDanhInput" placeholder="Nhập định danh thư vụ..." required>
-            <select id="doiTuongSelect" class="role-select" onchange="tinhToanXepLoaiQuyChe()">
+            <select id="doiTuongSelect" class="role-select" onchange="doiTuongThayDoi()">
                 <option value="giaovien">Đối tượng: GIÁO VIÊN</option>
                 <option value="nhanvien">Đối tượng: NHÂN VIÊN</option>
             </select>
@@ -119,12 +119,24 @@
         return false;
     };
 
+    // HÀM CHUYỂN ĐỔI ĐỐI TƯỢNG VÀ NẠP LẠI TỰ ĐỘNG
+    function doiTuongThayDoi() {
+        if (!document.getElementById("mainArea").classList.contains("hidden")) {
+            thucHienTraCuu(); // Gọi fetch lại file cấu hình từ Server nếu bảng đã mở
+        } else {
+            tinhToanXepLoaiQuyChe();
+        }
+    }
+
     async function thucHienTraCuu() {
         const thongTin = document.getElementById("dinhDanhInput").value.trim();
+        const doiTuong = document.getElementById("doiTuongSelect").value; // Lấy tuỳ chọn
+        
         if (!thongTin) return alert("Vui lòng nhập định danh!");
         hienThiTai(true);
         try {
-            const res = await fetch(`${API_URL}?thaotac=tracuu&dinhdanh=${encodeURIComponent(thongTin)}`);
+            // Gửi biến doiTuong lên server để bốc đúng file TIEUCHIGV / TIEUCHINV
+            const res = await fetch(`${API_URL}?thaotac=tracuu&dinhdanh=${encodeURIComponent(thongTin)}&doituong=${doiTuong}`);
             const result = await res.json();
             if (result.status === 'success') {
                 dinhDanhHienTai = thongTin;
@@ -362,7 +374,6 @@
             if (!phanHoi.ok) throw new Error("Không thể tải " + tenFile);
             const noiDungHTML = await phanHoi.text();
             
-            // Trích xuất mã bên trong thẻ <script> từ tệp HTML phụ
             const bieuThucChinhQuy = /<script>([\s\S]*?)<\/script>/i;
             const ketQua = noiDungHTML.match(bieuThucChinhQuy);
             
