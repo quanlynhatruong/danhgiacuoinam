@@ -1,40 +1,37 @@
 <script>
-// KHỐI LOGIC ĐÁNH GIÁ CHUYÊN BIỆT: NHÂN VIÊN
-function danhGiaNhanVien(thamSo, tonTai, passThangTot, passThangHT) {
-    const kiemTraVuotMucNV = () => {
-        let tuSo = 0;
-        if (kiemTraChuoi(thamSo.sKien, /huyện|tỉnh|quốc/i)) tuSo++;
-        if (kiemTraChuoi(thamSo.kNhiem, /xuất sắc/i)) tuSo++;
-        return tuSo >= (3 * 0.3); // Mẫu số là 3
+function hXetDuyetN(mKhoiA, mKhoiB, bXanhL, bXanhD) {
+    const hKiemLieuN = () => {
+        let vSo = 0;
+        if (hKiemTraChuoiM(mKhoiA.kH, /huyện|tỉnh|quốc/i)) vSo++;
+        if (hKiemTraChuoiM(mKhoiA.kG, /xuất sắc/i)) vSo++;
+        return vSo >= (3 * 0.3); 
     };
 
-    // BỔ SUNG: Hàm kiểm tra giá trị tồn tại (tránh việc để trống "-- Chọn mức --" vẫn được ghi nhận)
-    const coGiaTri = (chuoi) => chuoi && chuoi.trim() !== "";
+    const hCoChuoiG = (chuoi) => chuoi && chuoi.trim() !== "";
 
-    let nv_XS = passThangTot && (!tonTai.phBinh || thamSo.phBinh === 0) &&
-            (tonTai.chNghiep && kiemTraChuoi(thamSo.chNghiep, /tốt/i)) && 
-            (tonTai.chMon && kiemTraChuoi(thamSo.chMon, /giỏi/i)) && 
-            (tonTai.chBien && kiemTraChuoi(thamSo.chBien, /tốt/i)) && 
-            (tonTai.sKien && thamSo.sKien.trim() !== "" && kiemTraChuoi(thamSo.sKien, /xã|huyện|cụm|tỉnh|quốc/i)) && 
-            xetKiemNhiem(thamSo.kNhiem, 'XS') && kiemTraVuotMucNV();
+    let cMucA = bXanhL && (!mKhoiB.tA || mKhoiA.kA === 0) &&
+            (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /tốt/i)) && 
+            (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /giỏi/i)) && 
+            (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /tốt/i)) && 
+            (mKhoiB.tH && mKhoiA.kH.trim() !== "" && hKiemTraChuoiM(mKhoiA.kH, /xã|huyện|cụm|tỉnh|quốc/i)) && 
+            hXetChuoiN(mKhoiA.kG, 'XS') && hKiemLieuN();
 
-    let nv_Tot = passThangTot && (!tonTai.phBinh || thamSo.phBinh === 0) && 
-             (tonTai.chNghiep && kiemTraChuoi(thamSo.chNghiep, /khá|tốt/i)) && 
-             (tonTai.chMon && kiemTraChuoi(thamSo.chMon, /khá|giỏi/i)) && 
-             (tonTai.chBien && kiemTraChuoi(thamSo.chBien, /khá|tốt/i)) && 
-             xetKiemNhiem(thamSo.kNhiem, 'Tốt');
+    let cMucB = bXanhL && (!mKhoiB.tA || mKhoiA.kA === 0) && 
+             (mKhoiB.tB && hKiemTraChuoiM(mKhoiA.kB, /khá|tốt/i)) && 
+             (mKhoiB.tC && hKiemTraChuoiM(mKhoiA.kC, /khá|giỏi/i)) && 
+             (mKhoiB.tD && hKiemTraChuoiM(mKhoiA.kD, /khá|tốt/i)) && 
+             hXetChuoiN(mKhoiA.kG, 'Tốt');
 
-    // CẬP NHẬT: Bắt buộc Chuẩn nghề nghiệp, Chuyên môn, Chuyển biến phải "coGiaTri" mới được tính là Hoàn thành
-    let nv_HT = passThangHT && (!tonTai.phBinh || thamSo.phBinh <= 2) && 
-            (tonTai.chNghiep && coGiaTri(thamSo.chNghiep) && !kiemTraChuoi(thamSo.chNghiep, /chưa đạt|kém/i)) && 
-            (tonTai.chMon && coGiaTri(thamSo.chMon) && !kiemTraChuoi(thamSo.chMon, /yếu|kém/i)) &&
-            (tonTai.chBien && coGiaTri(thamSo.chBien) && !kiemTraChuoi(thamSo.chBien, /chưa đạt|kém/i)) &&
-            xetKiemNhiem(thamSo.kNhiem, 'HT');
+    let cMucC = bXanhD && (!mKhoiB.tA || mKhoiA.kA <= 2) && 
+            (mKhoiB.tB && hCoChuoiG(mKhoiA.kB) && !hKiemTraChuoiM(mKhoiA.kB, /chưa đạt|kém/i)) && 
+            (mKhoiB.tC && hCoChuoiG(mKhoiA.kC) && !hKiemTraChuoiM(mKhoiA.kC, /yếu|kém/i)) &&
+            (mKhoiB.tD && hCoChuoiG(mKhoiA.kD) && !hKiemTraChuoiM(mKhoiA.kD, /chưa đạt|kém/i)) &&
+            hXetChuoiN(mKhoiA.kG, 'HT');
 
-    if (nv_XS) return { kqThanhLieu: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", mauHienThi: "#28a745" };
-    if (nv_Tot) return { kqThanhLieu: "HOÀN THÀNH TỐT NHIỆM VỤ", mauHienThi: "#007bff" };
-    if (nv_HT) return { kqThanhLieu: "HOÀN THÀNH NHIỆM VỤ", mauHienThi: "#fd7e14" };
+    if (cMucA) return { kTra: "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ", kMau: "#28a745" };
+    if (cMucB) return { kTra: "HOÀN THÀNH TỐT NHIỆM VỤ", kMau: "#007bff" };
+    if (cMucC) return { kTra: "HOÀN THÀNH NHIỆM VỤ", kMau: "#fd7e14" };
     
-    return { kqThanhLieu: "CHƯA HOÀN THÀNH NHIỆM VỤ", mauHienThi: "#dc3545" };
+    return { kTra: "CHƯA HOÀN THÀNH NHIỆM VỤ", kMau: "#dc3545" };
 }
 </script>
