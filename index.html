@@ -79,20 +79,20 @@
             <tbody id="tableBody"></tbody>
         </table>
 
-        <div class="live-result-box" style="align-items: flex-start;">
-            <div style="flex: 1;">
-                <h3>DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3>
-                <div style="font-size: 14px; color: #555; margin-top: 5px;"><i>(Tích hợp 8 mục tối thiểu, 30% vượt mức & Đồng bộ Cột D)</i></div>
+        <div class="live-result-box" style="align-items: center;">
+            <div style="flex: 1.2;">
+                <h3 style="margin: 0 0 5px 0;">DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3>
+                <div style="font-size: 14px; color: #555;"><i>(Tích hợp 8 mục tối thiểu, 30% vượt mức & Đồng bộ Cột D)</i></div>
             </div>
             
-            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 15px; color: #d9534f; font-size: 18px;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #d9534f; font-size: 18px; line-height: 1.6;">
                 <div id="hienThiDiemP1">Tổng điểm phần 1: </div>
                 <div id="hienThiDiemP2">Tổng điểm phần 2: </div>
             </div>
             
-            <div class="live-rating" id="hienThiXepLoai" style="flex: 1;">
-                CHƯA HOÀN THÀNH NHIỆM VỤ<br>
-                <span style="font-size: 16px; color: #d9534f; font-weight: normal;">Tổng điểm năm học: 0</span>
+            <div class="live-rating" id="hienThiXepLoai" style="flex: 1.2; text-align: right;">
+                <div style="font-size: 24px; font-weight: bold; color: #dc3545; text-transform: uppercase;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
+                <div style="font-size: 16px; color: #d9534f; font-weight: normal; margin-top: 5px;">Tổng điểm năm học: 0</div>
             </div>
         </div>
 
@@ -145,7 +145,6 @@
             if (isAutoLoadField) {
                 kq = ketQuaThangTuDong !== "" ? ketQuaThangTuDong : kq;
                 if (kq) {
-                    // Cập nhật nguyên tắc thêm dấu hai chấm (:) ngăn cách xếp loại và điểm số
                     kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
                 }
                 html = `<input type="text" class="input-cell locked-input auto-loaded-data trigger-calc" value="${kq}" readonly title="Dữ liệu đồng bộ từ máy chủ, không thể chỉnh sửa">`;
@@ -371,9 +370,10 @@
         document.getElementById("hienThiDiemP2").innerText = `Tổng điểm phần 2: ${strDiemP2}`;
         
         const khuVucHT = document.getElementById("hienThiXepLoai");
+        // ĐÃ CHUYỂN SANG DÙNG DIV ĐỂ KIỂM SOÁT VỊ TRÍ, KÍCH THƯỚC CHUẨN XÁC
         khuVucHT.innerHTML = `
-            <span style="text-transform: uppercase; color: ${mauHienThi};">${kqThanhLieu}</span><br>
-            <span style="font-size: 16px; color: #d9534f; font-weight: normal;">Tổng điểm năm học: ${strDiemNH}</span>
+            <div style="font-size: 24px; font-weight: bold; color: ${mauHienThi}; text-transform: uppercase;">${kqThanhLieu}</div>
+            <div style="font-size: 16px; color: #d9534f; font-weight: normal; margin-top: 5px;">Tổng điểm năm học: ${strDiemNH}</div>
         `;
     }
 
