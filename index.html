@@ -74,7 +74,7 @@
         <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
         
         <div style="margin-bottom: 25px; padding: 15px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; font-size: 15px;">
-            <b>Cam kết bảo mật:</b> Hệ thống sử dụng token xác thực an toàn của Google. Tuyệt đối không thu thập mật khẩu.
+            <b>Xác thực hệ thống:</b> Email đăng nhập sẽ được đối chiếu để nạp dữ liệu viên chức tự động.
         </div>
 
         <div id="g_id_onload" 
@@ -105,7 +105,7 @@
         <input type="text" id="oNhapChinh">
     </div>
 
-    <div id="h-dang-tai">Đang tự động kết nối và tải dữ liệu...</div>
+    <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 10px;">
@@ -179,7 +179,7 @@
         
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) {
-            oNhap.value = email;
+            oNhap.value = email; // Đẩy email vào input để gửi lên server đối chiếu
             f_x_d(); 
         }
     }
@@ -190,7 +190,7 @@
     }
 
     /**
-     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN (GIỮ NGUYÊN HOÀN TOÀN)
+     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN
      */
     const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let v_l_a = "", v_l_b = "", v_l_c = {};
@@ -217,25 +217,27 @@
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
         
-        if (!p_c) return alert("Nhập mã!");
+        if (!p_c) return alert("Hệ thống chưa xác định được định danh!");
         f_x_j(true);
         try {
+            // Server nhận email (p_c) -> So sánh cột B -> Trả về Tên (y_b) và Điểm (y_c)
             const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`);
             const t_k = await res.json();
             if (t_k.status === 'success') {
                 v_l_a = p_c;
                 v_l_b = t_k.y_a; 
                 v_l_c = t_k.y_e;
-                v_l_d = t_k.y_c || ""; 
+                v_l_d = t_k.y_c || ""; // Giá trị lấy từ cột D
                 
+                // Hiển thị Tên từ cột C lên tiêu đề
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
                 
                 f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 f_x_h();
-            } else { alert(t_k.message); }
-        } catch (err) { alert("Loi"); }
+            } else { alert(t_k.message); f_x_logout(); }
+        } catch (err) { alert("Kết nối bị gián đoạn."); f_x_logout(); }
         f_x_j(false);
     }
 
@@ -243,6 +245,7 @@
         const k_b = document.getElementById("t-b-g");
         k_b.innerHTML = "";
         let d_d = 1;
+        let da_dien_dong_dau = false; // Cờ theo dõi dòng đầu tiên
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
@@ -250,12 +253,20 @@
             let html = "";
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
 
-            let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
+            let l_m = false;
+            
+            // XÁC ĐỊNH DÒNG ĐẦU TIÊN để nạp dữ liệu từ cột D (biến v_l_d)
+            if (!l_p && !da_dien_dong_dau) {
+                l_m = true;
+                da_dien_dong_dau = true;
+            } else if (item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm")) {
+                l_m = true;
+            }
 
             if (l_m) {
                 kq = v_l_d !== "" ? v_l_d : kq;
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
-                html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa">`;
+                html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
                 html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
