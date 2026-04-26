@@ -68,6 +68,33 @@
             border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+
+        /* --- UI TRẠNG THÁI CHỜ LƯU & THÔNG BÁO --- */
+        #o-luu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 10001;
+        }
+        .vong-xoay {
+            width: 50px; height: 50px; border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--mau-c); border-radius: 50%;
+            animation: xoay 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes xoay { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #o-thong-bao {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; color: #0f5132; padding: 30px 40px; border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid #198754;
+            display: none; flex-direction: column; align-items: center; z-index: 10002;
+            text-align: center; border-top: 8px solid #198754;
+        }
+        .n-dong-tb {
+            margin-top: 20px; padding: 10px 30px; background: #198754; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;
+            transition: 0.3s;
+        }
+        .n-dong-tb:hover { background: #146c43; }
     </style>
 </head>
 <body>
@@ -159,6 +186,20 @@
     </div>
 </div>
 
+<div id="o-luu-overlay">
+    <div class="vong-xoay"></div>
+    <div style="color: var(--mau-c); font-weight: bold; font-size: 16px;">Đang lưu kết quả lên hệ thống...</div>
+</div>
+
+<div id="o-thong-bao">
+    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="#198754" viewBox="0 0 16 16" style="margin-bottom: 15px;">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+    </svg>
+    <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">GHI NHẬN THÀNH CÔNG</div>
+    <div style="font-size: 16px; color: #333;">Dữ liệu tự đánh giá của đồng chí đã được lưu trữ an toàn.</div>
+    <button class="n-dong-tb" onclick="dongThongBao()">Xác nhận</button>
+</div>
+
 <script>
     /**
      * PHẦN 1: XỬ LÝ ĐĂNG NHẬP GOOGLE & TỰ ĐỘNG HÓA
@@ -242,7 +283,6 @@
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 
-                // Mở khối thông tin trong Sticky Header
                 document.getElementById("vungThongTin").style.display = "flex";
                 
                 f_x_h();
@@ -430,23 +470,43 @@
             const v_c_1 = d_k.querySelector(".m-cot-mot"), v_c_2 = d_k.cells[2], v_c_3 = d_k.querySelector(".o-n-bang");
             if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
         });
-        f_x_j(true);
+        
+        // Hiện overlay báo đang xử lý lưu
+        document.getElementById("o-luu-overlay").style.display = "flex";
+        
+        // Lấy chính xác Tên đang hiển thị trên web (Cột C sh KHAIBAO)
+        const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
+
         try {
             await fetch(z_y_a, { 
                 method: 'POST', 
                 mode: 'no-cors', 
                 body: JSON.stringify({ 
                     w_a: v_l_a, 
-                    w_b: v_l_b, 
+                    w_b: ten_tren_web, // Gửi tên hiển thị thay cho định danh/v_l_b cũ
                     w_c: m_k,
                     w_d: v_l_e,
                     w_e: v_l_f
                 }) 
             });
-            alert("Đã lưu kết quả thành công!");
-        } catch (err) { alert("Lỗi mạng 09."); }
-        f_x_j(false);
+            
+            // Ẩn overlay chờ
+            document.getElementById("o-luu-overlay").style.display = "none";
+            
+            // Hiện Modal thông báo thành công
+            document.getElementById("o-thong-bao").style.display = "flex";
+            
+        } catch (err) { 
+            document.getElementById("o-luu-overlay").style.display = "none";
+            alert("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
+        }
     }
+    
+    // Hàm đóng Modal thông báo
+    function dongThongBao() {
+        document.getElementById("o-thong-bao").style.display = "none";
+    }
+
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
     async function f_x_k(c_t_t) {
