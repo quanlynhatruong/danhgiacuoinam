@@ -10,11 +10,25 @@
 
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
-        body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 20px; }
-        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        /* Giảm tối đa khoảng cách đầu trang */
+        body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 5px 20px 20px 20px; }
+        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 0 30px 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        .logo-goc-trai { position: absolute; top: 20px; left: 30px; width: 65px; }
-        .k-dau { text-align: center; margin-bottom: 10px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; }
+        /* KHU VỰC CỐ ĐỊNH ĐẦU TRANG (STICKY HEADER) */
+        .k-header-sticky {
+            position: sticky; 
+            top: 0; 
+            background: #ffffff; 
+            z-index: 1000; 
+            padding-top: 15px; 
+            padding-bottom: 5px;
+        }
+        
+        .logo-goc-trai { position: absolute; top: 15px; left: 0; width: 65px; }
+        .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
+        .n-dx:hover { background: #5a6268; }
+
+        .k-dau { text-align: center; margin-bottom: 8px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; }
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
         .k-dau p { margin: 2px 0 0 0; font-size: 15px; }
@@ -29,7 +43,7 @@
         .n-nho { padding: 6px 10px; font-size: 13px; margin-left: 5px; }
         .n-do { background: #dc3545; color: white; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: middle; }
         th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 15px;}
         .o-n-bang { width: 100%; border: 1px solid #ddd; padding: 6px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s;}
@@ -54,12 +68,6 @@
             border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .n-dx {
-            position: absolute; top: 20px; right: 30px; padding: 6px 15px; 
-            background: #6c757d; color: white; border: none; border-radius: 4px; 
-            cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;
-        }
-        .n-dx:hover { background: #5a6268; }
     </style>
 </head>
 <body>
@@ -89,13 +97,26 @@
 </div>
 
 <div class="k-ngoai" id="main-ui" style="display: none;">
-    <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo" class="logo-goc-trai">
-    <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
     
-    <div class="k-dau">
-        <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
-        <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
-        <p><i>(Áp dụng từ năm học 2025-2026)</i></p>
+    <div class="k-header-sticky">
+        <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo" class="logo-goc-trai">
+        <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
+        
+        <div class="k-dau">
+            <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
+            <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
+            <p><i>(Áp dụng từ năm học 2025-2026)</i></p>
+        </div>
+
+        <div id="vungThongTin" style="display: none; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-top: 8px;">
+            <h3 style="color: var(--mau-c); margin: 0; font-size: 16px;">
+                Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
+            </h3>
+            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
+                <option value="giaovien">Phân loại: GIÁO VIÊN</option>
+                <option value="nhanvien">Phân loại: NHÂN VIÊN</option>
+            </select>
+        </div>
     </div>
 
     <div id="vungThuNhat" style="display: none;">
@@ -105,16 +126,6 @@
     <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 10px;">
-            <h3 style="color: var(--mau-c); margin: 0; font-size: 16px;">
-                Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
-            </h3>
-            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
-                <option value="giaovien">Phân loại: GIÁO VIÊN</option>
-                <option value="nhanvien">Phân loại: NHÂN VIÊN</option>
-            </select>
-        </div>
-        
         <table>
             <thead>
                 <tr>
@@ -230,6 +241,10 @@
                 f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
+                
+                // Mở khối thông tin trong Sticky Header
+                document.getElementById("vungThongTin").style.display = "flex";
+                
                 f_x_h();
             } else { alert(t_k.message); f_x_logout(); }
         } catch (err) { alert("Kết nối bị gián đoạn."); f_x_logout(); }
