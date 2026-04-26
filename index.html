@@ -10,11 +10,10 @@
 
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
-        /* Giảm tối đa khoảng cách đầu trang */
         body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 5px 20px 20px 20px; }
         .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 0 30px 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        /* KHU VỰC CỐ ĐỊNH ĐẦU TRANG (STICKY HEADER) */
+        /* KHU VỰC CỐ ĐỊNH ĐẦU TRANG */
         .k-header-sticky {
             position: sticky; 
             top: 0; 
@@ -105,21 +104,27 @@
         <h2 style="color: #b91c1c; margin: 0; text-transform: uppercase;">Hệ Thống Đánh Giá Viên Chức</h2>
         <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
         
-        <div style="margin-bottom: 25px; padding: 15px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; font-size: 15px;">
-            <b>Xác thực hệ thống:</b> Định danh truy cập sẽ được đối chiếu để nạp dữ liệu viên chức tự động.
-        </div>
-
-        <div id="g_id_onload" 
-             data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" 
-             data-callback="handleCredentialResponse" 
-             data-auto_prompt="false">
+        <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
+            <label for="oChonNhom" style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">1. Chọn đối tượng đánh giá:</label>
+            <select id="oChonNhom" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
+                <option value="giaovien">GIÁO VIÊN</option>
+                <option value="nhanvien">NHÂN VIÊN</option>
+            </select>
+            
+            <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
+            <div id="g_id_onload" 
+                 data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" 
+                 data-callback="handleCredentialResponse" 
+                 data-auto_prompt="false">
+            </div>
+            
+            <div style="display: flex; justify-content: center;">
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+            </div>
         </div>
         
-        <div style="display: flex; justify-content: center;">
-            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
-        </div>
-        
-        <div style="margin-top: 30px; font-size: 14px; color: #888; font-weight: bold;">Phát triển: HOÀNG NGỌC LÂM</div>
+        <div style="font-size: 13px; color: #888; text-align: center;">Hệ thống nạp dữ liệu tự động theo định danh chuẩn.</div>
+        <div style="margin-top: 15px; font-size: 14px; color: #888; font-weight: bold;">Phát triển: HOÀNG NGỌC LÂM</div>
     </div>
 </div>
 
@@ -139,10 +144,9 @@
             <h3 style="color: var(--mau-c); margin: 0; font-size: 16px;">
                 Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
             </h3>
-            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
-                <option value="giaovien">Phân loại: GIÁO VIÊN</option>
-                <option value="nhanvien">Phân loại: NHÂN VIÊN</option>
-            </select>
+            <div style="font-size: 15px; font-weight: bold; color: var(--mau-c);">
+                Phân loại: <span id="hienThiNhom" style="color: #d9534f; text-transform: uppercase;"></span>
+            </div>
         </div>
     </div>
 
@@ -209,7 +213,11 @@
         const kAttr = "em" + "ail"; 
         const d_danh = payload[kAttr];
         
+        const nhomDaChon = document.getElementById('oChonNhom').value;
+        
         sessionStorage.setItem("HTDG_USER_ID", d_danh);
+        sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
+        
         showMainUI(d_danh);
     }
 
@@ -226,6 +234,12 @@
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-ui').style.display = 'block';
         
+        // Cập nhật nhãn phân loại trên Header
+        const objNhom = document.getElementById('oChonNhom');
+        const tenNhom = objNhom.options[objNhom.selectedIndex].text;
+        const theHienNhom = document.getElementById('hienThiNhom');
+        if (theHienNhom) theHienNhom.innerText = tenNhom;
+        
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) {
             oNhap.value = d_danh; 
@@ -235,6 +249,7 @@
 
     function f_x_logout() {
         sessionStorage.removeItem("HTDG_USER_ID");
+        sessionStorage.removeItem("HTDG_NHOM_ID");
         location.reload();
     }
 
@@ -255,6 +270,7 @@
     };
 
     function f_x_c() {
+        // Hàm được bảo lưu theo nguyên tắc không xóa logic gốc
         if (!document.getElementById("vungThuHai").classList.contains("a-di")) {
             f_x_d(); 
         } else {
@@ -471,10 +487,8 @@
             if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
         });
         
-        // Hiện overlay báo đang xử lý lưu
         document.getElementById("o-luu-overlay").style.display = "flex";
         
-        // Lấy chính xác Tên đang hiển thị trên web (Cột C sh KHAIBAO)
         const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
 
         try {
@@ -483,17 +497,14 @@
                 mode: 'no-cors', 
                 body: JSON.stringify({ 
                     w_a: v_l_a, 
-                    w_b: ten_tren_web, // Gửi tên hiển thị thay cho định danh/v_l_b cũ
+                    w_b: ten_tren_web, 
                     w_c: m_k,
                     w_d: v_l_e,
                     w_e: v_l_f
                 }) 
             });
             
-            // Ẩn overlay chờ
             document.getElementById("o-luu-overlay").style.display = "none";
-            
-            // Hiện Modal thông báo thành công
             document.getElementById("o-thong-bao").style.display = "flex";
             
         } catch (err) { 
@@ -502,7 +513,6 @@
         }
     }
     
-    // Hàm đóng Modal thông báo
     function dongThongBao() {
         document.getElementById("o-thong-bao").style.display = "none";
     }
@@ -530,6 +540,12 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_USER_ID");
+        const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
+        
+        if (savedNhom) {
+            document.getElementById('oChonNhom').value = savedNhom;
+        }
+        
         if (loggedUser) {
             showMainUI(loggedUser);
         }
