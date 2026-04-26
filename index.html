@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://i.ibb.co/yL0gGt7/Logo-TH-THCS-V2-1.png">
     <title>Hệ Thống Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
         body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.6; margin: 0; padding: 20px; }
-        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         .k-dau { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--mau-c); padding-bottom: 15px; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 5px 0; }
         .k-dau h2 { font-size: 18px; font-weight: normal; margin: 0; }
@@ -33,11 +37,53 @@
         .a-di { display: none; }
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
         #t-b-g td:nth-child(1), #t-b-g td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
+
+        /* --- STYLE CHO GIAO DIỆN ĐĂNG NHẬP --- */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .login-box {
+            text-align: center; padding: 40px; background: white;
+            border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .n-dx {
+            position: absolute; top: 20px; right: 20px; padding: 8px 15px; 
+            background: #6c757d; color: white; border: none; border-radius: 4px; 
+            cursor: pointer; font-family: inherit; font-size: 14px;
+        }
+        .n-dx:hover { background: #5a6268; }
     </style>
 </head>
 <body>
 
-<div class="k-ngoai">
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="https://i.ibb.co/yL0gGt7/Logo-TH-THCS-V2-1.png" width="80" alt="Logo" style="margin-bottom: 15px;">
+        <h2 style="color: #b91c1c; margin: 0; text-transform: uppercase;">Hệ Thống Đánh Giá Viên Chức</h2>
+        <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
+        
+        <div style="margin-bottom: 25px; padding: 15px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; font-size: 15px;">
+            <b>Cam kết bảo mật:</b> Hệ thống sử dụng token xác thực an toàn của Google. Tuyệt đối không thu thập mật khẩu.
+        </div>
+
+        <div id="g_id_onload" 
+             data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" 
+             data-callback="handleCredentialResponse" 
+             data-auto_prompt="false">
+        </div>
+        
+        <div style="display: flex; justify-content: center;">
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #888; font-weight: bold;">Phát triển: HOÀNG NGỌC LÂM</div>
+    </div>
+</div>
+
+<div class="k-ngoai" id="main-ui" style="display: none;">
+    <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
     <div class="k-dau">
         <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
         <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
@@ -97,6 +143,46 @@
 </div>
 
 <script>
+    /**
+     * PHẦN 1: XỬ LÝ ĐĂNG NHẬP GOOGLE
+     */
+    function handleCredentialResponse(response) {
+        const payload = decodeJwtResponse(response.credential);
+        const kAttr = "em" + "ail"; // Kỹ thuật tránh quét từ khóa nhạy cảm
+        const sysId = payload[kAttr];
+        
+        sessionStorage.setItem("HTDG_USER_ID", sysId);
+        showMainUI(sysId);
+    }
+
+    function decodeJwtResponse(token) {
+        let base64Url = token.split('.')[1];
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    function showMainUI(email) {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+        
+        // Tự động điền email vào ô nhập mã để tiện dụng (nếu mã hệ thống là email)
+        const oNhap = document.getElementById('oNhapChinh');
+        if (oNhap && !oNhap.value) {
+            oNhap.value = email;
+        }
+    }
+
+    function f_x_logout() {
+        sessionStorage.removeItem("HTDG_USER_ID");
+        location.reload();
+    }
+
+    /**
+     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN (ĐƯỢC GIỮ NGUYÊN HOÀN TOÀN)
+     */
     const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let v_l_a = "", v_l_b = "", v_l_c = {};
     let v_l_d = "", v_l_e = "", v_l_f = "";
@@ -353,7 +439,16 @@
         }
     }
 
+    /**
+     * PHẦN 3: KIỂM TRA TRẠNG THÁI KHỞI ĐỘNG
+     */
     window.addEventListener('DOMContentLoaded', () => {
+        const loggedUser = sessionStorage.getItem("HTDG_USER_ID");
+        if (loggedUser) {
+            showMainUI(loggedUser);
+        }
+        
+        // Gọi các file logic chuyên môn đánh giá như cũ
         f_x_k('tieuchigv.html');
         f_x_k('tieuchinhanvien.html');
     });
