@@ -90,24 +90,22 @@
         <p><i>(Áp dụng từ năm học 2025-2026)</i></p>
     </div>
 
-    <div id="vungThuNhat">
-        <div class="h-chu-dam"><i>Ghi chú: Vui lòng nhập đúng mã dữ liệu để xem.</i></div>
-        <div class="v-nut-bam">
-            <input type="text" class="o-n-chuoi" id="oNhapChinh" placeholder="Nhập mã..." required>
-            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
-                <option value="giaovien">Đối tượng: GIÁO VIÊN</option>
-                <option value="nhanvien">Đối tượng: NHÂN VIÊN</option>
-            </select>
-            <button class="n-bam n-xanh-b" onclick="f_x_d()">XEM DỮ LIỆU</button>
-        </div>
+    <div id="vungThuNhat" style="display: none;">
+        <input type="text" id="oNhapChinh">
     </div>
 
-    <div id="h-dang-tai">Đang tải dữ liệu...</div>
+    <div id="h-dang-tai">Đang tự động kết nối và tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
-        <h3 style="color: var(--mau-c); border-bottom: 2px solid #ccc; padding-bottom: 10px;">
-            Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
-        </h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="color: var(--mau-c); margin: 0;">
+                Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
+            </h3>
+            <select id="oChonNhom" class="o-c-kieu" style="padding: 6px 12px; font-size: 14px;" onchange="f_x_c()">
+                <option value="giaovien">Phân loại: GIÁO VIÊN</option>
+                <option value="nhanvien">Phân loại: NHÂN VIÊN</option>
+            </select>
+        </div>
         
         <table>
             <thead>
@@ -144,11 +142,11 @@
 
 <script>
     /**
-     * PHẦN 1: XỬ LÝ ĐĂNG NHẬP GOOGLE
+     * PHẦN 1: XỬ LÝ ĐĂNG NHẬP GOOGLE & TỰ ĐỘNG HÓA
      */
     function handleCredentialResponse(response) {
         const payload = decodeJwtResponse(response.credential);
-        const kAttr = "em" + "ail"; // Kỹ thuật tránh quét từ khóa nhạy cảm
+        const kAttr = "em" + "ail"; 
         const sysId = payload[kAttr];
         
         sessionStorage.setItem("HTDG_USER_ID", sysId);
@@ -168,10 +166,11 @@
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-ui').style.display = 'block';
         
-        // Tự động điền email vào ô nhập mã để tiện dụng (nếu mã hệ thống là email)
+        // Gán email vào biến ẩn và tự động kích hoạt nạp dữ liệu
         const oNhap = document.getElementById('oNhapChinh');
-        if (oNhap && !oNhap.value) {
+        if (oNhap) {
             oNhap.value = email;
+            f_x_d(); // Vượt qua bước nhấn nút, chạy trực tiếp hàm lấy dữ liệu
         }
     }
 
@@ -181,7 +180,7 @@
     }
 
     /**
-     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN (ĐƯỢC GIỮ NGUYÊN HOÀN TOÀN)
+     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN (GIỮ NGUYÊN HOÀN TOÀN)
      */
     const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let v_l_a = "", v_l_b = "", v_l_c = {};
