@@ -13,7 +13,6 @@
         body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 5px 20px 20px 20px; }
         .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 0 30px 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        /* KHU VỰC CỐ ĐỊNH ĐẦU TRANG */
         .k-header-sticky {
             position: sticky; 
             top: 0; 
@@ -68,7 +67,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* --- UI TRẠNG THÁI CHỜ LƯU & THÔNG BÁO --- */
         #o-luu-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column;
@@ -309,7 +307,7 @@
         const k_b = document.getElementById("t-b-g");
         k_b.innerHTML = "";
         let d_d = 1;
-        let p_k = false; 
+        let p_k = false; // Cờ kiểm tra đã qua dòng nhập dữ liệu đầu tiên
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
@@ -317,17 +315,19 @@
             let html = "";
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
 
-            let l_m = false;
-            
+            let isFirstDataRow = false;
+            // Xử lý nạp giá trị cột D (v_l_d) vào dòng đầu tiên (độc lập với quy tắc đánh giá)
             if (!l_p && !p_k) {
-                l_m = true;
+                isFirstDataRow = true;
                 p_k = true;
-            } else if (item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm")) {
-                l_m = true;
+                kq = v_l_d !== "" ? v_l_d : kq;
             }
 
+            // Quy tắc đánh giá gốc (chỉ áp dụng cho tiêu chí quy định)
+            let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
+
             if (l_m) {
-                kq = v_l_d !== "" ? v_l_d : kq;
+                kq = v_l_d !== "" ? v_l_d : kq; // Dòng này cũng được phép lấy v_l_d nếu đúng tiêu chí
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
                 html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
             } 
@@ -340,7 +340,12 @@
                     return `<option value="${n.trim()}" data-p="${d.trim()}" ${kq.includes(n.trim())?'selected':''}>${n.trim()} (${d.trim()}đ)</option>`;
                 }).join("") + `</select>`;
             } else {
-                html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
+                if (isFirstDataRow) {
+                    // Dòng đầu tiên chỉ khóa và nhận giá trị, tuyệt đối KHÔNG gán class h-dong-bo
+                    html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
+                } else {
+                    html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
+                }
             }
 
             let h_s = "";
