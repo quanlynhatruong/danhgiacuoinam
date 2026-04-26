@@ -13,16 +13,7 @@
         body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 5px 20px 20px 20px; }
         .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 0 30px 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
         
-        /* KHU VỰC CỐ ĐỊNH ĐẦU TRANG */
-        .k-header-sticky {
-            position: sticky; 
-            top: 0; 
-            background: #ffffff; 
-            z-index: 1000; 
-            padding-top: 15px; 
-            padding-bottom: 5px;
-        }
-        
+        .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 5px; }
         .logo-goc-trai { position: absolute; top: 15px; left: 0; width: 65px; }
         .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
         .n-dx:hover { background: #5a6268; }
@@ -58,40 +49,15 @@
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
         #t-b-g td:nth-child(1), #t-b-g td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
 
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000;
-        }
-        .login-box {
-            text-align: center; padding: 35px; background: white;
-            border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .login-box { text-align: center; padding: 35px; background: white; border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
-        #o-luu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10001;
-        }
-        .vong-xoay {
-            width: 50px; height: 50px; border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--mau-c); border-radius: 50%;
-            animation: xoay 1s linear infinite; margin-bottom: 15px;
-        }
+        #o-luu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10001; }
+        .vong-xoay { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--mau-c); border-radius: 50%; animation: xoay 1s linear infinite; margin-bottom: 15px; }
         @keyframes xoay { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #o-thong-bao {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #ffffff; color: #0f5132; padding: 30px 40px; border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid #198754;
-            display: none; flex-direction: column; align-items: center; z-index: 10002;
-            text-align: center; border-top: 8px solid #198754;
-        }
-        .n-dong-tb {
-            margin-top: 20px; padding: 10px 30px; background: #198754; color: white;
-            border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;
-            transition: 0.3s;
-        }
+        #o-thong-bao { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #0f5132; padding: 30px 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid #198754; display: none; flex-direction: column; align-items: center; z-index: 10002; text-align: center; border-top: 8px solid #198754; }
+        .n-dong-tb { margin-top: 20px; padding: 10px 30px; background: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .n-dong-tb:hover { background: #146c43; }
     </style>
 </head>
@@ -111,12 +77,7 @@
             </select>
             
             <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
-            <div id="g_id_onload" 
-                 data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" 
-                 data-callback="handleCredentialResponse" 
-                 data-auto_prompt="false">
-            </div>
-            
+            <div id="g_id_onload" data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
             <div style="display: flex; justify-content: center;">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
             </div>
@@ -128,7 +89,6 @@
 </div>
 
 <div class="k-ngoai" id="main-ui" style="display: none;">
-    
     <div class="k-header-sticky">
         <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo" class="logo-goc-trai">
         <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
@@ -149,10 +109,7 @@
         </div>
     </div>
 
-    <div id="vungThuNhat" style="display: none;">
-        <input type="text" id="oNhapChinh">
-    </div>
-
+    <div id="vungThuNhat" style="display: none;"><input type="text" id="oNhapChinh"></div>
     <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
@@ -175,8 +132,8 @@
             </div>
             
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #d9534f; font-size: 18px; line-height: 1.6;">
-                <div id="vHT1" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: </div>
-                <div id="vHT2" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: </div>
+                <div id="vHT1" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: 0</div>
+                <div id="vHT2" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: 0</div>
             </div>
             
             <div class="v-d-g" id="vHT3" style="flex: 1.2;">
@@ -189,10 +146,7 @@
     </div>
 </div>
 
-<div id="o-luu-overlay">
-    <div class="vong-xoay"></div>
-    <div style="color: var(--mau-c); font-weight: bold; font-size: 16px;">Đang lưu kết quả lên hệ thống...</div>
-</div>
+<div id="o-luu-overlay"><div class="vong-xoay"></div><div style="color: var(--mau-c); font-weight: bold; font-size: 16px;">Đang lưu kết quả lên hệ thống...</div></div>
 
 <div id="o-thong-bao">
     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="#198754" viewBox="0 0 16 16" style="margin-bottom: 15px;">
@@ -204,19 +158,13 @@
 </div>
 
 <script>
-    /**
-     * PHẦN 1: XỬ LÝ ĐĂNG NHẬP GOOGLE & TỰ ĐỘNG HÓA
-     */
     function handleCredentialResponse(response) {
         const payload = decodeJwtResponse(response.credential);
         const kAttr = "em" + "ail"; 
         const d_danh = payload[kAttr];
-        
         const nhomDaChon = document.getElementById('oChonNhom').value;
-        
         sessionStorage.setItem("HTDG_USER_ID", d_danh);
         sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
-        
         showMainUI(d_danh);
     }
 
@@ -232,17 +180,10 @@
     function showMainUI(d_danh) {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-ui').style.display = 'block';
-        
         const objNhom = document.getElementById('oChonNhom');
-        const tenNhom = objNhom.options[objNhom.selectedIndex].text;
-        const theHienNhom = document.getElementById('hienThiNhom');
-        if (theHienNhom) theHienNhom.innerText = tenNhom;
-        
+        if(document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         const oNhap = document.getElementById('oNhapChinh');
-        if (oNhap) {
-            oNhap.value = d_danh; 
-            f_x_d(); 
-        }
+        if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
 
     function f_x_logout() {
@@ -251,53 +192,29 @@
         location.reload();
     }
 
-    /**
-     * PHẦN 2: LOGIC HỆ THỐNG GỐC CỦA DỰ ÁN
-     */
     const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let v_l_a = "", v_l_b = "", v_l_c = {};
     let v_l_d = "", v_l_e = "", v_l_f = "";
 
-    const f_x_a = (chuoi, bThuc) => new RegExp(bThuc, 'i').test(chuoi);
-    const f_x_b = (chuoiKN, mucDo) => {
-        if (!chuoiKN || f_x_a(chuoiKN, /không có|không kiêm|khong co|khong kiem/i)) return true; 
-        if (mucDo === 'XS') return f_x_a(chuoiKN, /tốt|xuất sắc|tot|xuat sac/i);
-        if (mucDo === 'Tốt') return f_x_a(chuoiKN, /khá|tốt|xuất sắc|kha|tot|xuat sac/i);
-        if (mucDo === 'HT') return !f_x_a(chuoiKN, /chưa|không hoàn|yếu|kém|chua|khong hoan|yeu|kem/i);
-        return false;
-    };
-
     function f_x_c() {
-        if (!document.getElementById("vungThuHai").classList.contains("a-di")) {
-            f_x_d(); 
-        } else {
-            f_x_h();
-        }
+        if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
     }
 
     async function f_x_d() {
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
-        
         if (!p_c) return alert("Hệ thống chưa xác định được định danh!");
         f_x_j(true);
         try {
             const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`);
             const t_k = await res.json();
             if (t_k.status === 'success') {
-                v_l_a = p_c;
-                v_l_b = t_k.y_a; 
-                v_l_c = t_k.y_e;
-                v_l_d = t_k.y_c || ""; 
-                
+                v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e; v_l_d = t_k.y_c || ""; 
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
-                
                 f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
-                
                 document.getElementById("vungThongTin").style.display = "flex";
-                
                 f_x_h();
             } else { alert(t_k.message); f_x_logout(); }
         } catch (err) { alert("Kết nối bị gián đoạn."); f_x_logout(); }
@@ -308,32 +225,25 @@
         const k_b = document.getElementById("t-b-g");
         k_b.innerHTML = "";
         let d_d = 1;
-        let p_k = false; // Cờ kiểm tra đã qua dòng nhập dữ liệu đầu tiên
+        let p_k = false; 
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
             let kq = item.x_c || "";
             let html = "";
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
-
             let isFirstDataRow = false;
-            // Xử lý nạp giá trị cột D (v_l_d) vào dòng đầu tiên (độc lập với quy tắc đánh giá)
-            if (!l_p && !p_k) {
-                isFirstDataRow = true;
-                p_k = true;
-                kq = v_l_d !== "" ? v_l_d : kq;
-            }
-
-            // Quy tắc đánh giá gốc (chỉ áp dụng cho tiêu chí quy định)
+            
+            if (!l_p && !p_k) { isFirstDataRow = true; p_k = true; kq = v_l_d !== "" ? v_l_d : kq; }
             let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
 
             if (l_m) {
-                kq = v_l_d !== "" ? v_l_d : kq; // Dòng này cũng được phép lấy v_l_d nếu đúng tiêu chí
+                kq = v_l_d !== "" ? v_l_d : kq; 
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
                 html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
-                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
+                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
                 html = `<select class="o-n-bang k-hoat-t">` + t_c + tg.split(",").map(opt => {
@@ -341,151 +251,55 @@
                     return `<option value="${n.trim()}" data-p="${d.trim()}" ${kq.includes(n.trim())?'selected':''}>${n.trim()} (${d.trim()}đ)</option>`;
                 }).join("") + `</select>`;
             } else {
-                if (isFirstDataRow) {
-                    html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
-                } else {
-                    html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
-                }
+                if (isFirstDataRow) html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
+                else html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
             }
 
             let h_s = "";
-            if (!l_p && item.x_a.trim() !== "") {
-                h_s = d_d;
-                d_d++;
-            }
-
+            if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
             k_b.insertAdjacentHTML('beforeend', `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`);
         });
         document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', f_x_h); el.addEventListener('input', f_x_h); });
     }
 
-    function f_x_f(idx) {
-        const v_c = document.getElementById(`h_c_${idx}`).value;
-        const v_s = parseInt(document.getElementById(`h_g_${idx}`).value);
-        const v_h = parseFloat(document.getElementById(`h_l_${idx}`).value);
-        const v_l = parseInt(document.getElementById(`h_s_${idx}`).value) || 1;
-
-        const m_c = { 'QUOCGIA': [18, 16, 14, 12], 'TINH': [12, 10, 8, 6], 'XA': [6, 4, 2, 1] };
-
-        let m_g;
-        if (v_l_c[`DIEM_HS_${v_c}`]) {
-            let m_t = v_l_c[`DIEM_HS_${v_c}`].split(',');
-            m_g = (m_t.length >= 4) ? m_t : m_c[v_c];
-        } else {
-            m_g = m_c[v_c];
-        }
-
-        let d_1 = parseFloat(m_g[v_s].toString().trim()) * v_h;
-        let d_t = d_1 * v_l;
-        
-        let c_t = document.getElementById(`h_c_${idx}`).options[document.getElementById(`h_c_${idx}`).selectedIndex].text;
-        let c_g = document.getElementById(`h_g_${idx}`).options[document.getElementById(`h_g_${idx}`).selectedIndex].text;
-        
-        let c_d = `+ ${v_l} HS đạt ${c_g} ${c_t} (${v_h > 1 ? 'Tập thể' : 'Cá nhân'}: ${d_1}đ/giải) = ${d_t} điểm\n`;
-        let c_a = document.getElementById(`h_a_${idx}`);
-        
-        c_a.value = (c_a.value.includes("...") ? "" : c_a.value) + c_d;
-        document.getElementById(`h_t_${idx}`).innerHTML = c_a.value.replace(/\n/g, '<br>');
-        
-        f_x_h();
-    }
-
-    function f_x_g(idx) { document.getElementById(`h_a_${idx}`).value = ""; document.getElementById(`h_t_${idx}`).innerHTML = "..."; f_x_h(); }
-
     function f_x_h() {
         const m_d = document.querySelectorAll("#t-b-g tr");
         const c_n = document.getElementById("oChonNhom").value;
+        let mangDuLieuGom = [];
         
-        let m_k_a = { a: 0, b: '', c: '', d: '', e: 0, f: '', g: '', h: '', i: '', j: 0, k: 0, l: 0, m: 0, n: false };
-        let m_k_b = { a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false, i: false, j: false, k: false, l: false };
-        let k_t_c = 0;
-        
-        let b_x_l = false;
-        let b_x_d = false;
-
         m_d.forEach(d_k => {
             let c_x_1 = d_k.querySelector(".m-cot-mot");
-            if (!c_x_1) return;
-            let c_t_1 = c_x_1.innerText.toLowerCase();
-            
             let c_x_2 = d_k.querySelector(".o-n-bang");
-            if (!c_x_2) return;
-            let c_g_1 = c_x_2.value.toLowerCase(), c_s_1 = parseFloat(c_g_1.replace(/[^\d\.]/g, '')) || 0;
-
-            if (d_k.querySelector("select.o-n-bang")) {
+            if (c_x_1 && c_x_2) {
                 let e_s = d_k.querySelector("select.o-n-bang");
-                k_t_c += parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0;
-            } else if (c_t_1.includes("vở sạch")) {
-                k_t_c += (c_s_1 * 0.1);
-            } else if (c_t_1.includes("thành tích") || d_k.cells[2].innerText === 'Quy chế T.Tích' || d_k.cells[2].innerText === 'Quy chế') {
-                let m_d_1 = c_g_1.match(/=\s*([\d\.]+)\s*điểm/g);
-                if (m_d_1) m_d_1.forEach(m => k_t_c += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
+                mangDuLieuGom.push({
+                    ten: c_x_1.innerText.toLowerCase(),
+                    giaTri: c_x_2.value.toLowerCase(),
+                    so: parseFloat(c_x_2.value.replace(/[^\d\.]/g, '')) || 0,
+                    isSelect: e_s !== null,
+                    selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
+                    isDongBo: d_k.querySelector(".h-dong-bo") !== null,
+                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : ''
+                });
             }
-
-            let c_d_b = d_k.querySelector(".h-dong-bo") !== null;
-            if (c_d_b || c_t_1.includes("tháng")) {
-                let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
-                let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
-
-                if (f_x_a(c_g_1, /xuất sắc/i)) { b_x_l = true; b_x_d = true; if (c_d_b) m_k_a.m = 100 + c_d_1; }
-                else if (f_x_a(c_g_1, /tốt/i)) { b_x_l = true; b_x_d = true; if (c_d_b) m_k_a.m = 80 + c_d_1; }
-                else if (f_x_a(c_g_1, /chưa hoàn thành|không hoàn thành|cht/i)) { b_x_l = false; b_x_d = false; if (c_d_b) m_k_a.m = 0 + c_d_1; }
-                else if (f_x_a(c_g_1, /hoàn thành|ht/i)) { b_x_l = false; b_x_d = true; if (c_d_b) m_k_a.m = 60 + c_d_1; } 
-                else { if (c_d_b) m_k_a.m = c_d_1; }
-                
-                if (c_d_b) m_k_a.n = true;
-                return; 
-            }
-
-            if (c_t_1.includes("phê bình")) { m_k_a.a = c_s_1; m_k_b.a = true; }
-            else if (c_t_1.includes("chuẩn")) { m_k_a.b = c_g_1; m_k_b.b = true; }
-            else if (c_t_1.includes("chuyên môn")) { m_k_a.c = c_g_1; m_k_b.c = true; }
-            else if (c_t_1.includes("chuyển biến")) { m_k_a.d = c_g_1; m_k_b.d = true; }
-            else if (c_t_1.includes("vở sạch")) { m_k_a.e = c_s_1; m_k_b.e = true; }
-            else if (c_t_1.includes("giáo viên giỏi") || c_t_1.includes("gvdg")) { m_k_a.f = c_g_1; m_k_b.f = true; }
-            else if (c_t_1.includes("thành tích") || d_k.cells[2].innerText === 'Quy chế T.Tích' || d_k.cells[2].innerText === 'Quy chế') { m_k_a.i = c_g_1; m_k_b.i = true; }
-            else if (c_t_1.includes("học sinh") || c_t_1.includes("hs") || c_t_1.includes("tỷ lệ hs")) {
-                if (c_t_1.includes("xuất sắc")) { m_k_a.k = c_s_1; m_k_b.k = true; }
-                else if (c_t_1.includes("tốt")) { m_k_a.l = c_s_1; m_k_b.l = true; }
-                else if ((c_t_1.includes("hoàn thành") || c_t_1.includes("ht")) && !c_t_1.includes("tốt") && !c_t_1.includes("xuất sắc")) { m_k_a.j = c_s_1; m_k_b.j = true; }
-            }
-            else if (c_t_1.includes("sáng kiến")) { m_k_a.h = c_g_1; m_k_b.h = true; }
-            else if (c_t_1.includes("kiêm nhiệm")) { m_k_a.g = c_g_1; m_k_b.g = true; }
         });
 
-        let g_k = { k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
+        let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 
-        if (c_n === "giaovien") {
-            if (typeof f_x_l === "function") g_k = f_x_l(m_k_a, m_k_b, b_x_l, b_x_d);
-        } else {
-            if (typeof f_x_m === "function") g_k = f_x_m(m_k_a, m_k_b, b_x_l, b_x_d);
+        if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
+            k_q = f_x_l_chinh(mangDuLieuGom);
+        } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
+            k_q = f_x_m_chinh(mangDuLieuGom);
         }
 
-        let k_t = g_k.k_t;
-        let k_m = g_k.k_m;
+        v_l_e = k_q.k_t;
+        v_l_f = k_q.tongDiem;
 
-        let k_t_a = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
-        let k_t_t = k_t_a + k_t_c;
-
-        // --- THUẬT TOÁN MỚI: Trừ 2 điểm cho mỗi lần bị nhắc nhở/phê bình ---
-        if (m_k_b.a && m_k_a.a > 0) {
-            k_t_t -= (m_k_a.a * 2);
-        }
-        // ------------------------------------------------------------------
-
-        let c_s_a = k_t_a % 1 === 0 ? k_t_a : k_t_a.toFixed(1);
-        let c_s_c = k_t_c % 1 === 0 ? k_t_c : k_t_c.toFixed(1);
-        let c_s_t = k_t_t % 1 === 0 ? k_t_t : k_t_t.toFixed(1);
-
-        v_l_e = k_t;
-        v_l_f = c_s_t;
-
-        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${c_s_a}`;
-        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${c_s_c}`;
-        
+        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
+        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
         document.getElementById("vHT3").innerHTML = `
-            <div style="font-size: 20px; font-weight: bold; color: ${k_m}; text-transform: uppercase; white-space: nowrap;">${k_t}</div>
-            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${c_s_t}</div>
+            <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
+            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
         `;
     }
 
@@ -497,36 +311,16 @@
         });
         
         document.getElementById("o-luu-overlay").style.display = "flex";
-        
         const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
-
         try {
-            await fetch(z_y_a, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ 
-                    w_a: v_l_a, 
-                    w_b: v_l_b, 
-                    w_f: ten_tren_web, 
-                    w_c: m_k,
-                    w_d: v_l_e,
-                    w_e: v_l_f
-                }) 
-            });
-            
-            document.getElementById("o-luu-overlay").style.display = "none";
-            document.getElementById("o-thong-bao").style.display = "flex";
-            
+            await fetch(z_y_a, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ w_a: v_l_a, w_b: v_l_b, w_f: ten_tren_web, w_c: m_k, w_d: v_l_e, w_e: v_l_f }) });
+            document.getElementById("o-luu-overlay").style.display = "none"; document.getElementById("o-thong-bao").style.display = "flex";
         } catch (err) { 
-            document.getElementById("o-luu-overlay").style.display = "none";
-            alert("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
+            document.getElementById("o-luu-overlay").style.display = "none"; alert("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
         }
     }
     
-    function dongThongBao() {
-        document.getElementById("o-thong-bao").style.display = "none";
-    }
-
+    function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
     async function f_x_k(c_t_t) {
@@ -534,36 +328,22 @@
             const r_n = await fetch(c_t_t);
             if (!r_n.ok) throw new Error("Loi " + c_t_t);
             const c_l = await r_n.text();
-            
             const c_q = /<script>([\s\S]*?)<\/script>/i;
             const m_q = c_l.match(c_q);
-            
             if (m_q && m_q[1]) {
-                const k_t = document.createElement('script');
-                k_t.textContent = m_q[1];
-                document.body.appendChild(k_t);
+                const k_t = document.createElement('script'); k_t.textContent = m_q[1]; document.body.appendChild(k_t);
             }
-        } catch (loi) {
-            console.error(loi);
-        }
+        } catch (loi) { console.error(loi); }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_USER_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-        
-        if (savedNhom) {
-            document.getElementById('oChonNhom').value = savedNhom;
-        }
-        
-        if (loggedUser) {
-            showMainUI(loggedUser);
-        }
-        
+        if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
+        if (loggedUser) showMainUI(loggedUser);
         f_x_k('tieuchigv.html');
-        f_x_k('tieuchinhanvien.html');
+        f_x_k('tieuchinv.html');
     });
 </script>
-
 </body>
 </html>
