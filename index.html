@@ -10,48 +10,57 @@
 
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
-        body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.6; margin: 0; padding: 20px; }
-        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
-        .k-dau { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--mau-c); padding-bottom: 15px; }
-        .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 5px 0; }
-        .k-dau h2 { font-size: 18px; font-weight: normal; margin: 0; }
-        .h-chu-dam { margin: 15px 0; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; background: #fff; border-left: 4px solid #17a2b8;}
-        .v-nut-bam { text-align: center; margin: 25px 0; display: flex; justify-content: center; gap: 10px; align-items: center;}
-        input[type="text"].o-n-chuoi { width: 350px; padding: 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; font-family: inherit;}
-        select.o-c-kieu { padding: 12px; border-radius: 4px; border: 1px solid #ced4da; font-size: 16px; font-family: inherit; background: white; color: var(--mau-c); font-weight: bold;}
-        .n-bam { padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; font-size: 16px;}
+        body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 20px; }
+        .k-ngoai { max-width: 1150px; margin: 0 auto; background: white; padding: 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        
+        /* ĐIỀU CHỈNH KHOẢNG CÁCH KHỐI TIÊU ĐỀ & LOGO */
+        .logo-goc-trai { position: absolute; top: 20px; left: 30px; width: 65px; }
+        .k-dau { text-align: center; margin-bottom: 10px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; }
+        .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
+        .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
+        .k-dau p { margin: 2px 0 0 0; font-size: 15px; }
+        
+        .h-chu-dam { margin: 10px 0; padding: 12px; border: 1px solid #dee2e6; border-radius: 4px; background: #fff; border-left: 4px solid #17a2b8;}
+        .v-nut-bam { text-align: center; margin: 15px 0; display: flex; justify-content: center; gap: 10px; align-items: center;}
+        input[type="text"].o-n-chuoi { width: 350px; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 16px; font-family: inherit;}
+        select.o-c-kieu { padding: 8px 12px; border-radius: 4px; border: 1px solid #ced4da; font-size: 15px; font-family: inherit; background: white; color: var(--mau-c); font-weight: bold;}
+        .n-bam { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; font-size: 15px;}
         .n-xanh-b { background: var(--mau-c); color: white; }
-        .n-xanh-l { background: #28a745; color: white; width: 100%; margin-top: 20px; font-size: 18px; }
-        .n-nho { padding: 8px 12px; font-size: 14px; margin-left: 5px; }
+        .n-xanh-l { background: #28a745; color: white; width: 100%; margin-top: 15px; font-size: 18px; padding: 12px;}
+        .n-nho { padding: 6px 10px; font-size: 13px; margin-left: 5px; }
         .n-do { background: #dc3545; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: middle; }
-        th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 16px;}
-        .o-n-bang { width: 100%; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s;}
-        .k-phu { background: #f8fbff; border: 1px solid #b8daff; padding: 12px; border-radius: 4px; }
-        .k-d-k { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;}
-        .k-k-q { font-weight: bold; color: #d9534f; background: #fff; padding: 12px; border: 1px dashed #dc3545; white-space: pre-line; min-height: 25px; line-height: 1.8;}
-        .v-t-k { background: #e9ecef; border-left: 5px solid var(--mau-c); padding: 15px 25px; margin-top: 30px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;}
-        .v-d-g { font-size: 24px; font-weight: bold; color: #dc3545; text-align: right;}
-        #h-dang-tai { display: none; color: var(--mau-c); font-style: italic; text-align: center; margin: 20px; font-size: 16px;}
+        
+        /* ĐIỀU CHỈNH BẢNG ĐỂ GIẢM KHOẢNG CÁCH DÒNG */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: middle; }
+        th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 15px;}
+        .o-n-bang { width: 100%; border: 1px solid #ddd; padding: 6px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s;}
+        
+        .k-phu { background: #f8fbff; border: 1px solid #b8daff; padding: 10px; border-radius: 4px; }
+        .k-d-k { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;}
+        .k-k-q { font-weight: bold; color: #d9534f; background: #fff; padding: 8px; border: 1px dashed #dc3545; white-space: pre-line; min-height: 20px; line-height: 1.5;}
+        
+        .v-t-k { background: #e9ecef; border-left: 5px solid var(--mau-c); padding: 12px 20px; margin-top: 20px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;}
+        .v-d-g { font-size: 22px; font-weight: bold; color: #dc3545; text-align: right;}
+        #h-dang-tai { display: none; color: var(--mau-c); font-style: italic; text-align: center; margin: 15px; font-size: 15px;}
         .a-di { display: none; }
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
         #t-b-g td:nth-child(1), #t-b-g td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
 
-        /* --- STYLE CHO GIAO DIỆN ĐĂNG NHẬP --- */
+        /* STYLE CHO GIAO DIỆN ĐĂNG NHẬP */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000;
         }
         .login-box {
-            text-align: center; padding: 40px; background: white;
+            text-align: center; padding: 35px; background: white;
             border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         .n-dx {
-            position: absolute; top: 20px; right: 20px; padding: 8px 15px; 
+            position: absolute; top: 20px; right: 30px; padding: 6px 15px; 
             background: #6c757d; color: white; border: none; border-radius: 4px; 
-            cursor: pointer; font-family: inherit; font-size: 14px;
+            cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;
         }
         .n-dx:hover { background: #5a6268; }
     </style>
@@ -83,7 +92,9 @@
 </div>
 
 <div class="k-ngoai" id="main-ui" style="display: none;">
+    <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo" class="logo-goc-trai">
     <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
+    
     <div class="k-dau">
         <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
         <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
@@ -97,11 +108,11 @@
     <div id="h-dang-tai">Đang tự động kết nối và tải dữ liệu...</div>
 
     <div id="vungThuHai" class="a-di">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">
-            <h3 style="color: var(--mau-c); margin: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-bottom: 10px;">
+            <h3 style="color: var(--mau-c); margin: 0; font-size: 16px;">
                 Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
             </h3>
-            <select id="oChonNhom" class="o-c-kieu" style="padding: 6px 12px; font-size: 14px;" onchange="f_x_c()">
+            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_c()">
                 <option value="giaovien">Phân loại: GIÁO VIÊN</option>
                 <option value="nhanvien">Phân loại: NHÂN VIÊN</option>
             </select>
@@ -126,13 +137,13 @@
             </div>
             
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #d9534f; font-size: 18px; line-height: 1.6;">
-                <div id="vHT1" style="font-size: 20px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: </div>
-                <div id="vHT2" style="font-size: 20px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: </div>
+                <div id="vHT1" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: </div>
+                <div id="vHT2" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: </div>
             </div>
             
             <div class="v-d-g" id="vHT3" style="flex: 1.2;">
-                <div style="font-size: 24px; font-weight: bold; color: #dc3545; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
-                <div style="font-size: 20px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: 0</div>
+                <div style="font-size: 20px; font-weight: bold; color: #dc3545; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
+                <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: 0</div>
             </div>
         </div>
 
@@ -166,11 +177,10 @@
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-ui').style.display = 'block';
         
-        // Gán email vào biến ẩn và tự động kích hoạt nạp dữ liệu
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) {
             oNhap.value = email;
-            f_x_d(); // Vượt qua bước nhấn nút, chạy trực tiếp hàm lấy dữ liệu
+            f_x_d(); 
         }
     }
 
@@ -389,8 +399,8 @@
         document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${c_s_c}`;
         
         document.getElementById("vHT3").innerHTML = `
-            <div style="font-size: 24px; font-weight: bold; color: ${k_m}; text-transform: uppercase; white-space: nowrap;">${k_t}</div>
-            <div style="font-size: 20px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${c_s_t}</div>
+            <div style="font-size: 20px; font-weight: bold; color: ${k_m}; text-transform: uppercase; white-space: nowrap;">${k_t}</div>
+            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${c_s_t}</div>
         `;
     }
 
