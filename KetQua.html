@@ -6,8 +6,6 @@
     <link rel="icon" href="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png">
     <title>Kết Quả Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
     
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
         body { font-family: 'Times New Roman', Times, serif; background-color: var(--mau-n); color: var(--mau-t); line-height: 1.4; margin: 0; padding: 0; }
@@ -43,50 +41,22 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #dee2e6; padding: 12px 10px; text-align: left; vertical-align: middle; font-size: 16px; }
         th { background: #e9ecef; color: var(--mau-c); text-align: center; font-weight: bold; text-transform: uppercase; }
-        
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .login-box { text-align: center; padding: 35px; background: white; border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .o-c-kieu { padding: 8px 12px; border-radius: 4px; border: 1px solid #ced4da; font-size: 15px; font-family: inherit; background: white; color: var(--mau-c); font-weight: bold;}
     </style>
 </head>
 <body>
 
-<div id="login-overlay">
-    <div class="login-box">
-        <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" width="80" alt="Logo" style="margin-bottom: 15px;">
-        <h2 style="color: #b91c1c; margin: 0; text-transform: uppercase;">Quản Lý Kết Quả Đánh Giá</h2>
-        <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
-        
-        <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
-            <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">Xác thực tài khoản hành chính:</label>
-            <div id="g_id_onload" data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div style="display: flex; justify-content: center;">
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
-            </div>
-        </div>
-        
-        <div style="font-size: 13px; color: #888; text-align: center;">Hệ thống đồng bộ dữ liệu bảo mật cấp trường.</div>
-        <div style="margin-top: 15px; font-size: 14px; color: #888; font-weight: bold;">Thiết kế và phát triển<br>Hoàng Ngọc Lâm</div>
-    </div>
-</div>
-
-<div id="bo-cuc-he-thong" class="bo-cuc-tong" style="display: none;">
+<div id="bo-cuc-he-thong" class="bo-cuc-tong">
     <div class="khung-trai">
         <div class="khung-logo">
             <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo">
         </div>
         <div class="ten-truong-trai">Trường TH&THCS Hợp Thành</div>
 
-        <div id="vungThongTin" style="display: flex; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.2); width: 85%; padding: 15px 10px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; text-align: center;">
-            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 3px;">Tài khoản truy xuất:</div>
-            <div id="theHienChinh" style="color: #ffc107; font-weight: bold; text-transform: uppercase; font-size: 14px; line-height: 1.3;">Quản trị viên</div>
-        </div>
-
         <div class="danh-muc-trai">
             <a href="index.html" class="the-chuyen" id="menu-danh-gia">
                 <span class="b-tuong">📝</span> Đánh giá
             </a>
-            <a href="javascript:void(0)" onclick="taiDuLieuKetQua(); return false;" class="the-chuyen" id="menu-ket-qua" style="background-color: rgba(255, 255, 255, 0.15); font-weight: bold;">
+            <a href="javascript:void(0)" class="the-chuyen" id="menu-ket-qua" style="background-color: rgba(255, 255, 255, 0.15); font-weight: bold;">
                 <span class="b-tuong">📈</span> Kết quả
             </a>
             <span class="the-chuyen" id="menu-quan-ly-quyen">
@@ -106,7 +76,7 @@
 
     <div class="k-ngoai" id="main-ui">
         <div class="k-header-sticky">
-            <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
+            <button class="n-dx" onclick="f_x_logout()">Quay lại Đánh giá</button>
             <div class="k-dau">
                 <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
                 <h1>KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC</h1>
@@ -133,24 +103,20 @@
 </div>
 
 <script>
-    function handleCredentialResponse(response) {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('bo-cuc-he-thong').style.display = 'flex'; 
+    // Kích hoạt nạp dữ liệu toàn bộ ngay khi mở trang mà không cần đăng nhập
+    window.addEventListener('DOMContentLoaded', () => {
         taiDuLieuKetQua();
-    }
+    });
 
+    // Nút quay lại trang chủ
     function f_x_logout() {
-        location.reload();
+        window.location.href = 'index.html';
     }
 
     const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
 
     async function taiDuLieuKetQua() {
-        document.getElementById("h-dang-tai-kq").style.display = "block";
-        document.getElementById("vungKetQua").style.display = "none";
-        
         try {
-            // Lệnh API đã thiết lập trong Codel.html (z_p_a = l_k_q)
             const res = await fetch(`${z_y_a}?z_p_a=l_k_q`);
             const t_k = await res.json();
             
@@ -159,12 +125,10 @@
                 document.getElementById("h-dang-tai-kq").style.display = "none";
                 document.getElementById("vungKetQua").style.display = "block";
             } else {
-                alert(t_k.message);
-                document.getElementById("h-dang-tai-kq").innerText = "Không có dữ liệu.";
+                document.getElementById("h-dang-tai-kq").innerText = "Chưa có dữ liệu trên hệ thống.";
             }
         } catch (err) {
-            alert("Kết nối bị gián đoạn. Không thể lấy dữ liệu kết quả.");
-            document.getElementById("h-dang-tai-kq").innerText = "Lỗi kết nối máy chủ.";
+            document.getElementById("h-dang-tai-kq").innerText = "Lỗi kết nối máy chủ. Không thể tải kết quả.";
         }
     }
 
