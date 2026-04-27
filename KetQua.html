@@ -32,7 +32,6 @@
         .k-dau { text-align: center; margin-bottom: 8px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; width: 100%;}
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
-        .k-dau p { margin: 2px 0 0 0; font-size: 15px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #dee2e6; padding: 12px 10px; text-align: left; vertical-align: middle; font-size: 16px; }
@@ -78,7 +77,12 @@
             <div class="k-dau">
                 <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
                 <h1>KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC</h1>
-                <p><i>(Áp dụng từ năm học 2025-2026)</i></p>
+                <div style="margin-top: 15px; display: inline-flex; align-items: center; background: #e9ecef; padding: 5px 15px; border-radius: 20px;">
+                    <label for="locNamHoc" style="font-weight: bold; color: var(--mau-c); margin-right: 10px; font-size: 15px;">Năm học:</label>
+                    <select id="locNamHoc" style="padding: 5px 15px; border-radius: 15px; border: 1px solid #ced4da; font-family: inherit; font-size: 15px; color: #dc3545; font-weight: bold; outline: none; cursor: pointer;" onchange="locDuLieuTheoNam()">
+                        <option value="">-- Chọn năm học --</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -101,6 +105,9 @@
 </div>
 
 <script>
+    // Biến toàn cục lưu trữ dữ liệu trả về từ server
+    let v_dl_toan_bo = [];
+
     window.addEventListener('DOMContentLoaded', () => {
         let quyenAdmin = sessionStorage.getItem("HTDG_IS_ADMIN") === "true";
         if (document.getElementById("menu-quan-ly-quyen")) {
@@ -128,15 +135,56 @@
             const t_k = await res.json();
             
             if (t_k.status === 'success') {
-                hienThiBangKetQua(t_k.d_l_k);
+                v_dl_toan_bo = t_k.d_l_k;
+                napDropdownNamHoc(v_dl_toan_bo); // Nạp tùy chọn năm học
+                
                 document.getElementById("h-dang-tai-kq").style.display = "none";
                 document.getElementById("vungKetQua").style.display = "block";
+                
+                locDuLieuTheoNam(); // Chạy bộ lọc lần đầu
             } else {
                 document.getElementById("h-dang-tai-kq").innerText = "Chưa có dữ liệu trên hệ thống.";
             }
         } catch (err) {
             document.getElementById("h-dang-tai-kq").innerText = "Lỗi kết nối máy chủ. Không thể tải kết quả.";
         }
+    }
+
+    // Hàm tự động trích xuất Năm học không trùng lặp và đẩy vào Select
+    function napDropdownNamHoc(d_l) {
+        const selectNam = document.getElementById("locNamHoc");
+        let cacNam = new Set();
+        d_l.forEach(item => {
+            if (item.n_hoc && item.n_hoc.trim() !== "") cacNam.add(item.n_hoc.trim());
+        });
+        
+        let mangNam = Array.from(cacNam).sort().reverse(); // Năm mới nhất đưa lên đầu
+        mangNam.forEach(nam => {
+            let opt = document.createElement("option");
+            opt.value = nam;
+            opt.textContent = nam;
+            selectNam.appendChild(opt);
+        });
+        
+        // Tự động chọn năm học đầu tiên (mới nhất) làm mặc định
+        if(mangNam.length > 0) {
+            selectNam.value = mangNam[0];
+        }
+    }
+
+    // Hàm Lọc dữ liệu hiển thị bảng theo Năm học
+    function locDuLieuTheoNam() {
+        const namChon = document.getElementById("locNamHoc").value;
+        const k_b = document.getElementById("bang-ket-qua");
+        
+        if (!namChon) {
+            k_b.innerHTML = `<tr><td colspan="3" style="text-align:center; font-style: italic; color: #555;">Vui lòng chọn năm học để xem kết quả</td></tr>`;
+            return;
+        }
+        
+        // Lọc mảng
+        let duLieuLoc = v_dl_toan_bo.filter(item => item.n_hoc === namChon);
+        hienThiBangKetQua(duLieuLoc);
     }
 
     function hienThiBangKetQua(d_l) {
@@ -165,7 +213,7 @@
             </tr>`;
         });
         
-        if (html === "") html = `<tr><td colspan="3" style="text-align:center;">Chưa có viên chức nào nộp đánh giá</td></tr>`;
+        if (html === "") html = `<tr><td colspan="3" style="text-align:center;">Chưa có viên chức nào nộp đánh giá trong năm học này</td></tr>`;
         k_b.innerHTML = html;
     }
 
