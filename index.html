@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png">
+    <link rel="icon" href="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png">
     <title>Hệ Thống Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -27,12 +27,10 @@
         
         .k-ngoai { flex: 1; background: white; padding: 0 30px 25px 30px; border-radius: 0 5px 5px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; width: 100%; box-sizing: border-box; margin: 0;}
         
-        /* Đã khử padding-bottom để ôm sát bảng */
         .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 0px; display: flex; flex-direction: column; align-items: center;}
         .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
         .n-dx:hover { background: #5a6268; }
 
-        /* Đã đưa margin-bottom về 0, giữ đường kẻ sát mép bảng */
         .k-dau { text-align: center; margin-bottom: 0px; border-bottom: 2px solid var(--mau-c); padding-bottom: 10px; width: 100%;}
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
@@ -48,7 +46,6 @@
         .n-nho { padding: 6px 10px; font-size: 13px; margin-left: 5px; }
         .n-do { background: #dc3545; color: white; }
         
-        /* Đã đưa margin-top về 0 để đầu bảng dính liền đường kẻ */
         table { width: 100%; border-collapse: collapse; margin-top: 0px; }
         th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: middle; }
         th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 15px;}
@@ -75,13 +72,34 @@
         #o-thong-bao { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #0f5132; padding: 30px 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid #198754; display: none; flex-direction: column; align-items: center; z-index: 10002; text-align: center; border-top: 8px solid #198754; }
         .n-dong-tb { margin-top: 20px; padding: 10px 30px; background: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .n-dong-tb:hover { background: #146c43; }
+
+        /* BỔ SUNG: GIAO DIỆN CHATBOT AI TRỢ GIÚP QUY CHẾ */
+        .ai-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 10005; align-items: center; justify-content: center;
+        }
+        .ai-modal-content {
+            background: #fff; width: 95%; max-width: 650px; border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column;
+        }
+        .ai-modal-header {
+            background: var(--mau-c); color: white; padding: 15px 20px; font-weight: bold; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .ai-modal-body { padding: 20px; flex: 1; max-height: 60vh; overflow-y: auto; background: #f8fbff; }
+        .ai-modal-footer { padding: 15px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
+        .ai-response-box {
+            background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+            border-left: 4px solid #0284c7; font-size: 15px; color: #1e3a8a; min-height: 60px; line-height: 1.6;
+        }
+        .ai-user-query { font-weight: bold; color: #333; margin-bottom: 8px; display: block; border-bottom: 1px dashed #ccc; padding-bottom: 5px;}
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
     <div class="login-box">
-        <img src="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png" width="80" alt="Logo" style="margin-bottom: 15px;">
+        <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" width="80" alt="Logo" style="margin-bottom: 15px;">
         <h2 style="color: #b91c1c; margin: 0; text-transform: uppercase;">Hệ Thống Đánh Giá Viên Chức</h2>
         <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
         
@@ -108,7 +126,7 @@
     
     <div class="khung-trai">
         <div class="khung-logo">
-            <img src="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png" alt="Logo">
+            <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo">
         </div>
         <div class="ten-truong-trai">Trường TH&THCS Hợp Thành</div>
         
@@ -141,7 +159,7 @@
                 <span class="b-tuong">💼</span> Tiêu chí NV
             </span>
 
-            <span class="the-chuyen" id="menu-tro-giup">
+            <span class="the-chuyen" id="menu-tro-giup" onclick="moKhungChatAI()">
                 <span class="b-tuong">💡</span> Trợ giúp
             </span>
         </div>
@@ -192,6 +210,24 @@
             </div>
 
             <button class="n-bam n-xanh-l" onclick="f_x_i()">LƯU KẾT QUẢ</button>
+        </div>
+    </div>
+</div>
+
+<div id="aiChatModal" class="ai-modal-overlay">
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <span>🤖 Trợ lý AI - Giải đáp Quy chế</span>
+            <button onclick="dongKhungChatAI()" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;" title="Đóng">✖</button>
+        </div>
+        <div class="ai-modal-body">
+            <div id="aiResponseBox" class="ai-response-box">
+                <em>Xin chào đồng chí! Tôi là trợ lý ảo hỗ trợ giải đáp nhanh các thắc mắc về <b>Quy chế đánh giá xếp loại</b>. Vui lòng nhập câu hỏi bên dưới.</em>
+            </div>
+        </div>
+        <div class="ai-modal-footer">
+            <textarea id="aiQueryInput" placeholder="Ví dụ: Quy chế tính điểm cho giải thi đua cấp tỉnh như thế nào?" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:4px; resize:none; height:45px; font-family:inherit; font-size: 15px;"></textarea>
+            <button onclick="guiCauHoiAI()" id="btnSendAI" style="background:var(--mau-c); color:white; border:none; padding:0 25px; border-radius:4px; font-weight:bold; cursor:pointer; font-size: 15px;">Hỏi AI</button>
         </div>
     </div>
 </div>
@@ -416,6 +452,76 @@
         } catch (loi) { console.error(loi); }
     }
 
+    // =========================================================================
+    // BỔ SUNG: CÁC HÀM XỬ LÝ GIAO TIẾP VỚI TRỢ LÝ AI (Hỗ trợ Quy chế)
+    // =========================================================================
+    function moKhungChatAI() {
+        document.getElementById('aiChatModal').style.display = 'flex';
+        document.getElementById('aiQueryInput').value = '';
+    }
+
+    function dongKhungChatAI() {
+        document.getElementById('aiChatModal').style.display = 'none';
+    }
+
+    function formatVanBanAI(text) {
+        if (!text) return "";
+        let html = text;
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
+        html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
+        html = html.replace(/\n/g, '<br>');
+        html = html.replace(/<\/div><br>/g, '</div>');
+        return html;
+    }
+
+    function guiCauHoiAI() {
+        const cauHoi = document.getElementById('aiQueryInput').value.trim();
+        const hopPhanHoi = document.getElementById('aiResponseBox');
+        const nutGui = document.getElementById('btnSendAI');
+
+        if(!cauHoi) {
+            alert("Đồng chí vui lòng nhập câu hỏi!"); return;
+        }
+
+        // Khóa nút và hiện trạng thái đang xử lý
+        nutGui.disabled = true;
+        nutGui.innerHTML = "⏳ Đang tra cứu...";
+        hopPhanHoi.innerHTML = `<span class="ai-user-query">👤 Bạn: ${cauHoi}</span><span style="color:#666; font-style:italic;">⏳ AI đang quét dữ liệu quy chế, xin vui lòng chờ giây lát...</span>`;
+
+        // Gọi hàm backend qua google.script.run
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run
+                .withSuccessHandler(res => {
+                    nutGui.disabled = false;
+                    nutGui.innerHTML = "Hỏi AI";
+                    if(res.success) {
+                        const phanHoiDep = formatVanBanAI(res.message);
+                        hopPhanHoi.innerHTML = `<span class="ai-user-query">👤 Bạn: ${cauHoi}</span><strong>🤖 AI Trả lời:</strong><br>${phanHoiDep}`;
+                        document.getElementById('aiQueryInput').value = '';
+                    } else {
+                        hopPhanHoi.innerHTML = `<span class="ai-user-query">👤 Bạn: ${cauHoi}</span><span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
+                    }
+                })
+                .withFailureHandler(err => {
+                    nutGui.disabled = false;
+                    nutGui.innerHTML = "Hỏi AI";
+                    hopPhanHoi.innerHTML = `<span class="ai-user-query">👤 Bạn: ${cauHoi}</span><span style="color:red;"><strong>❌ Lỗi máy chủ:</strong> Không thể kết nối. ${err}</span>`;
+                })
+                .API_TroGiupQuyChe(cauHoi);
+        } else {
+            nutGui.disabled = false;
+            nutGui.innerHTML = "Hỏi AI";
+            hopPhanHoi.innerHTML = `<span class="ai-user-query">👤 Bạn: ${cauHoi}</span><span style="color:red;"><strong>❌ Lỗi:</strong> Môi trường hiện tại không hỗ trợ gọi thư viện Google Script. Hãy chạy trên Web App chính thức.</span>`;
+        }
+    }
+    
+    // Thêm sự kiện bấm Enter để gửi câu hỏi
+    document.getElementById('aiQueryInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            guiCauHoiAI();
+        }
+    });
 </script>
 </body>
 </html>
