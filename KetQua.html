@@ -25,15 +25,18 @@
         
         .k-ngoai { flex: 1; background: white; padding: 0 30px 25px 30px; border-radius: 0 5px 5px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; width: 100%; box-sizing: border-box; margin: 0;}
         
-        .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 5px; display: flex; flex-direction: column; align-items: center;}
+        /* Đã khử padding-bottom để ôm sát bảng */
+        .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 0px; display: flex; flex-direction: column; align-items: center;}
         .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
         .n-dx:hover { background: #5a6268; }
 
-        .k-dau { text-align: center; margin-bottom: 8px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; width: 100%;}
+        /* Đã đưa margin-bottom về 0, giữ đường kẻ sát mép bảng */
+        .k-dau { text-align: center; margin-bottom: 0px; border-bottom: 2px solid var(--mau-c); padding-bottom: 10px; width: 100%;}
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        /* Đã đưa margin-top về 0 để đầu bảng dính liền đường kẻ */
+        table { width: 100%; border-collapse: collapse; margin-top: 0px; }
         th, td { border: 1px solid #dee2e6; padding: 12px 10px; text-align: left; vertical-align: middle; font-size: 16px; }
         th { background: #e9ecef; color: var(--mau-c); text-align: center; font-weight: bold; text-transform: uppercase; }
     </style>
@@ -78,7 +81,7 @@
                 <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
                 <h1>KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC</h1>
                 
-                <div style="margin-top: 15px; display: inline-flex; align-items: center; background: #e9ecef; padding: 5px 15px; border-radius: 20px;">
+                <div style="margin-top: 10px; display: inline-flex; align-items: center; background: #e9ecef; padding: 5px 15px; border-radius: 20px;">
                     <label for="locNamHoc" style="font-weight: bold; color: var(--mau-c); margin-right: 10px; font-size: 15px;">Năm học:</label>
                     <select id="locNamHoc" style="padding: 5px 15px; border-radius: 15px; border: 1px solid #ced4da; font-family: inherit; font-size: 15px; color: #dc3545; font-weight: bold; outline: none; cursor: pointer;">
                         <option value="">-- Chọn năm học --</option>
@@ -120,7 +123,6 @@
             document.getElementById("menu-tieu-chi-nv").style.display = quyenAdmin ? "flex" : "none";
         }
         
-        // Gắn sự kiện thay đổi an toàn bằng JavaScript thay vì inline HTML
         const selectNam = document.getElementById("locNamHoc");
         if(selectNam) {
             selectNam.addEventListener('change', locDuLieuTheoNam);
@@ -158,7 +160,7 @@
 
     function napDropdownNamHoc(d_l) {
         const selectNam = document.getElementById("locNamHoc");
-        selectNam.innerHTML = '<option value="">-- Chọn năm học --</option>'; // Làm sạch danh sách
+        selectNam.innerHTML = '<option value="">-- Chọn năm học --</option>'; 
         
         let cacNam = new Set();
         d_l.forEach(item => {
@@ -182,7 +184,7 @@
         const selectObj = document.getElementById("locNamHoc");
         if (!selectObj) return;
         
-        const namChon = selectObj.value.trim(); // Cắt khoảng trắng dư thừa
+        const namChon = selectObj.value.trim(); 
         const k_b = document.getElementById("bang-ket-qua");
         
         if (!namChon) {
@@ -190,7 +192,6 @@
             return;
         }
         
-        // Thuật toán lọc kết hợp trim() chống sai sót chuỗi
         let duLieuLoc = v_dl_toan_bo.filter(item => {
             let checkNam = item.n_hoc ? item.n_hoc.trim() : "";
             return checkNam === namChon;
@@ -232,7 +233,7 @@
     }
 
     function phanTichXepLoai(chuoi) {
-        let str = chuoi ? chuoi.toLowerCase() : ""; // Khử lỗi chuỗi null
+        let str = chuoi ? chuoi.toLowerCase() : ""; 
         let muc = 0; 
         if (str.includes("xuất sắc")) muc = 4;
         else if (str.includes("tốt")) muc = 3;
