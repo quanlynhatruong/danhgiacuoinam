@@ -15,22 +15,22 @@
         /* --- KHỐI CSS: BỐ CỤC TỔNG THỂ & MENU DỌC --- */
         .bo-cuc-tong { display: flex; max-width: 1400px; margin: 0 auto; gap: 20px; padding-top: 0; align-items: flex-start; }
         
-        .khung-trai { width: 180px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding-top: 20px; position: sticky; top: 10px;}
-        .khung-logo { border: 2px solid red; padding: 25px 15px; margin-bottom: 20px; color: red; font-size: 16px; font-family: sans-serif; text-align: center; display: flex; align-items: center; justify-content: center; background: white;}
-        .ten-truong-trai { color: red; font-size: 17px; text-align: center; margin-bottom: 40px; line-height: 1.4; padding: 0 5px;}
-        .danh-muc-trai { width: 100%; display: flex; flex-direction: column; gap: 18px; padding-left: 20px; box-sizing: border-box;}
-        .the-chuyen { color: red; font-size: 16px; text-decoration: none; cursor: pointer; transition: 0.2s; display: block;}
-        .the-chuyen:hover { font-weight: bold; text-decoration: underline; }
+        .khung-trai { width: 230px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding-top: 25px; position: sticky; top: 10px; background-color: var(--mau-c); border-radius: 8px; padding-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
+        .khung-logo { margin-bottom: 15px; display: flex; align-items: center; justify-content: center;}
+        .khung-logo img { width: 85px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        .ten-truong-trai { color: #ffffff; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 25px; line-height: 1.4; padding: 0 15px; text-transform: uppercase; border-bottom: 1px dashed rgba(255, 255, 255, 0.4); padding-bottom: 15px; width: 85%;}
+        .danh-muc-trai { width: 100%; display: flex; flex-direction: column; gap: 5px; padding: 0 15px; box-sizing: border-box;}
+        .the-chuyen { color: #ffffff; font-size: 15px; text-decoration: none; cursor: pointer; transition: 0.2s; display: block; padding: 12px 15px; border-radius: 4px;}
+        .the-chuyen:hover { font-weight: bold; background-color: rgba(255, 255, 255, 0.15); }
         
         /* --- KHỐI CSS: NỘI DUNG CHÍNH --- */
         .k-ngoai { flex: 1; background: white; padding: 0 30px 25px 30px; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; width: 100%; box-sizing: border-box;}
         
-        .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 5px; }
-        .logo-goc-trai { position: absolute; top: 15px; left: 0; width: 65px; }
+        .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 5px; display: flex; flex-direction: column; align-items: center;}
         .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
         .n-dx:hover { background: #5a6268; }
 
-        .k-dau { text-align: center; margin-bottom: 8px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; }
+        .k-dau { text-align: center; margin-bottom: 8px; border-bottom: 2px solid var(--mau-c); padding-bottom: 8px; width: 100%;}
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
         .k-dau h1 { font-size: 24px; color: var(--mau-c); text-transform: uppercase; margin: 4px 0; }
         .k-dau p { margin: 2px 0 0 0; font-size: 15px; }
@@ -103,7 +103,9 @@
 <div id="bo-cuc-he-thong" class="bo-cuc-tong" style="display: none;">
     
     <div class="khung-trai">
-        <div class="khung-logo">Logo</div>
+        <div class="khung-logo">
+            <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo">
+        </div>
         <div class="ten-truong-trai">Trường TH&THCS Hợp Thành</div>
         
         <div class="danh-muc-trai">
@@ -112,27 +114,26 @@
             <span class="the-chuyen" id="menu-quan-ly-quyen">Quản lý quyền</span>
             <span class="the-chuyen" id="menu-tieu-chi-gv">Tiêu chí GV</span>
             <span class="the-chuyen" id="menu-tieu-chi-nv">Tiêu chí NV</span>
+            <span class="the-chuyen" id="menu-tro-giup">Trợ giúp</span>
+        </div>
+
+        <div id="vungThongTin" style="display: none; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.2); width: 85%; padding: 15px 10px; border-radius: 8px; margin-top: 25px; box-sizing: border-box; text-align: center;">
+            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 3px;">Dữ liệu:</div>
+            <div id="theHienChinh" style="color: #ffc107; font-weight: bold; text-transform: uppercase; font-size: 14px; margin-bottom: 12px; line-height: 1.3;"></div>
+            
+            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 3px;">Phân loại:</div>
+            <div id="hienThiNhom" style="color: #ffc107; font-weight: bold; text-transform: uppercase; font-size: 14px;"></div>
         </div>
     </div>
 
     <div class="k-ngoai" id="main-ui">
         <div class="k-header-sticky">
-            <img src="https://i.ibb.co/d0JNW94Z/logo-l-a-ch-n6.png" alt="Logo" class="logo-goc-trai">
             <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
             
             <div class="k-dau">
                 <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
                 <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
                 <p><i>(Áp dụng từ năm học 2025-2026)</i></p>
-            </div>
-
-            <div id="vungThongTin" style="display: none; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 6px; margin-top: 8px;">
-                <h3 style="color: var(--mau-c); margin: 0; font-size: 16px;">
-                    Dữ liệu: <span id="theHienChinh" style="color: #d9534f; text-transform: uppercase;"></span>
-                </h3>
-                <div style="font-size: 15px; font-weight: bold; color: var(--mau-c);">
-                    Phân loại: <span id="hienThiNhom" style="color: #d9534f; text-transform: uppercase;"></span>
-                </div>
             </div>
         </div>
 
@@ -207,7 +208,6 @@
 
     function showMainUI(d_danh) {
         document.getElementById('login-overlay').style.display = 'none';
-        /* Đã cập nhật dòng hiển thị sang ID bố cục mới theo nguyên tắc vàng */
         document.getElementById('bo-cuc-he-thong').style.display = 'flex'; 
         const objNhom = document.getElementById('oChonNhom');
         if(document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
@@ -243,6 +243,7 @@
                 f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
+                /* Hiển thị vùng thông tin bên menu trái dưới dạng cột (flex-direction: column đã được đặt ở CSS inline) */
                 document.getElementById("vungThongTin").style.display = "flex";
                 f_x_h();
             } else { alert(t_k.message); f_x_logout(); }
