@@ -59,15 +59,17 @@
             <a href="javascript:void(0)" class="the-chuyen" id="menu-ket-qua" style="background-color: rgba(255, 255, 255, 0.15); font-weight: bold;">
                 <span class="b-tuong">📈</span> Kết quả
             </a>
-            <span class="the-chuyen" id="menu-quan-ly-quyen">
+            
+            <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;">
                 <span class="b-tuong">👥</span> Quản lý quyền
             </span>
-            <span class="the-chuyen" id="menu-tieu-chi-gv">
+            <span class="the-chuyen" id="menu-tieu-chi-gv" style="display: none;">
                 <span class="b-tuong">🏫</span> Tiêu chí GV
             </span>
-            <span class="the-chuyen" id="menu-tieu-chi-nv">
+            <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
                 <span class="b-tuong">💼</span> Tiêu chí NV
             </span>
+
             <span class="the-chuyen" id="menu-tro-giup">
                 <span class="b-tuong">💡</span> Trợ giúp
             </span>
@@ -103,8 +105,21 @@
 </div>
 
 <script>
-    // Kích hoạt nạp dữ liệu toàn bộ ngay khi mở trang mà không cần đăng nhập
+    // Kích hoạt nạp dữ liệu toàn bộ ngay khi mở trang
     window.addEventListener('DOMContentLoaded', () => {
+        // --- THÊM MỚI: Đồng bộ Trạng thái Phân quyền Admin từ index.html ---
+        let quyenAdmin = sessionStorage.getItem("HTDG_IS_ADMIN") === "true";
+        if (document.getElementById("menu-quan-ly-quyen")) {
+            document.getElementById("menu-quan-ly-quyen").style.display = quyenAdmin ? "flex" : "none";
+        }
+        if (document.getElementById("menu-tieu-chi-gv")) {
+            document.getElementById("menu-tieu-chi-gv").style.display = quyenAdmin ? "flex" : "none";
+        }
+        if (document.getElementById("menu-tieu-chi-nv")) {
+            document.getElementById("menu-tieu-chi-nv").style.display = quyenAdmin ? "flex" : "none";
+        }
+        // --- KẾT THÚC ---
+
         taiDuLieuKetQua();
     });
 
