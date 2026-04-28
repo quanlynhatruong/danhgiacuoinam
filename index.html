@@ -118,6 +118,10 @@
             <div style="display: flex; justify-content: center;">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
             </div>
+            
+            <div style="margin-top: 20px; display: flex; justify-content: center; border-top: 1px dashed #b8daff; padding-top: 15px;">
+                <button onclick="f_x_vao_khach()" style="background: transparent; border: 1px solid #ccc; border-radius: 4px; padding: 6px 15px; color: #555; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: bold;">Vào xem với tư cách Khách</button>
+            </div>
         </div>
         
         <div style="font-size: 13px; color: #888; text-align: center;">Hệ thống nạp dữ liệu tự động theo định danh chuẩn.</div>
@@ -264,8 +268,9 @@
 </div>
 
 <script>
-    // BỔ SUNG: Biến toàn cục để nhận diện trạng thái Admin đang xem dữ liệu người khác
+    // BỔ SUNG: Biến toàn cục để nhận diện trạng thái Admin hoặc trạng thái Khách
     let v_che_do_xem_admin = false;
+    let v_che_do_khach = false; // Thêm biến nhận diện chế độ khách
 
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_USER_ID");
@@ -320,6 +325,29 @@
         if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
 
+    // BỔ SUNG: Hàm kích hoạt vào bằng quyền Khách
+    function f_x_vao_khach() {
+        v_che_do_khach = true;
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('bo-cuc-he-thong').style.display = 'flex';
+        document.getElementById('theHienChinh').innerText = "Khách tham quan";
+        
+        const objNhom = document.getElementById('oChonNhom');
+        document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
+        
+        document.getElementById("vungThongTin").style.display = "flex";
+        
+        document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Giao diện chỉ xem. Hệ thống không tải dữ liệu vì chưa đăng nhập.</td></tr>";
+        
+        document.getElementById("vungThuNhat").classList.add("a-di");
+        document.getElementById("vungThuHai").classList.remove("a-di");
+        
+        let nutLuu = document.getElementById("btnLuuKetQua");
+        if (nutLuu) nutLuu.style.display = "none";
+        
+        hienThiThongBaoUI("Đồng chí đang truy cập với tư cách Khách.<br>Có thể xem các giao diện nhưng chức năng tương tác đã bị khóa.");
+    }
+
     function f_x_logout() {
         sessionStorage.removeItem("HTDG_USER_ID");
         sessionStorage.removeItem("HTDG_NHOM_ID");
@@ -338,12 +366,14 @@
     }
 
     async function f_x_d() {
-        v_che_do_xem_admin = false; // BỔ SUNG: Khôi phục quyền tương tác khi load dữ liệu cá nhân
+        v_che_do_xem_admin = false; 
         
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
         
+        // SỬA ĐỔI: Chặn thông báo lỗi nếu đang ở chế độ khách
         if (!p_c) {
+            if (v_che_do_khach) return; 
             hienThiThongBaoUI("Hệ thống chưa xác định được định danh!");
             return;
         }
@@ -353,6 +383,7 @@
             const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`);
             const t_k = await res.json();
             if (t_k.status === 'success') {
+                v_che_do_khach = false; // Reset chế độ khách nếu load thành công
                 v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e; v_l_d = t_k.y_c || ""; 
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
                 
@@ -387,7 +418,17 @@
                 document.getElementById("vungThongTin").style.display = "flex";
                 f_x_h();
             } else { 
-                hienThiThongBaoUI(t_k.message, f_x_logout); 
+                // SỬA ĐỔI: Chuyển sang chế độ khách thay vì logout khi định danh không có trong CSDL
+                v_che_do_khach = true;
+                document.getElementById('theHienChinh').innerText = "Tài khoản không hợp lệ";
+                document.getElementById("vungThongTin").style.display = "flex";
+                document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>Tài khoản của đồng chí không có trong danh sách hệ thống.<br>Giao diện tự động chuyển sang chế độ chỉ xem.</td></tr>";
+                document.getElementById("vungThuNhat").classList.add("a-di");
+                document.getElementById("vungThuHai").classList.remove("a-di");
+                let nutLuu = document.getElementById("btnLuuKetQua");
+                if (nutLuu) nutLuu.style.display = "none";
+                
+                hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem).</b>");
             }
         } catch (err) { 
             hienThiThongBaoUI("Kết nối tới máy chủ bị gián đoạn. Vui lòng tải lại trang.", f_x_logout); 
@@ -426,7 +467,7 @@
 
         if (!selectedId) return; 
 
-        v_che_do_xem_admin = true; // BỔ SUNG: Kích hoạt chế độ khóa dữ liệu khi Admin xem form người khác
+        v_che_do_xem_admin = true; 
 
         const selectedOption = selectObj.options[selectObj.selectedIndex];
         const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
@@ -503,11 +544,11 @@
         });
         document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', f_x_h); el.addEventListener('input', f_x_h); });
 
-        // BỔ SUNG: Khối xử lý khóa giao diện và ẩn nút lưu nếu đang ở chế độ xem Admin
-        if (v_che_do_xem_admin) {
+        // SỬA ĐỔI: Khóa giao diện nếu đang ở chế độ xem Admin HOẶC chế độ khách
+        if (v_che_do_xem_admin || v_che_do_khach) {
             document.querySelectorAll("#t-b-g input, #t-b-g select, #t-b-g button").forEach(el => {
                 el.disabled = true;
-                if (el.tagName === 'INPUT') el.style.backgroundColor = "#e9ecef";
+                if (el.tagName === 'INPUT' || el.tagName === 'SELECT') el.style.backgroundColor = "#e9ecef";
                 el.style.cursor = "not-allowed";
             });
             let nutLuu = document.getElementById("btnLuuKetQua");
