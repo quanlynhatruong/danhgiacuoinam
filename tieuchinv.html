@@ -20,7 +20,7 @@ function f_x_b_nv(chuoiKN, mucDo) {
 }
 
 function f_x_m_chinh(dataRows) {
-    // Thêm biến 'o: 0' để lưu trữ riêng Điểm bình quân tháng bóc tách được
+    // Biến 'o' lưu Điểm bình quân tháng gốc, 'm' lưu Tổng điểm phần 1 sau quy đổi
     let m_k_a = { a: 0, b: '', c: '', d: '', e: 0, f: '', g: '', h: '', i: '', j: 0, k: 0, l: 0, m: 0, n: false, o: 0 };
     let m_k_b = { a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false, i: false, j: false, k: false, l: false };
     let k_t_c = 0; 
@@ -37,7 +37,7 @@ function f_x_m_chinh(dataRows) {
             k_t_c += r.selectDataP;
         }
         
-        // 2. Nhận diện kết quả xếp loại và tính Tổng điểm phần 1
+        // 2. Nhận diện kết quả xếp loại và tính Tổng điểm phần 1 (Quy đổi 100/80/60 + Điểm gốc)
         if (r.isDiemPhan1 || r.isDongBo || c_t_1.includes("tháng")) {
             let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
             let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
@@ -45,7 +45,7 @@ function f_x_m_chinh(dataRows) {
             if (f_x_a_nv(c_g_1, /xuất sắc/i)) { 
                 b_x_l = true; 
                 b_x_d = true; 
-                m_k_a.m = 100 + c_d_1; // Điểm quy đổi + Điểm bóc tách
+                m_k_a.m = 100 + c_d_1; 
             } 
             else if (f_x_a_nv(c_g_1, /tốt/i)) { 
                 b_x_l = true; 
@@ -56,16 +56,17 @@ function f_x_m_chinh(dataRows) {
                 b_x_l = false; 
                 b_x_d = false; 
                 m_k_a.m = 0 + c_d_1;
-            }
-             else if (f_x_a_nv(c_g_1, /hoàn thành|ht/i)) { 
+            } 
+            else if (f_x_a_nv(c_g_1, /hoàn thành|ht/i)) { 
                 b_x_l = false; 
                 b_x_d = true; 
                 m_k_a.m = 60 + c_d_1;
             } 
-           else {
+            else {
                 m_k_a.m = c_d_1;
             }
-            m_k_a.o = c_d_1; // Lưu giữ riêng Điểm bình quân gốc
+            
+            m_k_a.o = c_d_1; // Lưu điểm bình quân gốc để xét mức 180
             m_k_a.n = true;
             return; 
         }
@@ -100,9 +101,9 @@ function f_x_m_chinh(dataRows) {
     const h_c_c_n = (c_h) => c_h && c_h.trim() !== "";
 
     // ĐIỀU KIỆN HOÀN THÀNH XUẤT SẮC
-    // Sử dụng biến o cho mức 180 và biến m cho mức 260
     let c_m_a = (!m_k_b.a || m_k_a.a < 2) && 
                 ((b_x_l && m_k_a.n && m_k_a.o >= 180) || (m_k_a.n && m_k_a.m >= 260)) && 
+                (m_k_b.b && f_x_a_nv(m_k_a.b, /tốt|xuất sắc/i)) && // Đã bổ sung điều kiện Hiệu quả công tác
                 (!m_k_b.c || f_x_a_nv(m_k_a.c, /giỏi|xuất sắc/i)) && 
                 (!m_k_b.d || f_x_a_nv(m_k_a.d, /tốt|xuất sắc/i)) && 
                 (m_k_b.h && m_k_a.h.trim() !== "" && f_x_a_nv(m_k_a.h, /xã|cụm|huyện|tỉnh|quốc/i)) && 
@@ -138,10 +139,10 @@ function f_x_m_chinh(dataRows) {
         k_m = "#fd7e14"; 
     }
 
-    // TÍNH TOÁN ĐIỂM SỐ CHUNG
+    // TÍNH TOÁN ĐIỂM SỐ
     let k_t_a = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
     
-    // Trừ 2 điểm cho mỗi lần bị nhắc nhở/phê bình trực tiếp vào Điểm phần 2
+    // Trừ 2 điểm cho mỗi lần bị nhắc nhở/phê bình vào Điểm phần 2
     if (m_k_b.a && m_k_a.a > 0) {
         k_t_c -= (m_k_a.a * 2);
     }
