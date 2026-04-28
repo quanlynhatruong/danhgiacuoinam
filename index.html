@@ -217,8 +217,8 @@
                     <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: 0</div>
                 </div>
             </div>
-
-            <button class="n-bam n-xanh-l" onclick="f_x_i()">LƯU KẾT QUẢ</button>
+            
+            <button id="btnLuuKetQua" class="n-bam n-xanh-l" onclick="f_x_i()">LƯU KẾT QUẢ</button>
         </div>
     </div>
 </div>
@@ -262,6 +262,9 @@
 </div>
 
 <script>
+    // BỔ SUNG: Biến toàn cục để nhận diện trạng thái Admin đang xem dữ liệu người khác
+    let v_che_do_xem_admin = false;
+
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_USER_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
@@ -333,6 +336,8 @@
     }
 
     async function f_x_d() {
+        v_che_do_xem_admin = false; // BỔ SUNG: Khôi phục quyền tương tác khi load dữ liệu cá nhân
+        
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
         
@@ -365,9 +370,6 @@
                     document.getElementById("menu-tieu-chi-nv").style.display = quyenAdmin ? "flex" : "none";
                 }
 
-                // =========================================================================
-                // BỔ SUNG: KÍCH HOẠT VÙNG CHỌN ADMIN ĐỂ ĐỔI DỮ LIỆU
-                // =========================================================================
                 if (quyenAdmin) {
                     document.getElementById("vungChonAdmin").style.display = "block";
                     document.getElementById("vungHienThiNamHoc").style.display = "none";
@@ -391,9 +393,6 @@
         f_x_j(false);
     }
 
-    // =========================================================================
-    // KHỐI SCRIPT BỔ SUNG DÀNH CHO ADMIN
-    // =========================================================================
     let danhSachVienChucAdmin = [];
 
     async function f_x_load_users() {
@@ -407,7 +406,7 @@
                 
                 danhSachVienChucAdmin.forEach(vc => {
                     let opt = document.createElement('option');
-                    opt.value = vc.id; // Truyền ID (Mã Cột A)
+                    opt.value = vc.id; 
                     opt.text = vc.name + (vc.role ? ` - ${vc.role}` : "");
                     opt.setAttribute('data-role', vc.role);
                     opt.setAttribute('data-name', vc.name);
@@ -425,20 +424,20 @@
 
         if (!selectedId) return; 
 
+        v_che_do_xem_admin = true; // BỔ SUNG: Kích hoạt chế độ khóa dữ liệu khi Admin xem form người khác
+
         const selectedOption = selectObj.options[selectObj.selectedIndex];
         const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
         const selectedName = selectedOption.getAttribute('data-name');
 
-        // Phân tách GV/NV chính xác từ Cột D KHAIBAO để điều hướng thuật toán tính điểm
         let nhomXacDinh = 'giaovien';
         if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien')) {
             nhomXacDinh = 'nhanvien';
         }
 
-        // Cập nhật Cột Trái
         document.getElementById("theHienChinh").innerText = selectedName;
         document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
-        document.getElementById("oChonNhom").value = nhomXacDinh; // Khớp logic nội tại
+        document.getElementById("oChonNhom").value = nhomXacDinh; 
 
         f_x_j(true);
         try {
@@ -446,9 +445,8 @@
             const t_k = await res.json();
 
             if (t_k.status === 'success') {
-                // Ánh xạ lại biến toàn cục đảm bảo ghi nhận (f_x_i) hoạt động đúng quyền của User đó
-                v_l_b = t_k.y_a; // Mã Sheet
-                v_l_a = t_k.y_acc; // Account của người được chọn (Mấu chốt để bypass bảo mật hàm doPost)
+                v_l_b = t_k.y_a; 
+                v_l_a = t_k.y_acc; 
                 v_l_c = t_k.y_e;
                 v_l_d = t_k.y_c || "";
 
@@ -462,7 +460,6 @@
         }
         f_x_j(false);
     }
-    // =========================================================================
 
     function f_x_e(m_n) {
         const k_b = document.getElementById("t-b-g");
@@ -503,6 +500,20 @@
             k_b.insertAdjacentHTML('beforeend', `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`);
         });
         document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', f_x_h); el.addEventListener('input', f_x_h); });
+
+        // BỔ SUNG: Khối xử lý khóa giao diện và ẩn nút lưu nếu đang ở chế độ xem Admin
+        if (v_che_do_xem_admin) {
+            document.querySelectorAll("#t-b-g input, #t-b-g select, #t-b-g button").forEach(el => {
+                el.disabled = true;
+                if (el.tagName === 'INPUT') el.style.backgroundColor = "#e9ecef";
+                el.style.cursor = "not-allowed";
+            });
+            let nutLuu = document.getElementById("btnLuuKetQua");
+            if (nutLuu) nutLuu.style.display = "none";
+        } else {
+            let nutLuu = document.getElementById("btnLuuKetQua");
+            if (nutLuu) nutLuu.style.display = "block";
+        }
     }
 
     function f_x_h() {
