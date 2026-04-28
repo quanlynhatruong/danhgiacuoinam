@@ -320,13 +320,55 @@
     function showMainUI(d_danh) {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('bo-cuc-he-thong').style.display = 'flex'; 
+        
+        // Khôi phục hiển thị menu Kết quả nếu trước đó bị ẩn do chế độ Khách
+        if (document.getElementById("menu-ket-qua")) document.getElementById("menu-ket-qua").style.display = "flex";
+
         const objNhom = document.getElementById('oChonNhom');
         if(document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
 
-    // SỬA ĐỔI LỚN: Hàm kích hoạt vào bằng quyền Khách, gọi máy chủ lấy mảng tiêu chí mẫu
+    // Hàm gọi lấy cấu trúc tiêu chí mẫu cho Khách
+    async function f_x_load_guest_template(p_n) {
+        try {
+            const resList = await fetch(`${z_y_a}?z_p_a=l_d_s`);
+            const tkList = await resList.json();
+            let repId = "";
+            
+            if (tkList.status === 'success' && tkList.data) {
+                for (let vc of tkList.data) {
+                    let roleStr = (vc.role || "").toLowerCase();
+                    let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
+                    if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) {
+                        repId = vc.id;
+                        break;
+                    }
+                }
+            }
+
+            if (repId) {
+                const resAdmin = await fetch(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(repId)}&z_p_c=${p_n}`);
+                const t_k_admin = await resAdmin.json();
+                
+                if (t_k_admin.status === 'success' && t_k_admin.y_d) {
+                    // Xóa trắng kết quả cá nhân của người mượn mẫu
+                    let blankData = t_k_admin.y_d.map(item => ({ ...item, x_c: "" }));
+                    f_x_e(blankData);
+                    f_x_h();
+                } else {
+                    document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                }
+            } else {
+                document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu.</td></tr>";
+            }
+        } catch (e) {
+            document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi kết nối tải mẫu tiêu chí.</td></tr>";
+        }
+    }
+
+    // Hàm kích hoạt vào bằng quyền Khách
     async function f_x_vao_khach() {
         v_che_do_khach = true;
         document.getElementById('login-overlay').style.display = 'none';
@@ -345,30 +387,19 @@
         let nutLuu = document.getElementById("btnLuuKetQua");
         if (nutLuu) nutLuu.style.display = "none";
         
-        // Hiển thị đầy đủ menu như quyền Admin
+        // Hiển thị các menu ẩn như Admin cho Khách
         if (document.getElementById("menu-quan-ly-quyen")) document.getElementById("menu-quan-ly-quyen").style.display = "flex";
         if (document.getElementById("menu-tieu-chi-gv")) document.getElementById("menu-tieu-chi-gv").style.display = "flex";
         if (document.getElementById("menu-tieu-chi-nv")) document.getElementById("menu-tieu-chi-nv").style.display = "flex";
         
-        // Thực hiện truy vấn đến máy chủ bằng định danh giả để nhận về cấu trúc mảng tiêu chí (y_d)
+        // KHÓA THẺ MENU KẾT QUẢ
+        if (document.getElementById("menu-ket-qua")) document.getElementById("menu-ket-qua").style.display = "none";
+        
         f_x_j(true);
-        try {
-            const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=khach_tham_quan&z_p_c=${p_n}`);
-            const t_k = await res.json();
-            
-            // Xử lý nạp tiêu chí nếu máy chủ có trả về mẫu
-            if (t_k.y_d && t_k.y_d.length > 0) {
-                f_x_e(t_k.y_d);
-                f_x_h();
-            } else {
-                document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Chưa tải được dữ liệu mẫu tiêu chí từ máy chủ.</td></tr>";
-            }
-        } catch (e) {
-            document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi kết nối tải mẫu tiêu chí.</td></tr>";
-        }
+        await f_x_load_guest_template(p_n);
         f_x_j(false);
         
-        hienThiThongBaoUI("Đồng chí đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị khóa.");
+        hienThiThongBaoUI("Đồng chí đang truy cập với tư cách Khách.<br>Thẻ menu <b>Kết quả</b> đã bị khóa. Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị vô hiệu.");
     }
 
     function f_x_logout() {
@@ -440,7 +471,7 @@
                 document.getElementById("vungThongTin").style.display = "flex";
                 f_x_h();
             } else { 
-                // SỬA ĐỔI: Chuyển sang chế độ khách và nạp dữ liệu tiêu chí thay vì báo rỗng khi định danh sai
+                // Chuyển sang chế độ khách nếu định danh không tồn tại
                 v_che_do_khach = true;
                 document.getElementById('theHienChinh').innerText = "Tài khoản không hợp lệ";
                 document.getElementById("vungThongTin").style.display = "flex";
@@ -450,20 +481,16 @@
                 let nutLuu = document.getElementById("btnLuuKetQua");
                 if (nutLuu) nutLuu.style.display = "none";
 
-                // Hiển thị các menu ẩn như Admin cho Khách khi tài khoản không hợp lệ
                 if (document.getElementById("menu-quan-ly-quyen")) document.getElementById("menu-quan-ly-quyen").style.display = "flex";
                 if (document.getElementById("menu-tieu-chi-gv")) document.getElementById("menu-tieu-chi-gv").style.display = "flex";
                 if (document.getElementById("menu-tieu-chi-nv")) document.getElementById("menu-tieu-chi-nv").style.display = "flex";
                 
-                // Hiển thị danh mục tiêu chí nếu máy chủ có xuất ra mảng y_d trong t_k khi báo lỗi
-                if (t_k.y_d && t_k.y_d.length > 0) {
-                    f_x_e(t_k.y_d);
-                    f_x_h();
-                } else {
-                    document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>Tài khoản của đồng chí không hợp lệ.<br>Máy chủ không trả về cấu trúc tiêu chí mẫu để hiển thị.</td></tr>";
-                }
+                // KHÓA THẺ MENU KẾT QUẢ
+                if (document.getElementById("menu-ket-qua")) document.getElementById("menu-ket-qua").style.display = "none";
                 
-                hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem).</b>");
+                await f_x_load_guest_template(p_n);
+                
+                hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Menu Kết quả đã bị khóa.</b>");
             }
         } catch (err) { 
             hienThiThongBaoUI("Kết nối tới máy chủ bị gián đoạn. Vui lòng tải lại trang.", f_x_logout); 
@@ -579,7 +606,7 @@
         });
         document.querySelectorAll(".k-hoat-t").forEach(el => { el.addEventListener('change', f_x_h); el.addEventListener('input', f_x_h); });
 
-        // KHÓA TOÀN BỘ GIAO DIỆN NẾU LÀ GUEST
+        // KHÓA TOÀN BỘ GIAO DIỆN NẾU LÀ GUEST HOẶC XEM ADMIN
         if (v_che_do_xem_admin || v_che_do_khach) {
             document.querySelectorAll("#t-b-g input, #t-b-g select, #t-b-g button").forEach(el => {
                 el.disabled = true;
