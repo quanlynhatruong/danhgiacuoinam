@@ -238,7 +238,7 @@
         </div>
         <div class="ai-modal-body" id="aiModalBody">
             <div id="aiResponseBox" class="ai-response-box">
-                <div id="aiWelcomeMsg"><em>Xin chào đồng chí! Tôi là trợ lý ảo hỗ trợ giải đáp nhanh các thắc mắc về <b>Quy chế đánh giá xếp loại</b>. Vui lòng nhập câu hỏi bên dưới.</em></div>
+                <div id="aiWelcomeMsg"><em>Xin chào bạn! Tôi là trợ lý ảo hỗ trợ giải đáp nhanh các thắc mắc về <b>Quy chế đánh giá xếp loại</b>. Vui lòng nhập câu hỏi bên dưới.</em></div>
             </div>
         </div>
         <div class="ai-modal-footer">
@@ -255,7 +255,7 @@
         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
     </svg>
     <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">GHI NHẬN THÀNH CÔNG</div>
-    <div style="font-size: 16px; color: #333;">Dữ liệu tự đánh giá của đồng chí đã được lưu trữ an toàn.</div>
+    <div style="font-size: 16px; color: #333;">Dữ liệu tự đánh giá của bạn đã được lưu trữ an toàn.</div>
     <button class="n-dong-tb" onclick="dongThongBao()">Xác nhận</button>
 </div>
 
@@ -416,7 +416,7 @@
         await f_x_load_guest_template(p_n);
         f_x_j(false);
         
-        hienThiThongBaoUI("Đồng chí đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị vô hiệu.");
+        hienThiThongBaoUI("Bạn đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị vô hiệu.");
     }
 
     function f_x_logout() {
@@ -497,7 +497,7 @@
                 if (t_k_khac.status === 'success') {
                     // Nếu đúng email nhưng sai nhóm -> Báo lỗi và gọi hàm thoát ra đăng nhập
                     let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
-                    hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai đối tượng đánh giá!<br>Tài khoản của đồng chí được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện đăng nhập.", f_x_logout);
+                    hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Tài khoản của bạn được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện đăng nhập.", f_x_logout);
                     f_x_j(false);
                     return;
                 }
@@ -769,7 +769,7 @@
         const modalBody = document.getElementById('aiModalBody'); 
 
         if(!cauHoi) {
-            hienThiThongBaoUI("Đồng chí vui lòng nhập câu hỏi!"); 
+            hienThiThongBaoUI("Bạn vui lòng nhập câu hỏi!"); 
             return;
         }
 
