@@ -813,25 +813,22 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY) - KIẾN TRÚC GỐC ĐƯỢC VÁ LỖI TOẠ ĐỘ
+        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY) - KIẾN TRÚC GỐC
         const divIn = document.createElement('div');
         divIn.id = "khung_pdf_tam";
         divIn.style.position = "absolute";
         divIn.style.top = "0";
         divIn.style.left = "0";
         divIn.style.width = "800px"; 
-        // BẢO HIỂM 1: Ép thẻ mẹ không được nhỏ hơn 800px, tránh bóp méo thẻ con
-        divIn.style.minWidth = "800px"; 
         divIn.style.minHeight = "100vh";
         divIn.style.backgroundColor = "#ffffff"; 
         divIn.style.zIndex = "999999"; 
         divIn.style.padding = "20px 0"; 
 
         const innerDiv = document.createElement('div');
-        // KÍCH THƯỚC CHUẨN: Tăng lên 780px để mở rộng không gian sau khi đã giảm lề PDF
-        innerDiv.style.width = "780px"; 
-        // BẢO HIỂM 2: Hủy căn giữa tự động (margin: 0 auto), neo chặt bảng vào lề trái (X=0)
-        innerDiv.style.margin = "0"; 
+        // KÍCH THƯỚC CHUẨN: 760px để khớp lề PDF, an toàn tuyệt đối không cắt phải
+        innerDiv.style.width = "760px"; 
+        innerDiv.style.margin = "0"; // Giữ bằng 0 để chống mất lề trái
         innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
         innerDiv.style.color = "#000";
         innerDiv.style.backgroundColor = "#ffffff";
@@ -839,7 +836,7 @@ function f_x_xuat_pdf() {
         innerDiv.style.padding = "10px"; 
 
         // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed;
-        // Tinh chỉnh tỷ lệ cột: Giảm cột Kết quả, Tăng cột Tiêu chí
+        // Tinh chỉnh tỷ lệ cột: STT 5%, Tiêu chí 35%, Thang giá trị 15%, Kết quả 45%
         innerDiv.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
@@ -851,9 +848,9 @@ function f_x_xuat_pdf() {
                     <thead>
                         <tr>
                             <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="33%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="17%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="40%">Kết quả đạt được</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
@@ -878,10 +875,10 @@ function f_x_xuat_pdf() {
 
         hienThiThongBaoUI("Hệ thống đang trích xuất PDF...<br>Vui lòng không cuộn chuột lúc này.");
 
-        // 4. Kết xuất PDF từ innerDiv
+        // 4. Kết xuất PDF chụp chuẩn innerDiv
         setTimeout(() => {
             const opt = {
-                margin:       10, // GIẢM LỀ: Từ 15mm xuống 10mm đều 4 cạnh
+                margin:       10, 
                 filename:     tenFile,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
@@ -889,16 +886,14 @@ function f_x_xuat_pdf() {
                     useCORS: true, 
                     scrollY: 0,
                     scrollX: 0,
-                    x: 0,
-                    y: 0,
-                    windowWidth: 800,
-                    width: 800
-                },
+                    width: 760, // KHÓA CỨNG ĐỘ RỘNG MÁY QUÉT ĐÚNG BẰNG INNERDIV -> 100% KHÔNG BỊ CẮT XÉN
+                    windowWidth: 800
+                }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
-            html2pdf().set(opt).from(divIn).save().then(() => {
+            html2pdf().set(opt).from(innerDiv).save().then(() => {
                 document.body.removeChild(divIn); 
                 window.scrollTo(0, currentScroll); 
                 dongCanhBaoUI();
