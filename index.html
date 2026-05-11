@@ -750,6 +750,8 @@
 /* ========================================================= */
 /* HÀM XUẤT PDF CHUẨN - ÁP DỤNG THUẬT TOÁN ÉP THÔNG SỐ VẬT LÝ */
 /* ========================================================= */
+/* HÀM XUẤT PDF CHUẨN - CÓ TIÊU ĐỀ ĐẦU TRANG & ÉP CHUẨN A4 */
+/* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
         // 1. XÁC ĐỊNH VÙNG DỮ LIỆU THỰC TẾ
@@ -771,7 +773,7 @@ async function f_x_xuat_pdf() {
 
         // 3. THÔNG BÁO GIAO DIỆN
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang thiết lập bản in chuẩn A4...<br>Vui lòng không cuộn chuột trong giây lát.");
+            hienThiThongBaoUI("Hệ thống đang khởi tạo bản in chuẩn...<br>Vui lòng không cuộn chuột trong giây lát.");
         }
 
         // 4. LƯU LẠI CẤU HÌNH GIAO DIỆN (UI) HIỆN TẠI
@@ -780,9 +782,21 @@ async function f_x_xuat_pdf() {
         const oldMaxWidth = element.style.maxWidth;
         const vungNut = document.getElementById("vungNutBam");
 
-        // 5. ÉP CHUẨN VẬT LÝ A4 (190mm) VÀ CHUẨN HÓA BẢNG BIỂU
-        // Tạm thời ẩn nút bấm để bản in sạch sẽ
-        if (vungNut) vungNut.style.display = "none";
+        // 5. TẠO TIÊU ĐỀ ĐẦU TRANG TẠM THỜI CHO PDF
+        const tieuDePDF = document.createElement("div");
+        tieuDePDF.id = "tieu-de-pdf-tam";
+        tieuDePDF.style.textAlign = "center";
+        tieuDePDF.style.marginBottom = "25px";
+        tieuDePDF.style.fontFamily = "'Times New Roman', serif";
+        tieuDePDF.innerHTML = `
+            <div style="font-weight: bold; font-size: 16pt; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <h2 style="margin: 10px 0; font-size: 20pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+            <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+        `;
+        element.prepend(tieuDePDF);
+
+        // 6. ÉP CHUẨN VẬT LÝ A4 (190mm) VÀ CHUẨN HÓA BẢNG BIỂU
+        if (vungNut) vungNut.style.display = "none"; // Ẩn nút bấm khi in
         
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
@@ -801,9 +815,10 @@ async function f_x_xuat_pdf() {
                 c.style.fontSize = "13px";
                 c.style.border = "1px solid #000";
                 c.style.padding = "6px";
+                c.style.color = "#000";
             });
             
-            // Đảm bảo tỷ lệ cột chuẩn như thiết kế ban đầu
+            // Ép tỷ lệ cột chuẩn để đảm bảo nội dung không bị cắt lệch
             const firstRow = tb.querySelector("tr");
             if (firstRow && firstRow.children.length >= 4) {
                 firstRow.children[0].style.width = "5%";   // STT
@@ -813,12 +828,12 @@ async function f_x_xuat_pdf() {
             }
         });
 
-        // 6. CHỜ TRÌNH DUYỆT RENDER LẠI THEO THÔNG SỐ MỚI (500ms)
+        // 7. CHỜ TRÌNH DUYỆT CẬP NHẬT GIAO DIỆN (500ms)
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 7. CẤU HÌNH VÀ THỰC THI XUẤT PDF
+        // 8. CẤU HÌNH VÀ THỰC THI XUẤT PDF
         const opt = {
-            margin: [10, 10, 10, 10], // Lề 10mm
+            margin: [10, 10, 10, 10], // Lề PDF 10mm
             filename: tenFile,
             image: { type: "jpeg", quality: 1 },
             html2canvas: {
@@ -838,13 +853,13 @@ async function f_x_xuat_pdf() {
 
         await html2pdf().set(opt).from(element).save();
 
-        // 8. KHÔI PHỤC LẠI GIAO DIỆN (UI) GỐC
+        // 9. KHÔI PHỤC LẠI GIAO DIỆN (UI) GỐC & DỌN DẸP
+        element.removeChild(tieuDePDF); // Xóa tiêu đề tạm thời
         element.style.width = oldWidth;
         element.style.maxWidth = oldMaxWidth;
         element.style.overflow = oldOverflow;
         if (vungNut) vungNut.style.display = "flex";
 
-        // 9. ĐÓNG THÔNG BÁO
         if (typeof dongCanhBaoUI === "function") {
             dongCanhBaoUI();
         }
