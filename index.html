@@ -755,10 +755,6 @@ function f_x_xuat_pdf() {
 
         hienThiThongBaoUI("Hệ thống đang trích xuất dữ liệu và dàn trang PDF...");
 
-        // KHẮC PHỤC LỖI TỌA ĐỘ ĐẦU TRANG: Buộc trình duyệt cuộn về đỉnh tuyệt đối
-        const currentScroll = window.scrollY || document.documentElement.scrollTop;
-        window.scrollTo(0, 0);
-
         // 1. Trích xuất dữ liệu trực tiếp từ giao diện bảng hiện tại
         const hangGoc = document.querySelectorAll('#t-b-g tr');
         let htmlBanIn = "";
@@ -791,13 +787,13 @@ function f_x_xuat_pdf() {
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            // Ép chữ dài bẻ dòng trong ô, không xô đẩy vỡ bảng
+            // Ép chữ dài bẻ dòng bằng word-break và hyphens để tuyệt đối không đẩy tràn bảng gây mất lề phải
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle;">${stt}</td>
-                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">${tieuChi}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle;">${thangDiem}</td>
-                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">${stt}</td>
+                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">${thangDiem}</td>
+                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
                 </tr>
             `;
         });
@@ -815,17 +811,31 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 2. XÂY DỰNG KHỐI HTML VỚI KÍCH THƯỚC ĐÓNG BĂNG
-        // Sửa lỗi lề phải: Chuyển width từ 100% thành hằng số tĩnh 800px
-        // Sửa lỗi lùi đỉnh trang: Loại bỏ toàn bộ margin/padding đầu vào (margin: 0; padding: 0)
-        const htmlContent = `
-            <div id="vung_in_doc_lap" style="width: 800px; margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; color: #000; font-size: 15px; box-sizing: border-box;">
-                <div style="font-weight: bold; font-size: 16px; margin: 0 0 20px 0; padding-top: 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+        // 2. TẠO KHUNG DOM ẢO (VIRTUAL DOM) ĐỂ KHÓA TỌA ĐỘ VÀ KÍCH THƯỚC
+        const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+
+        const divIn = document.createElement('div');
+        divIn.id = "khung_in_pdf_tam";
+        // Khóa chặt kích thước tĩnh 800px bất chấp môi trường hiển thị (điện thoại/máy tính)
+        divIn.style.width = "800px";
+        divIn.style.position = "absolute";
+        divIn.style.left = "0px";
+        // Bám sát tọa độ mắt nhìn hiện tại để thiết bị chụp đúng nội dung, không có khoảng trắng đầu trang
+        divIn.style.top = currentScrollY + "px";
+        divIn.style.backgroundColor = "#ffffff";
+        divIn.style.zIndex = "999999";
+        divIn.style.boxSizing = "border-box";
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.color = "#000";
+
+        divIn.innerHTML = `
+            <div style="padding: 15px; box-sizing: border-box; width: 100%;">
+                <div style="font-weight: bold; font-size: 16px; margin: 0 0 20px 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
                 <div style="text-align: center; margin-bottom: 20px;">
                     <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
                     <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
                 </div>
-                
+
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; word-wrap: break-word; overflow-wrap: break-word;">
                     <thead>
                         <tr>
@@ -837,7 +847,7 @@ function f_x_xuat_pdf() {
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
                 </table>
-                
+
                 <div style="margin-top: 15px; border: 1px solid #000; padding: 12px 15px; background-color: #f0f0f0; page-break-inside: avoid; break-inside: avoid;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="width: 50%;">
@@ -853,37 +863,41 @@ function f_x_xuat_pdf() {
             </div>
         `;
 
-        // 3. CẤU HÌNH PDF KHÓA TRỤC
+        document.body.appendChild(divIn);
+
+        // 3. CẤU HÌNH CROP CANVAS TUYỆT ĐỐI CHỐNG CẮT TRANG VÀ ÉP LỀ A4
         const opt = {
-            margin:       [10, 10, 10, 10], // Lề chuẩn 10mm
+            margin:       10, // Lề A4 đồng đều 10mm
             filename:     tenFile,
-            image:        { type: 'jpeg', quality: 1.0 }, // Nâng chất lượng ảnh lên mức tuyệt đối
+            image:        { type: 'jpeg', quality: 1.0 },
             html2canvas:  { 
                 scale: 2, 
                 useCORS: true,
                 letterRendering: true,
-                scrollY: 0, // Sửa lỗi lùi đỉnh: Ép ống kính chụp từ Y=0
-                scrollX: 0, // Sửa lỗi cắt lề: Ép ống kính chụp từ X=0
-                windowWidth: 800, // Sửa lỗi mất dữ liệu: Mở rộng khung nhìn ảo bằng 800px
-                width: 800 // Đóng băng kích thước bản chụp chuẩn khớp với thẻ div bên trên
+                // Ép ống kính bắt đầu chụp chính xác tại tọa độ khối DOM ảo
+                x: 0,
+                y: currentScrollY,
+                // Xác định băng thông chụp ngang tĩnh là 800px, bảo toàn lề phải
+                width: 800,
+                windowWidth: 800
+                // Không gán thuộc tính height để máy quét kéo tự do đến cuối văn bản
             }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
-        // 4. Kết xuất với độ trễ an toàn
-        // Thêm setTimeout 300ms để trình duyệt có đủ thời gian tính toán lại chiều cao DOM, chống mất dữ liệu chân trang
+        // 4. Xuất file với độ trễ để DOM kịp Render bố cục
         setTimeout(() => {
-            html2pdf().set(opt).from(htmlContent).save().then(() => {
-                window.scrollTo(0, currentScroll); // Trả lại vị trí cuộn cũ cho người dùng
+            html2pdf().set(opt).from(divIn).save().then(() => {
+                document.body.removeChild(divIn);
                 dongCanhBaoUI();
             }).catch(err => {
-                window.scrollTo(0, currentScroll);
+                document.body.removeChild(divIn);
                 dongCanhBaoUI();
                 hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
-                console.error("PDF Export Error:", err);
+                console.error("Lỗi PDF:", err);
             });
-        }, 300);
+        }, 400);
     }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
