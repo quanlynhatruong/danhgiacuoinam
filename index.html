@@ -753,9 +753,13 @@ function f_x_xuat_pdf() {
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        hienThiThongBaoUI("Hệ thống đang trích xuất dữ liệu và dàn trang PDF...");
+        hienThiThongBaoUI("Hệ thống đang trích xuất dữ liệu. Vui lòng giữ nguyên màn hình...");
 
-        // 1. Trích xuất dữ liệu trực tiếp từ giao diện bảng hiện tại
+        // 1. Ép cuộn trang về đỉnh để đồng bộ tọa độ chụp tuyệt đối
+        const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+        window.scrollTo(0, 0);
+
+        // 2. Trích xuất nội dung trực tiếp từ giao diện (khu vực viền đỏ)
         const hangGoc = document.querySelectorAll('#t-b-g tr');
         let htmlBanIn = "";
 
@@ -785,19 +789,20 @@ function f_x_xuat_pdf() {
             }
 
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
-            let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
+            let cssDong = isPhan ? "font-weight: bold; background-color: #f0f8ff; color: #0056b3;" : "";
 
-            // Ép chữ dài bẻ dòng bằng word-break để bảo vệ cấu trúc các cột, không gây tràn bảng
+            // Ngắt dòng an toàn tuyệt đối cho văn bản dài
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle;">${stt}</td>
-                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${tieuChi}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">${thangDiem}</td>
-                    <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${stt}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; text-align: left; word-wrap: break-word; overflow-wrap: break-word;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${thangDiem}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; text-align: left; color: #b91c1c; font-weight: ${isPhan ? 'bold' : 'normal'}; word-wrap: break-word; overflow-wrap: break-word;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
                 </tr>
             `;
         });
 
+        // Trích xuất khối Dự kiến kết quả
         const diemP1 = document.getElementById("vHT1") ? document.getElementById("vHT1").innerText : "";
         const diemP2 = document.getElementById("vHT2") ? document.getElementById("vHT2").innerText : "";
         const divTong = document.getElementById("vHT3");
@@ -811,66 +816,92 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 2. CHUỖI HTML ĐÓNG GÓI CHUẨN (VIRTUAL HTML STRING)
-        // Bắt buộc thay thế 100% thành 800px ở thẻ div gốc để chống lỗi cắt lề phải trên di động
-        const htmlContent = `
-            <div style="width: 800px; padding: 10px; box-sizing: border-box; background-color: #fff; color: #000; font-family: 'Times New Roman', Times, serif; font-size: 15px;">
-                <div style="font-weight: bold; font-size: 16px; margin: 0 0 15px 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+        // 3. TẠO KHUNG RENDER THỰC TẾ TRÊN DOM
+        const divIn = document.createElement('div');
+        divIn.id = "khung_in_pdf_chuan";
+        // Khóa chặt kích thước chuẩn A4 (794px) để chống tràn lề
+        divIn.style.width = "794px";
+        divIn.style.position = "absolute";
+        divIn.style.top = "0px";
+        divIn.style.left = "0px";
+        divIn.style.backgroundColor = "#ffffff";
+        // Giấu khung in phía sau giao diện hiện tại để người dùng không nhìn thấy
+        divIn.style.zIndex = "-1"; 
+        divIn.style.color = "#000";
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.padding = "0px"; 
+
+        // SỬ DỤNG CẤU TRÚC TABLE ĐỂ THAY THẾ HOÀN TOÀN FLEXBOX GÂY LỖI
+        divIn.innerHTML = `
+            <div style="padding: 15px; width: 100%; box-sizing: border-box;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0 0 8px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                    <div style="font-weight: bold; font-size: 16px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+                    <h2 style="margin: 10px 0; font-size: 22px; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
                     <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
                 </div>
 
-                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; word-wrap: break-word; overflow-wrap: break-word;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; font-size: 15px;">
                     <thead>
-                        <tr>
-                            <th style="width: 6%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">STT</th>
-                            <th style="width: 30%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Tên tiêu chí</th>
-                            <th style="width: 14%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Thang giá trị</th>
-                            <th style="width: 50%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Kết quả đạt được</th>
+                        <tr style="background-color: #e9ecef;">
+                            <th style="width: 6%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">STT</th>
+                            <th style="width: 34%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Tên tiêu chí</th>
+                            <th style="width: 15%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Thang giá trị</th>
+                            <th style="width: 45%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
                 </table>
 
-                <div style="margin-top: 15px; border: 1px solid #000; padding: 12px 15px; background-color: #f0f0f0; page-break-inside: avoid; break-inside: avoid;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="width: 50%;">
-                            <div style="font-weight: bold; margin-bottom: 6px; color: #0056b3;">${diemP1}</div>
-                            <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
-                        </div>
-                        <div style="width: 50%; text-align: right;">
-                            <div style="font-size: 16px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
-                            <div style="font-weight: bold; margin-top: 6px; color: #b30000;">${tongDiem}</div>
-                        </div>
-                    </div>
+                <div style="margin-top: 20px; border: 1px solid #000; padding: 15px; background-color: #f8fbff; page-break-inside: avoid;">
+                    <table style="width: 100%; border: none; border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: middle; border: none; padding: 0;">
+                                <div style="font-weight: bold; color: #0056b3; margin-bottom: 8px; font-size: 16px;">${diemP1}</div>
+                                <div style="font-weight: bold; color: #0056b3; font-size: 16px;">${diemP2}</div>
+                            </td>
+                            <td style="width: 50%; vertical-align: middle; text-align: right; border: none; padding: 0;">
+                                <div style="font-size: 18px; font-weight: bold; color: #dc3545; text-transform: uppercase;">XẾP LOẠI: ${xepLoai}</div>
+                                <div style="font-weight: bold; color: #b30000; margin-top: 8px; font-size: 16px;">${tongDiem}</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         `;
 
-        // 3. CẤU HÌNH XUẤT BẢN THUẦN TÚY (LỌC BỎ CÁC YẾU TỐ GÂY LỖI TRANG TRẮNG)
+        document.body.appendChild(divIn);
+
+        // 4. THIẾT LẬP ỐNG KÍNH KHÓA TRỤC
         const opt = {
-            margin:       10, // Giữ lề chuẩn 10mm cho A4
+            margin:       [10, 10, 15, 10], // Lề [Trên, Phải, Dưới, Trái] (mm)
             filename:     tenFile,
-            image:        { type: 'jpeg', quality: 0.98 },
+            image:        { type: 'jpeg', quality: 1.0 },
             html2canvas:  { 
                 scale: 2, 
                 useCORS: true,
-                letterRendering: true,
-                windowWidth: 800 // KHÓA KÉP: Bắt buộc ống kính máy ảnh quét trên khung nhìn đúng 800px
+                scrollY: 0, 
+                x: 0,
+                y: 0,
+                windowWidth: 800 // Ép ống kính mở góc chụp chuẩn 800px
             }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
-        // 4. CHẠY TRỰC TIẾP TỪ CHUỖI VIRTUAL HTML (KHÔNG GÁN VÀO DOM)
-        html2pdf().set(opt).from(htmlContent).save().then(() => {
-            dongCanhBaoUI();
-        }).catch(err => {
-            dongCanhBaoUI();
-            hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
-            console.error("Lỗi trích xuất PDF:", err);
-        });
+        // 5. TRÌ HOÃN 500MS ĐỂ TRÌNH DUYỆT RENDER TOÀN BỘ CSS TRƯỚC KHI CHỤP
+        setTimeout(() => {
+            html2pdf().set(opt).from(divIn).save().then(() => {
+                document.body.removeChild(divIn); // Dọn dẹp DOM
+                window.scrollTo(0, currentScrollY); // Trả lại vị trí cuộn cho người dùng
+                dongCanhBaoUI();
+            }).catch(err => {
+                document.body.removeChild(divIn);
+                window.scrollTo(0, currentScrollY);
+                dongCanhBaoUI();
+                hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
+                console.error("PDF Export Error:", err);
+            });
+        }, 500);
     }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
