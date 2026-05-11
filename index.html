@@ -747,65 +747,20 @@
         }
     }
 /* ========================================================= */
-async function f_x_xuat_pdf() {
+async function f_x_xuat_pdf(){
 
-    let divIn = null;
+    try{
 
-    try {
+        // =========================
+        // LẤY NODE THẬT
+        // =========================
 
-        // =====================
-        // TÊN FILE
-        // =====================
-
-        var tenNV = "VienChuc";
-
-        var eTen =
-            document.getElementById("theHienChinh");
-
-        if (eTen) {
-
-            tenNV =
-                eTen.innerText.trim();
-
-        }
-
-        var nam =
-            new Date().getFullYear();
-
-        var tenFile =
-            "KetQuaDanhGia_" +
-            tenNV.replace(/\s+/g, "_") +
-            "_" +
-            nam +
-            ".pdf";
-
-
-        // =====================
-        // THÔNG BÁO
-        // =====================
-
-        if (
-            typeof hienThiThongBaoUI ===
-            "function"
-        ) {
-
-            hienThiThongBaoUI(
-                "Đang xuất PDF..."
-            );
-
-        }
-
-
-        // =====================
-        // VÙNG DỮ LIỆU
-        // =====================
-
-        var goc =
+        const element =
             document.getElementById(
                 "vungThuHai"
             );
 
-        if (!goc) {
+        if(!element){
 
             alert(
                 "Không tìm thấy vùng dữ liệu."
@@ -816,96 +771,106 @@ async function f_x_xuat_pdf() {
         }
 
 
-        // =====================
-        // KHUNG IN
-        // =====================
+        // =========================
+        // THÔNG BÁO
+        // =========================
 
-        divIn =
-            document.createElement("div");
+        if(
+            typeof hienThiThongBaoUI ===
+            "function"
+        ){
 
-        divIn.style.position =
-            "fixed";
-
-        divIn.style.left =
-            "-10000px";
-
-        divIn.style.top = "0";
-
-        divIn.style.width =
-            "210mm";
-
-        divIn.style.background =
-            "#fff";
-
-        divIn.style.padding =
-            "10mm";
-
-        divIn.style.boxSizing =
-            "border-box";
-
-
-        // =====================
-        // CLONE
-        // =====================
-
-        var content =
-            goc.cloneNode(true);
-
-        content.style.width =
-            "100%";
-
-
-        // =====================
-        // XÓA NÚT
-        // =====================
-
-        var nutBam =
-            content.querySelector(
-                "#vungNutBam"
+            hienThiThongBaoUI(
+                "Đang tạo PDF..."
             );
-
-        if (nutBam) {
-
-            nutBam.remove();
 
         }
 
 
-        // =====================
-        // TABLE
-        // =====================
+        // =========================
+        // TÊN FILE
+        // =========================
 
-        var tables =
-            content.querySelectorAll(
+        let tenNV = "VienChuc";
+
+        const eTen =
+            document.getElementById(
+                "theHienChinh"
+            );
+
+        if(eTen){
+
+            tenNV =
+                eTen.innerText.trim();
+
+        }
+
+        const tenFile =
+            "KetQuaDanhGia_" +
+            tenNV.replace(/\s+/g,"_") +
+            ".pdf";
+
+
+        // =========================
+        // LƯU STYLE CŨ
+        // =========================
+
+        const oldWidth =
+            element.style.width;
+
+        const oldOverflow =
+            element.style.overflow;
+
+        const oldMaxWidth =
+            element.style.maxWidth;
+
+
+        // =========================
+        // ÉP CHUẨN A4
+        // =========================
+
+        element.style.width =
+            "190mm";
+
+        element.style.maxWidth =
+            "190mm";
+
+        element.style.overflow =
+            "visible";
+
+
+        // =========================
+        // FIX TABLE
+        // =========================
+
+        const tables =
+            element.querySelectorAll(
                 "table"
             );
 
-        tables.forEach(function(tb){
+        tables.forEach(tb=>{
 
             tb.style.width =
                 "100%";
 
-            tb.style.borderCollapse =
-                "collapse";
-
             tb.style.tableLayout =
                 "fixed";
 
-            var cells =
+            tb.style.borderCollapse =
+                "collapse";
+
+            const cells =
                 tb.querySelectorAll(
                     "th,td"
                 );
 
-            cells.forEach(function(c){
-
-                c.style.border =
-                    "1px solid #000";
-
-                c.style.padding =
-                    "6px";
+            cells.forEach(c=>{
 
                 c.style.wordBreak =
                     "break-word";
+
+                c.style.whiteSpace =
+                    "pre-wrap";
 
                 c.style.fontSize =
                     "13px";
@@ -915,31 +880,33 @@ async function f_x_xuat_pdf() {
         });
 
 
-        // =====================
-        // APPEND
-        // =====================
+        // =========================
+        // CHỜ DOM RENDER
+        // =========================
 
-        divIn.appendChild(content);
-
-        document.body.appendChild(
-            divIn
+        await new Promise(
+            resolve =>
+                setTimeout(resolve,500)
         );
 
 
-        // =====================
+        // =========================
         // XUẤT PDF
-        // =====================
+        // =========================
 
         await html2pdf()
             .set({
 
-                margin: 0,
+                margin: [10,10,10,10],
 
                 filename: tenFile,
 
                 image: {
+
                     type: "jpeg",
+
                     quality: 1
+
                 },
 
                 html2canvas: {
@@ -947,6 +914,8 @@ async function f_x_xuat_pdf() {
                     scale: 2,
 
                     useCORS: true,
+
+                    logging: false,
 
                     scrollX: 0,
 
@@ -966,18 +935,32 @@ async function f_x_xuat_pdf() {
                 }
 
             })
-            .from(divIn)
+            .from(element)
             .save();
 
 
-        // =====================
-        // ĐÓNG UI
-        // =====================
+        // =========================
+        // KHÔI PHỤC STYLE
+        // =========================
 
-        if (
+        element.style.width =
+            oldWidth;
+
+        element.style.maxWidth =
+            oldMaxWidth;
+
+        element.style.overflow =
+            oldOverflow;
+
+
+        // =========================
+        // ĐÓNG THÔNG BÁO
+        // =========================
+
+        if(
             typeof dongCanhBaoUI ===
             "function"
-        ) {
+        ){
 
             dongCanhBaoUI();
 
@@ -989,27 +972,9 @@ async function f_x_xuat_pdf() {
         console.error(err);
 
         alert(
-            "Lỗi xuất PDF: " +
+            "Lỗi xuất PDF:\n" +
             err.message
         );
-
-    }
-    finally{
-
-        // =====================
-        // DỌN DẸP
-        // =====================
-
-        if (
-            divIn &&
-            document.body.contains(divIn)
-        ) {
-
-            document.body.removeChild(
-                divIn
-            );
-
-        }
 
     }
 
