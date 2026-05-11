@@ -753,7 +753,7 @@ function f_x_xuat_pdf() {
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        hienThiThongBaoUI("Hệ thống đang kết xuất PDF. Vui lòng chờ trong giây lát...");
+        hienThiThongBaoUI("Hệ thống đang tinh chỉnh thẩm mỹ bản in. Vui lòng chờ trong giây lát...");
 
         // 1. Trích xuất dữ liệu sạch từ giao diện
         const hangGoc = document.querySelectorAll('#t-b-g tr');
@@ -784,15 +784,20 @@ function f_x_xuat_pdf() {
                 ketQua = tdKieu[3].innerText;
             }
 
+            // Xóa khoảng trắng thừa có thể gây xô lệch
+            ketQua = ketQua.trim();
+
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f4f7f6; color: #0056b3;" : "";
 
+            // KHẮC PHỤC TRÌNH BÀY: Dùng word-break: normal để chữ không bị cắt đôi. 
+            // Căn trái (text-align: left) cho cột Tên tiêu chí và Kết quả để dễ đọc.
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
                     <td style="border: 1px solid #000; padding: 8px 5px; text-align: center; vertical-align: middle;">${stt}</td>
-                    <td style="border: 1px solid #000; padding: 8px 5px; vertical-align: middle; word-wrap: break-word; word-break: break-word;">${tieuChi}</td>
-                    <td style="border: 1px solid #000; padding: 8px 5px; text-align: center; vertical-align: middle;">${thangDiem}</td>
-                    <td style="border: 1px solid #000; padding: 8px 5px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'bold' : 'normal'}; word-wrap: break-word; word-break: break-word;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                    <td style="border: 1px solid #000; padding: 8px 8px; text-align: left; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 8px 5px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${thangDiem}</td>
+                    <td style="border: 1px solid #000; padding: 8px 8px; text-align: left; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'bold' : 'normal'}; word-wrap: break-word; overflow-wrap: break-word; word-break: normal; line-height: 1.4;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
                 </tr>
             `;
         });
@@ -811,25 +816,25 @@ function f_x_xuat_pdf() {
         }
 
         // 2. KỸ THUẬT TRÁO ĐỔI DOM (DOM REPLACEMENT)
-        // Lưu lại vị trí cuộn chuột hiện tại
         const currentScrollY = window.scrollY || document.documentElement.scrollTop;
 
         // Tạm thời ẨN toàn bộ khung giao diện web phức tạp
         const boCucHeThong = document.getElementById('bo-cuc-he-thong');
         if(boCucHeThong) boCucHeThong.style.display = 'none';
 
-        // Tạo một thẻ div sạch 100%, là phần tử duy nhất hiển thị trên màn hình
+        // Khởi tạo thẻ in với vùng lề an toàn
         const divIn = document.createElement('div');
         divIn.id = "khung_in_pdf_toan_dien";
-        // Cấu hình CSS tĩnh, cơ bản nhất để vô hiệu hóa lỗi của html2canvas
         divIn.style.width = "800px";
         divIn.style.margin = "0 auto";
-        divIn.style.padding = "20px";
+        divIn.style.padding = "20px 25px"; // Thêm lề trái/phải để nội dung không ép sát mép ống kính
         divIn.style.backgroundColor = "#ffffff";
         divIn.style.color = "#000";
         divIn.style.fontFamily = "'Times New Roman', Times, serif";
         divIn.style.boxSizing = "border-box";
+        divIn.style.minHeight = "100vh";
 
+        // Tinh chỉnh font-size xuống 14px và thiết lập lại tỷ lệ các cột (mở rộng cột tiêu chí và kết quả)
         divIn.innerHTML = `
             <div style="text-align: center; margin-bottom: 25px;">
                 <div style="font-weight: bold; font-size: 16px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
@@ -837,13 +842,13 @@ function f_x_xuat_pdf() {
                 <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; font-size: 15px;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; font-size: 14px;">
                 <thead>
                     <tr style="background-color: #e9ecef;">
-                        <th style="width: 6%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">STT</th>
-                        <th style="width: 34%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Tên tiêu chí</th>
-                        <th style="width: 15%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Thang giá trị</th>
-                        <th style="width: 45%; border: 1px solid #000; padding: 10px 5px; text-align: center; font-weight: bold;">Kết quả đạt được</th>
+                        <th style="width: 6%; border: 1px solid #000; padding: 10px 4px; text-align: center; font-weight: bold;">STT</th>
+                        <th style="width: 32%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold;">Tên tiêu chí</th>
+                        <th style="width: 14%; border: 1px solid #000; padding: 10px 4px; text-align: center; font-weight: bold;">Thang giá trị</th>
+                        <th style="width: 48%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold;">Kết quả đạt được</th>
                     </tr>
                 </thead>
                 <tbody>${htmlBanIn}</tbody>
@@ -877,26 +882,22 @@ function f_x_xuat_pdf() {
             html2canvas:  { 
                 scale: 2, 
                 useCORS: true,
-                windowWidth: 800
+                windowWidth: 800,
+                letterRendering: true
             }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
-        // 3. THỰC THI CHỤP VÀ KHÔI PHỤC (Đợi 500ms để nét chữ kịp load)
+        // 3. THỰC THI CHỤP VÀ KHÔI PHỤC (Đợi 500ms để CSS chữ giãn cách đều đặn)
         setTimeout(() => {
             html2pdf().set(opt).from(divIn).save().then(() => {
-                // Xóa bỏ khung in
                 document.body.removeChild(divIn);
                 
-                // HIỆN LẠI giao diện web như cũ
                 if(boCucHeThong) boCucHeThong.style.display = 'flex';
-                
-                // Trả lại vị trí cuộn cho người dùng
                 window.scrollTo(0, currentScrollY);
                 dongCanhBaoUI();
             }).catch(err => {
-                // Dọn dẹp nếu có lỗi mạng
                 document.body.removeChild(divIn);
                 if(boCucHeThong) boCucHeThong.style.display = 'flex';
                 window.scrollTo(0, currentScrollY);
