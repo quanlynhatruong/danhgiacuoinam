@@ -787,10 +787,10 @@ function f_x_xuat_pdf() {
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            // Ép chữ dài bẻ dòng bằng word-break và hyphens để tuyệt đối không đẩy tràn bảng gây mất lề phải
+            // Ép chữ dài bẻ dòng bằng word-break để bảo vệ cấu trúc các cột, không gây tràn bảng
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">${stt}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle;">${stt}</td>
                     <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${tieuChi}</td>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">${thangDiem}</td>
                     <td style="border: 1px solid #000; padding: 6px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; hyphens: auto;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
@@ -811,28 +811,13 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 2. TẠO KHUNG DOM ẢO (VIRTUAL DOM) ĐỂ KHÓA TỌA ĐỘ VÀ KÍCH THƯỚC
-        const currentScrollY = window.scrollY || document.documentElement.scrollTop;
-
-        const divIn = document.createElement('div');
-        divIn.id = "khung_in_pdf_tam";
-        // Khóa chặt kích thước tĩnh 800px bất chấp môi trường hiển thị (điện thoại/máy tính)
-        divIn.style.width = "800px";
-        divIn.style.position = "absolute";
-        divIn.style.left = "0px";
-        // Bám sát tọa độ mắt nhìn hiện tại để thiết bị chụp đúng nội dung, không có khoảng trắng đầu trang
-        divIn.style.top = currentScrollY + "px";
-        divIn.style.backgroundColor = "#ffffff";
-        divIn.style.zIndex = "999999";
-        divIn.style.boxSizing = "border-box";
-        divIn.style.fontFamily = "'Times New Roman', Times, serif";
-        divIn.style.color = "#000";
-
-        divIn.innerHTML = `
-            <div style="padding: 15px; box-sizing: border-box; width: 100%;">
-                <div style="font-weight: bold; font-size: 16px; margin: 0 0 20px 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+        // 2. CHUỖI HTML ĐÓNG GÓI CHUẨN (VIRTUAL HTML STRING)
+        // Bắt buộc thay thế 100% thành 800px ở thẻ div gốc để chống lỗi cắt lề phải trên di động
+        const htmlContent = `
+            <div style="width: 800px; padding: 10px; box-sizing: border-box; background-color: #fff; color: #000; font-family: 'Times New Roman', Times, serif; font-size: 15px;">
+                <div style="font-weight: bold; font-size: 16px; margin: 0 0 15px 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                    <h2 style="margin: 0 0 8px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
                     <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
                 </div>
 
@@ -863,41 +848,29 @@ function f_x_xuat_pdf() {
             </div>
         `;
 
-        document.body.appendChild(divIn);
-
-        // 3. CẤU HÌNH CROP CANVAS TUYỆT ĐỐI CHỐNG CẮT TRANG VÀ ÉP LỀ A4
+        // 3. CẤU HÌNH XUẤT BẢN THUẦN TÚY (LỌC BỎ CÁC YẾU TỐ GÂY LỖI TRANG TRẮNG)
         const opt = {
-            margin:       10, // Lề A4 đồng đều 10mm
+            margin:       10, // Giữ lề chuẩn 10mm cho A4
             filename:     tenFile,
-            image:        { type: 'jpeg', quality: 1.0 },
+            image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
                 scale: 2, 
                 useCORS: true,
                 letterRendering: true,
-                // Ép ống kính bắt đầu chụp chính xác tại tọa độ khối DOM ảo
-                x: 0,
-                y: currentScrollY,
-                // Xác định băng thông chụp ngang tĩnh là 800px, bảo toàn lề phải
-                width: 800,
-                windowWidth: 800
-                // Không gán thuộc tính height để máy quét kéo tự do đến cuối văn bản
+                windowWidth: 800 // KHÓA KÉP: Bắt buộc ống kính máy ảnh quét trên khung nhìn đúng 800px
             }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
-        // 4. Xuất file với độ trễ để DOM kịp Render bố cục
-        setTimeout(() => {
-            html2pdf().set(opt).from(divIn).save().then(() => {
-                document.body.removeChild(divIn);
-                dongCanhBaoUI();
-            }).catch(err => {
-                document.body.removeChild(divIn);
-                dongCanhBaoUI();
-                hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
-                console.error("Lỗi PDF:", err);
-            });
-        }, 400);
+        // 4. CHẠY TRỰC TIẾP TỪ CHUỖI VIRTUAL HTML (KHÔNG GÁN VÀO DOM)
+        html2pdf().set(opt).from(htmlContent).save().then(() => {
+            dongCanhBaoUI();
+        }).catch(err => {
+            dongCanhBaoUI();
+            hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
+            console.error("Lỗi trích xuất PDF:", err);
+        });
     }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
