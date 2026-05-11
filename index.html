@@ -7,6 +7,7 @@
     <title>Hệ Thống Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
@@ -43,9 +44,11 @@
         select.o-c-kieu { padding: 8px 12px; border-radius: 4px; border: 1px solid #ced4da; font-size: 15px; font-family: inherit; background: white; color: var(--mau-c); font-weight: bold;}
         .n-bam { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.3s; font-size: 15px;}
         .n-xanh-b { background: var(--mau-c); color: white; }
-        .n-xanh-l { background: #28a745; color: white; width: 100%; margin-top: 15px; font-size: 18px; padding: 12px;}
+        .n-xanh-l { background: #28a745; color: white; font-size: 18px; padding: 12px;}
         .n-nho { padding: 6px 10px; font-size: 13px; margin-left: 5px; }
         .n-do { background: #dc3545; color: white; }
+        .n-cam { background: #ffc107; color: #333; }
+        .n-cam:hover { background: #e0a800; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 0px; }
         th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: middle; }
@@ -87,7 +90,6 @@
         .ai-response-box { background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0284c7; font-size: 15px; color: #1e3a8a; min-height: 60px; line-height: 1.6; }
         .ai-user-query { font-weight: bold; color: #333; margin-bottom: 8px; display: block; padding-bottom: 5px;}
         
-        /* Bổ sung class CSS cho nút copy AI */
         .btn-copy-ai {
             background: none;
             border: none;
@@ -103,9 +105,7 @@
             margin-top: 8px;
             transition: background 0.2s;
         }
-        .btn-copy-ai:hover {
-            background: #bae6fd;
-        }
+        .btn-copy-ai:hover { background: #bae6fd; }
     </style>
 </head>
 <body>
@@ -198,7 +198,7 @@
                         <option value="">-- Quản trị viên: Chọn nhân sự để tra cứu/đánh giá --</option>
                     </select>
                 </div>
-                </div>
+            </div>
         </div>
 
         <div id="vungThuNhat" style="display: none;"><input type="text" id="oNhapChinh"></div>
@@ -234,7 +234,10 @@
                 </div>
             </div>
             
-            <button id="btnLuuKetQua" class="n-bam n-xanh-l" onclick="f_x_i()">LƯU KẾT QUẢ</button>
+            <div id="vungNutBam" style="display: flex; gap: 15px; margin-top: 15px;">
+                <button id="btnLuuKetQua" class="n-bam n-xanh-l" style="flex: 2; margin-top: 0;" onclick="f_x_i()">LƯU KẾT QUẢ</button>
+                <button id="btnXuatPDF" class="n-bam n-cam" style="flex: 1; margin-top: 0; font-size: 18px; padding: 12px;" onclick="f_x_xuat_pdf()">XUẤT BẢN PDF</button>
+            </div>
         </div>
     </div>
 </div>
@@ -282,16 +285,14 @@
     let v_che_do_khach = false; 
 
     let danhSachVienChucAdmin = [];
-    let v_bo_nho_dem_admin = {}; // BỘ NHỚ ĐỆM TỐI ƯU TỐC ĐỘ (CACHE)
+    let v_bo_nho_dem_admin = {}; 
 
-    // TỐI ƯU CỰC ĐẠI: Ủy quyền sự kiện (Event Delegation) tránh tràn bộ nhớ RAM
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
         if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
         if (loggedUser) showMainUI(loggedUser);
         
-        // Chỉ gán sự kiện thay đổi dữ liệu 1 LẦN DUY NHẤT vào Root Table thay vì hàng trăm thẻ Input nhỏ
         const tbg = document.getElementById("t-b-g");
         tbg.addEventListener('change', function(e) {
             if (e.target && e.target.classList.contains('k-hoat-t')) f_x_h();
@@ -319,7 +320,6 @@
         }
     }
 
-    // TỐI ƯU BẢO MẬT: Chuẩn hóa lại các biến tránh bị Google nhận nhầm hệ thống đánh cắp tài khoản
     function f_x_xac_thuc(response) {
         const payload = decodeJwtResponse(response.credential);
         const kAttr = "em" + "ail"; 
@@ -358,7 +358,6 @@
         if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
 
-    // HÀM RÚT GỌN LÕI: Điều phối giao diện Admin gọn nhẹ
     function v_hien_thi_menu_admin(hienThi) {
         let kieu = hienThi ? "flex" : "none";
         if (document.getElementById("menu-quan-ly-quyen")) document.getElementById("menu-quan-ly-quyen").style.display = kieu;
@@ -420,7 +419,7 @@
         document.getElementById("vungThuNhat").classList.add("a-di");
         document.getElementById("vungThuHai").classList.remove("a-di");
         
-        let nutLuu = document.getElementById("btnLuuKetQua");
+        let nutLuu = document.getElementById("vungNutBam");
         if (nutLuu) nutLuu.style.display = "none";
         
         v_hien_thi_menu_admin(true);
@@ -449,7 +448,7 @@
         sessionStorage.removeItem("HTDG_ACCOUNT_ID");
         sessionStorage.removeItem("HTDG_NHOM_ID");
         sessionStorage.removeItem("HTDG_IS_ADMIN");
-        v_bo_nho_dem_admin = {}; // XÓA BỘ NHỚ ĐỆM KHI ĐĂNG XUẤT
+        v_bo_nho_dem_admin = {}; 
         location.reload();
     }
 
@@ -463,7 +462,6 @@
         if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
     }
 
-    // Luồng Fetch song song cải thiện độ trễ mạng
     async function f_x_d() {
         v_che_do_xem_admin = false; 
         
@@ -524,7 +522,7 @@
                 
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
-                let nutLuu = document.getElementById("btnLuuKetQua");
+                let nutLuu = document.getElementById("vungNutBam");
                 if (nutLuu) nutLuu.style.display = "none";
 
                 v_hien_thi_menu_admin(true);
@@ -590,7 +588,6 @@
         document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
         document.getElementById("oChonNhom").value = nhomXacDinh; 
 
-        // KIỂM TRA BỘ NHỚ ĐỆM (TẢI TỨC THÌ NẾU ĐÃ TẢI TRƯỚC ĐÓ)
         if (v_bo_nho_dem_admin[selectedId]) {
             let t_k = v_bo_nho_dem_admin[selectedId];
             v_l_b = t_k.y_a; 
@@ -608,7 +605,7 @@
             const t_k = await res.json();
 
             if (t_k.status === 'success') {
-                v_bo_nho_dem_admin[selectedId] = t_k; // LƯU DỮ LIỆU VÀO BỘ NHỚ ĐỆM
+                v_bo_nho_dem_admin[selectedId] = t_k; 
 
                 v_l_b = t_k.y_a; 
                 v_l_a = t_k.y_acc; 
@@ -680,11 +677,11 @@
                 if (el.tagName === 'INPUT' || el.tagName === 'SELECT') el.style.backgroundColor = "#e9ecef";
                 el.style.cursor = "not-allowed";
             });
-            let nutLuu = document.getElementById("btnLuuKetQua");
+            let nutLuu = document.getElementById("vungNutBam");
             if (nutLuu) nutLuu.style.display = "none";
         } else {
-            let nutLuu = document.getElementById("btnLuuKetQua");
-            if (nutLuu) nutLuu.style.display = "block";
+            let nutLuu = document.getElementById("vungNutBam");
+            if (nutLuu) nutLuu.style.display = "flex";
         }
     }
 
@@ -742,7 +739,7 @@
         try {
             await fetch(z_y_a, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ w_a: v_l_a, w_b: v_l_b, w_f: ten_tren_web, w_c: m_k, w_d: v_l_e, w_e: v_l_f, w_g: v_nam_hoc_hien_tai }) });
             
-            v_bo_nho_dem_admin = {}; // LÀM SẠCH BỘ NHỚ ĐỆM SAU KHI LƯU ĐỂ TRÁNH LỆCH DỮ LIỆU CŨ
+            v_bo_nho_dem_admin = {}; 
 
             document.getElementById("o-luu-overlay").style.display = "none"; document.getElementById("o-thong-bao").style.display = "flex";
         } catch (err) { 
@@ -751,6 +748,142 @@
         }
     }
     
+    // HÀM BỔ SUNG: XỬ LÝ XUẤT FILE PDF TẠI MÁY KHÁCH
+    function f_x_xuat_pdf() {
+        const tenNV = document.getElementById("theHienChinh").innerText || v_l_b;
+        const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
+        const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
+
+        // 1. Khởi tạo container chứa nội dung in ấn theo bố cục hành chính
+        const divIn = document.createElement('div');
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.color = "#000";
+        divIn.style.padding = "20px";
+        divIn.style.boxSizing = "border-box";
+
+        // 2. Thiết lập phần tiêu đề (Header)
+        divIn.innerHTML = `
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 20px;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <div style="text-align: center; margin-top: 20px;">
+                <h2 style="margin: 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                <div style="font-size: 18px; font-weight: bold; margin-top: 10px;">${tenNV} - Năm học: ${namHoc}</div>
+            </div>
+            <div style="margin-top: 30px;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_pdf_xuat"></tbody>
+                </table>
+            </div>
+        `;
+
+        // 3. Quét và trích xuất dữ liệu từ giao diện thực tế
+        const tbodyPDF = divIn.querySelector('#tbody_pdf_xuat');
+        const hangGoc = document.querySelectorAll('#t-b-g tr');
+
+        hangGoc.forEach(tr => {
+            const tdKieu = tr.cells;
+            if(tdKieu.length < 4) return;
+
+            let stt = tdKieu[0].innerText.trim();
+            let tieuChi = tdKieu[1].innerText.trim();
+            let thangDiem = tdKieu[2].innerText.trim();
+            let ketQua = "";
+
+            // Trích xuất thông minh tùy theo loại ô nhập liệu
+            const inputEl = tdKieu[3].querySelector('input[type="text"], input[type="number"]');
+            const selectEl = tdKieu[3].querySelector('select.o-n-bang');
+            const divKetQua = tdKieu[3].querySelector('.k-k-q'); 
+
+            if (divKetQua) {
+                ketQua = divKetQua.innerText; // Lấy text từ ô thành tích học sinh động
+            } else if (selectEl) {
+                if (selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex].value !== "") {
+                    ketQua = selectEl.options[selectEl.selectedIndex].text;
+                }
+            } else if (inputEl) {
+                ketQua = inputEl.value;
+            } else {
+                ketQua = tdKieu[3].innerText;
+            }
+
+            // Phân biệt dòng tiêu đề mục và dòng dữ liệu
+            let isPhan = tr.style.backgroundColor !== "" || stt === "";
+            let trMoi = document.createElement('tr');
+            
+            if(isPhan) {
+                trMoi.style.fontWeight = "bold";
+                trMoi.style.backgroundColor = "#f9f9f9";
+            }
+
+            trMoi.innerHTML = `
+                <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${stt}</td>
+                <td style="border: 1px solid #000; padding: 8px; vertical-align: middle;">${tieuChi}</td>
+                <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${thangDiem}</td>
+                <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'};">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+            `;
+            tbodyPDF.appendChild(trMoi);
+        });
+
+        // 4. Bố cục phần Tổng hợp kết quả ở cuối trang
+        const diemP1 = document.getElementById("vHT1").innerText;
+        const diemP2 = document.getElementById("vHT2").innerText;
+        const divTong = document.getElementById("vHT3");
+        let xepLoai = "";
+        let tongDiem = "";
+        
+        if(divTong) {
+            const divs = divTong.querySelectorAll('div');
+            if(divs.length >= 2) {
+                xepLoai = divs[0].innerText;
+                tongDiem = divs[1].innerText;
+            }
+        }
+
+        const divKetLuan = document.createElement('div');
+        divKetLuan.style.marginTop = "20px";
+        divKetLuan.style.border = "1px solid #000";
+        divKetLuan.style.padding = "15px 20px";
+        divKetLuan.style.backgroundColor = "#f0f0f0";
+        divKetLuan.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="width: 50%;">
+                    <div style="font-weight: bold; margin-bottom: 8px; color: #0056b3;">${diemP1}</div>
+                    <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
+                </div>
+                <div style="width: 50%; text-align: right;">
+                    <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
+                    <div style="font-weight: bold; margin-top: 8px; color: #b30000;">${tongDiem}</div>
+                </div>
+            </div>
+        `;
+        divIn.appendChild(divKetLuan);
+
+        // 5. Cấu hình thư viện và thực thi xuất file
+        const opt = {
+            margin:       12,
+            filename:     tenFile,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        hienThiThongBaoUI("Hệ thống đang tổng hợp dữ liệu và tạo tệp PDF.<br>Tiến trình này sẽ diễn ra trong vài giây...");
+        
+        html2pdf().set(opt).from(divIn).save().then(() => {
+            dongCanhBaoUI();
+        }).catch(err => {
+            dongCanhBaoUI();
+            hienThiThongBaoUI("Lỗi trích xuất PDF. Vui lòng kiểm tra lại trình duyệt.");
+        });
+    }
+
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
@@ -780,14 +913,12 @@
         if (!text) return "";
         let html = text;
         
-        // Căn chỉnh thu hẹp thẻ Heading
         html = html.replace(/###\s+(.*)/g, '<h4 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h4>');
         html = html.replace(/##\s+(.*)/g, '<h3 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h3>');
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
         html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
         html = html.replace(/\n/g, '<br>');
         
-        // Loại bỏ triệt để các thẻ <br> thừa do AI sinh ra bao quanh thẻ block
         html = html.replace(/<\/div><br>/g, '</div>');
         html = html.replace(/(<br>)+<h3/g, '<h3');
         html = html.replace(/<\/h3>(<br>)+/g, '</h3>');
@@ -797,12 +928,10 @@
         return html;
     }
 
-    // Hàm bổ sung: Xử lý sao chép văn bản thuần túy của AI (loại bỏ hoàn toàn thẻ HTML)
     function copyVanBanAI(elementId, btnElement) {
         const textElement = document.getElementById(elementId);
         if (!textElement) return;
         
-        // Thuộc tính innerText tự động làm sạch HTML, chỉ lấy văn bản hiển thị
         const textToCopy = textElement.innerText;
         
         navigator.clipboard.writeText(textToCopy).then(() => {
@@ -829,7 +958,6 @@
             return;
         }
 
-        // Đã cập nhật: Xóa ngay ô nhập liệu ngay khi bắt đầu gửi câu hỏi
         oNhap.value = '';
 
         const welcomeMsg = document.getElementById('aiWelcomeMsg');
@@ -865,7 +993,6 @@
             if (res.success) {
                 const phanHoiDep = formatVanBanAI(res.message);
                 
-                // Đã cập nhật: Bọc nội dung AI vào div có ID và gọi hàm lấy innerText để copy thuần túy
                 if(loadingEl) loadingEl.outerHTML = `
                     <div style="margin-top: 8px;">
                         <strong>🤖 AI:</strong><br>
