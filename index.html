@@ -789,13 +789,13 @@ function f_x_xuat_pdf() {
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            // Bổ sung word-break: break-word để các cụm từ dính liền tự động xuống dòng trong ô
+            // Sử dụng word-break: normal để không bị cắt đôi từ tiếng Việt (ví dụ: Th-ang)
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
                     <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${stt}</td>
-                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; word-wrap: break-word; word-break: break-word;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${tieuChi}</td>
                     <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${thangDiem}</td>
-                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; word-break: break-word;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
                 </tr>
             `;
         });
@@ -813,31 +813,30 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY) - KIẾN TRÚC GỐC
+        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY)
         const divIn = document.createElement('div');
         divIn.id = "khung_pdf_tam";
         divIn.style.position = "absolute";
         divIn.style.top = "0";
         divIn.style.left = "0";
-        divIn.style.width = "800px"; 
+        divIn.style.width = "800px"; // Khóa cứng chiều rộng container
         divIn.style.minHeight = "100vh";
         divIn.style.backgroundColor = "#ffffff"; 
         divIn.style.zIndex = "999999"; 
         divIn.style.padding = "20px 0"; 
 
         const innerDiv = document.createElement('div');
-        // KÍCH THƯỚC CHUẨN: 760px để khớp lề PDF, an toàn tuyệt đối không cắt phải
-        innerDiv.style.width = "760px"; 
-        innerDiv.style.margin = "0"; // Giữ bằng 0 để chống mất lề trái
+        innerDiv.style.width = "780px"; // Vùng in khả dụng
+        innerDiv.style.margin = "0"; // Neo chặt lề trái X=0
         innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
         innerDiv.style.color = "#000";
         innerDiv.style.backgroundColor = "#ffffff";
         innerDiv.style.boxSizing = "border-box"; 
         innerDiv.style.padding = "10px"; 
 
-        // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed;
-        // Tinh chỉnh tỷ lệ cột: STT 5%, Tiêu chí 35%, Thang giá trị 15%, Kết quả 45%
+        // Khóa cứng bảng bằng table-layout: fixed và ép box-sizing bằng style nội bộ
         innerDiv.innerHTML = `
+            <style>#khung_pdf_tam * { box-sizing: border-box !important; }</style>
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
@@ -847,10 +846,10 @@ function f_x_xuat_pdf() {
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="6%">STT</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="33%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="17%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="44%">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
@@ -875,7 +874,7 @@ function f_x_xuat_pdf() {
 
         hienThiThongBaoUI("Hệ thống đang trích xuất PDF...<br>Vui lòng không cuộn chuột lúc này.");
 
-        // 4. Kết xuất PDF chụp chuẩn innerDiv
+        // 4. Kết xuất PDF
         setTimeout(() => {
             const opt = {
                 margin:       10, 
@@ -886,8 +885,8 @@ function f_x_xuat_pdf() {
                     useCORS: true, 
                     scrollY: 0,
                     scrollX: 0,
-                    width: 760, // KHÓA CỨNG ĐỘ RỘNG MÁY QUÉT ĐÚNG BẰNG INNERDIV -> 100% KHÔNG BỊ CẮT XÉN
-                    windowWidth: 800
+                    windowWidth: 800,
+                    width: 800
                 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'] } 
