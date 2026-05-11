@@ -828,8 +828,8 @@ function f_x_xuat_pdf() {
         divIn.style.padding = "20px 0"; 
 
         const innerDiv = document.createElement('div');
-        // KÍCH THƯỚC CHUẨN: 760px để khớp lề 15mm của file PDF
-        innerDiv.style.width = "760px"; 
+        // KÍCH THƯỚC CHUẨN: Tăng lên 780px để mở rộng không gian sau khi đã giảm lề PDF
+        innerDiv.style.width = "780px"; 
         // BẢO HIỂM 2: Hủy căn giữa tự động (margin: 0 auto), neo chặt bảng vào lề trái (X=0)
         innerDiv.style.margin = "0"; 
         innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
@@ -839,6 +839,7 @@ function f_x_xuat_pdf() {
         innerDiv.style.padding = "10px"; 
 
         // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed;
+        // Tinh chỉnh tỷ lệ cột: Giảm cột Kết quả, Tăng cột Tiêu chí
         innerDiv.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
@@ -849,10 +850,10 @@ function f_x_xuat_pdf() {
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="6%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="34%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="38%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="14%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="43%">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
@@ -877,10 +878,10 @@ function f_x_xuat_pdf() {
 
         hienThiThongBaoUI("Hệ thống đang trích xuất PDF...<br>Vui lòng không cuộn chuột lúc này.");
 
-        // 4. Kết xuất PDF từ innerDiv (đúng như code gốc của thầy)
+        // 4. Kết xuất PDF từ innerDiv
         setTimeout(() => {
             const opt = {
-                margin:       [15, 15, 15, 15], 
+                margin:       10, // GIẢM LỀ: Từ 15mm xuống 10mm đều 4 cạnh
                 filename:     tenFile,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
