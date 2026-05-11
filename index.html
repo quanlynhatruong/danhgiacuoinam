@@ -755,6 +755,10 @@ function f_x_xuat_pdf() {
 
         hienThiThongBaoUI("Hệ thống đang trích xuất dữ liệu và dàn trang PDF...");
 
+        // KHẮC PHỤC LỖI TỌA ĐỘ ĐẦU TRANG: Buộc trình duyệt cuộn về đỉnh tuyệt đối
+        const currentScroll = window.scrollY || document.documentElement.scrollTop;
+        window.scrollTo(0, 0);
+
         // 1. Trích xuất dữ liệu trực tiếp từ giao diện bảng hiện tại
         const hangGoc = document.querySelectorAll('#t-b-g tr');
         let htmlBanIn = "";
@@ -811,22 +815,23 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 2. Xây dựng Chuỗi HTML (Không append vào Document Body)
-        // Việc này đảm bảo môi trường in vô trùng, tự động dàn trang theo đúng lề A4
+        // 2. XÂY DỰNG KHỐI HTML VỚI KÍCH THƯỚC ĐÓNG BĂNG
+        // Sửa lỗi lề phải: Chuyển width từ 100% thành hằng số tĩnh 800px
+        // Sửa lỗi lùi đỉnh trang: Loại bỏ toàn bộ margin/padding đầu vào (margin: 0; padding: 0)
         const htmlContent = `
-            <div style="font-family: 'Times New Roman', Times, serif; color: #000; width: 100%; font-size: 14px; box-sizing: border-box;">
-                <div style="font-weight: bold; font-size: 15px; margin-bottom: 20px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <div id="vung_in_doc_lap" style="width: 800px; margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; color: #000; font-size: 15px; box-sizing: border-box;">
+                <div style="font-weight: bold; font-size: 16px; margin: 0 0 20px 0; padding-top: 0; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0 0 8px 0; font-size: 20px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-                    <div style="font-size: 15px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+                    <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                    <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
                 </div>
                 
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; table-layout: fixed; word-wrap: break-word; overflow-wrap: break-word;">
                     <thead>
                         <tr>
                             <th style="width: 6%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">STT</th>
-                            <th style="width: 32%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Tên tiêu chí</th>
-                            <th style="width: 12%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Thang giá trị</th>
+                            <th style="width: 30%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Tên tiêu chí</th>
+                            <th style="width: 14%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Thang giá trị</th>
                             <th style="width: 50%; border: 1px solid #000; padding: 8px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Kết quả đạt được</th>
                         </tr>
                     </thead>
@@ -848,28 +853,37 @@ function f_x_xuat_pdf() {
             </div>
         `;
 
-        // 3. Cấu hình PDF tối ưu hóa lề và độ sắc nét
+        // 3. CẤU HÌNH PDF KHÓA TRỤC
         const opt = {
-            margin:       [10, 8, 10, 8], // Thu hẹp lề: [Trên 10mm, Phải 8mm, Dưới 10mm, Trái 8mm]
+            margin:       [10, 10, 10, 10], // Lề chuẩn 10mm
             filename:     tenFile,
-            image:        { type: 'jpeg', quality: 0.98 },
+            image:        { type: 'jpeg', quality: 1.0 }, // Nâng chất lượng ảnh lên mức tuyệt đối
             html2canvas:  { 
                 scale: 2, 
                 useCORS: true,
-                letterRendering: true // Giúp chống mờ chữ
+                letterRendering: true,
+                scrollY: 0, // Sửa lỗi lùi đỉnh: Ép ống kính chụp từ Y=0
+                scrollX: 0, // Sửa lỗi cắt lề: Ép ống kính chụp từ X=0
+                windowWidth: 800, // Sửa lỗi mất dữ liệu: Mở rộng khung nhìn ảo bằng 800px
+                width: 800 // Đóng băng kích thước bản chụp chuẩn khớp với thẻ div bên trên
             }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
-        // 4. Kết xuất trực tiếp từ chuỗi HTML String
-        html2pdf().set(opt).from(htmlContent).save().then(() => {
-            dongCanhBaoUI();
-        }).catch(err => {
-            dongCanhBaoUI();
-            hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
-            console.error("PDF Export Error:", err);
-        });
+        // 4. Kết xuất với độ trễ an toàn
+        // Thêm setTimeout 300ms để trình duyệt có đủ thời gian tính toán lại chiều cao DOM, chống mất dữ liệu chân trang
+        setTimeout(() => {
+            html2pdf().set(opt).from(htmlContent).save().then(() => {
+                window.scrollTo(0, currentScroll); // Trả lại vị trí cuộn cũ cho người dùng
+                dongCanhBaoUI();
+            }).catch(err => {
+                window.scrollTo(0, currentScroll);
+                dongCanhBaoUI();
+                hienThiThongBaoUI("Lỗi kết xuất PDF. Vui lòng kiểm tra lại cấu hình trình duyệt.");
+                console.error("PDF Export Error:", err);
+            });
+        }, 300);
     }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
