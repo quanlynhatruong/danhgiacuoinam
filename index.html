@@ -753,7 +753,7 @@ function f_x_xuat_pdf() {
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        // 1. Lưu lại vị trí cuộn hiện tại và ép cuộn lên đỉnh để hệ tọa độ chụp chuẩn 100%
+        // 1. Lưu lại vị trí cuộn hiện tại và ép cuộn lên đỉnh để hệ tọa độ chụp chuẩn
         const currentScroll = window.scrollY || document.documentElement.scrollTop;
         window.scrollTo(0, 0);
 
@@ -789,7 +789,7 @@ function f_x_xuat_pdf() {
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            // Bổ sung overflow-wrap và word-break để ép chữ dài tự động bẻ dòng, tuyệt đối không đẩy tràn bảng
+            // Ép chữ dài bẻ dòng trong ô, không xô đẩy vỡ bảng
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
                     <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${stt}</td>
@@ -813,31 +813,25 @@ function f_x_xuat_pdf() {
             }
         }
 
-        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY)
+        // 3. XÂY DỰNG LỚP PHỦ TẠM THỜI (OVERLAY) - KHẮC PHỤC LỖI TỌA ĐỘ
         const divIn = document.createElement('div');
         divIn.id = "khung_pdf_tam";
         divIn.style.position = "absolute";
         divIn.style.top = "0";
-        divIn.style.left = "0";
-        divIn.style.width = "100%"; 
+        // Bắt buộc ghim tọa độ trái tại 0 để không bị cắt lề trên các thiết bị màn hình nhỏ
+        divIn.style.left = "0"; 
+        // Kích thước tuyệt đối, không dùng 100% để tránh sai số tính toán viewport
+        divIn.style.width = "800px"; 
         divIn.style.minHeight = "100vh";
         divIn.style.backgroundColor = "#ffffff"; 
         divIn.style.zIndex = "999999"; 
-        divIn.style.padding = "20px 0"; 
+        divIn.style.boxSizing = "border-box"; 
+        divIn.style.padding = "20px"; // Lề trong thay thế cho margin
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.color = "#000";
 
-        const innerDiv = document.createElement('div');
-        // KÍCH THƯỚC CHUẨN A4 PIXEL: Hạ xuống 760px để tương thích hoàn hảo với lề 15mm của PDF
-        innerDiv.style.width = "760px"; 
-        innerDiv.style.maxWidth = "100%";
-        innerDiv.style.margin = "0 auto";
-        innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
-        innerDiv.style.color = "#000";
-        innerDiv.style.backgroundColor = "#ffffff";
-        innerDiv.style.boxSizing = "border-box"; 
-        innerDiv.style.padding = "10px"; 
-
-        // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed; và tinh chỉnh lại % các cột cho cân đối hơn
-        innerDiv.innerHTML = `
+        // Cấu trúc bảng áp dụng inline CSS cho từng cột bằng thuộc tính style width
+        divIn.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
@@ -847,10 +841,10 @@ function f_x_xuat_pdf() {
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed; word-wrap: break-word; overflow-wrap: break-word;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="6%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="32%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="14%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="48%">Kết quả đạt được</th>
+                            <th style="width: 6%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;">STT</th>
+                            <th style="width: 32%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Tên tiêu chí</th>
+                            <th style="width: 14%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Thang giá trị</th>
+                            <th style="width: 48%; border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
@@ -870,12 +864,11 @@ function f_x_xuat_pdf() {
             </div>
         `;
         
-        divIn.appendChild(innerDiv);
         document.body.appendChild(divIn);
 
         hienThiThongBaoUI("Hệ thống đang trích xuất PDF...<br>Vui lòng không cuộn chuột lúc này.");
 
-        // 4. Kết xuất
+        // 4. Kết xuất PDF
         setTimeout(() => {
             const opt = {
                 margin:       [15, 15, 15, 15], 
@@ -885,14 +878,14 @@ function f_x_xuat_pdf() {
                     scale: 2, 
                     useCORS: true, 
                     scrollY: 0, 
-                    // Ống kính khớp với chiều rộng mới
-                    windowWidth: 760 
+                    scrollX: 0,  // Ép tọa độ chụp bắt đầu nghiêm ngặt từ X = 0
+                    windowWidth: 800 // Phải khớp với chiều rộng tuyệt đối của khung divIn
                 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
-            html2pdf().set(opt).from(innerDiv).save().then(() => {
+            html2pdf().set(opt).from(divIn).save().then(() => {
                 document.body.removeChild(divIn); 
                 window.scrollTo(0, currentScroll); 
                 dongCanhBaoUI();
