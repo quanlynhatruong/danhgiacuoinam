@@ -749,12 +749,12 @@
     }
     
     // Đã chỉnh sửa toàn diện hàm này để sửa lỗi cắt trang và căn lề
-   function f_x_xuat_pdf() {
+    function f_x_xuat_pdf() {
         const tenNV = document.getElementById("theHienChinh").innerText || v_l_b;
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        // Tạo khung ảo tĩnh, kích thước cố định
+        // Tạo khung ảo tĩnh, kích thước cố định để html2canvas tính đúng tỷ lệ thay vì chiều cao ảo
         const divIn = document.createElement('div');
         divIn.style.fontFamily = "'Times New Roman', Times, serif";
         divIn.style.color = "#000";
@@ -785,6 +785,7 @@
             </div>
         `;
 
+        // Phải đưa vào Body để trình duyệt tính chiều cao thật, từ đó mới ngắt trang được
         document.body.appendChild(divIn);
 
         const tbodyPDF = divIn.querySelector('#tbody_pdf_xuat');
@@ -854,6 +855,7 @@
         divKetLuan.style.border = "1px solid #000";
         divKetLuan.style.padding = "15px 20px";
         divKetLuan.style.backgroundColor = "#f0f0f0";
+        // Đảm bảo nguyên phần tổng hợp luôn đi liền khối, không rơi vãi kết quả
         divKetLuan.style.pageBreakInside = "avoid"; 
         divKetLuan.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -870,26 +872,21 @@
         divIn.appendChild(divKetLuan);
 
         const opt = {
-            margin:       [20, 15, 20, 15], // Căn lề chuẩn văn bản
+            margin:       [20, 15, 20, 15], // Căn lề chuẩn văn bản: top 20mm, left 15mm, bottom 20mm, right 15mm
             filename:     tenFile,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                windowWidth: 1000,
-                scrollY: 0 // <--- BỔ SUNG THUỘC TÍNH NÀY ĐỂ ÉP CHỤP TỪ ĐẦU TRANG
-            }, 
+            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1000 }, // Khớp với chiều rộng divIn
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Chìa khóa vàng giải quyết cắt ngang trang
         };
 
         hienThiThongBaoUI("Hệ thống đang tổng hợp dữ liệu và tạo tệp PDF.<br>Tiến trình này sẽ diễn ra trong vài giây...");
         
         html2pdf().set(opt).from(divIn).save().then(() => {
-            document.body.removeChild(divIn); 
+            document.body.removeChild(divIn); // Dọn dẹp DOM ngay sau khi xong
             dongCanhBaoUI();
         }).catch(err => {
-            document.body.removeChild(divIn); 
+            document.body.removeChild(divIn); // Gặp lỗi cũng phải dọn dẹp
             dongCanhBaoUI();
             hienThiThongBaoUI("Lỗi trích xuất PDF. Vui lòng kiểm tra lại trình duyệt.");
         });
