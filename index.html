@@ -748,56 +748,48 @@
     }
 /* ========================================================= */
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - ÁP DỤNG THUẬT TOÁN ÉP THÔNG SỐ VẬT LÝ */
-/* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - CÓ TIÊU ĐỀ ĐẦU TRANG & ÉP CHUẨN A4 */
+/* HÀM XUẤT PDF CHUẨN - TỐI ƯU KHÔNG GIAN, CHỐNG NHẢY TRANG */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
-        // 1. XÁC ĐỊNH VÙNG DỮ LIỆU THỰC TẾ
         const element = document.getElementById("vungThuHai");
         if (!element) {
             alert("Không tìm thấy vùng dữ liệu đánh giá.");
             return;
         }
 
-        // 2. LẤY ĐỊNH DANH NHÂN SỰ VÀ TÊN FILE
         let tenNV = "VienChuc";
         const eTen = document.getElementById("theHienChinh");
-        if (eTen) {
-            tenNV = eTen.innerText.trim();
-        }
+        if (eTen) { tenNV = eTen.innerText.trim(); }
         
         const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
-        // 3. THÔNG BÁO GIAO DIỆN
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang khởi tạo bản in chuẩn...<br>Vui lòng không cuộn chuột trong giây lát.");
+            hienThiThongBaoUI("Hệ thống đang nén dữ liệu và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
-        // 4. LƯU LẠI CẤU HÌNH GIAO DIỆN (UI) HIỆN TẠI
         const oldWidth = element.style.width;
         const oldOverflow = element.style.overflow;
         const oldMaxWidth = element.style.maxWidth;
         const vungNut = document.getElementById("vungNutBam");
 
-       // 5. TẠO TIÊU ĐỀ ĐẦU TRANG TẠM THỜI CHO PDF
-const tieuDePDF = document.createElement("div");
-tieuDePDF.id = "tieu-de-pdf-tam";
-tieuDePDF.style.marginBottom = "25px";
-tieuDePDF.style.fontFamily = "'Times New Roman', serif";
-tieuDePDF.innerHTML = `
-    <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-    <div style="text-align: center;">
-        <h2 style="margin: 10px 0; font-size: 15pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-        <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
-    </div>
-`;
+        // 1. TẠO TIÊU ĐỀ ĐẦU TRANG (Tên trường bên trái 12pt, Tiêu đề giữa 20pt)
+        const tieuDePDF = document.createElement("div");
+        tieuDePDF.id = "tieu-de-pdf-tam";
+        tieuDePDF.style.marginBottom = "15px"; // Giảm khoảng cách để tiết kiệm không gian
+        tieuDePDF.style.fontFamily = "'Times New Roman', serif";
+        tieuDePDF.innerHTML = `
+            <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; margin-bottom: 10px;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <div style="text-align: center;">
+                <h2 style="margin: 0 0 8px 0; font-size: 20pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+            </div>
+        `;
         element.prepend(tieuDePDF);
 
-        // 6. ÉP CHUẨN VẬT LÝ A4 (190mm) VÀ CHUẨN HÓA BẢNG BIỂU
-        if (vungNut) vungNut.style.display = "none"; // Ẩn nút bấm khi in
+        // 2. ÉP CHUẨN VẬT LÝ VÀ TỐI ƯU BẢNG (Thu hẹp padding để tránh nhảy trang)
+        if (vungNut) vungNut.style.display = "none";
         
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
@@ -813,28 +805,26 @@ tieuDePDF.innerHTML = `
             cells.forEach(c => {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
-                c.style.fontSize = "13px";
+                c.style.fontSize = "12px"; // Giảm nhẹ cỡ chữ để vừa một trang
                 c.style.border = "1px solid #000";
-                c.style.padding = "6px";
+                c.style.padding = "4px 3px"; // Thu hẹp tối đa khoảng cách hàng
                 c.style.color = "#000";
             });
             
-            // Ép tỷ lệ cột chuẩn để đảm bảo nội dung không bị cắt lệch
             const firstRow = tb.querySelector("tr");
             if (firstRow && firstRow.children.length >= 4) {
-                firstRow.children[0].style.width = "5%";   // STT
-                firstRow.children[1].style.width = "35%";  // Tên tiêu chí
-                firstRow.children[2].style.width = "15%";  // Thang giá trị
-                firstRow.children[3].style.width = "45%";  // Kết quả đạt được
+                firstRow.children[0].style.width = "5%";
+                firstRow.children[1].style.width = "35%";
+                firstRow.children[2].style.width = "15%";
+                firstRow.children[3].style.width = "45%";
             }
         });
 
-        // 7. CHỜ TRÌNH DUYỆT CẬP NHẬT GIAO DIỆN (500ms)
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 8. CẤU HÌNH VÀ THỰC THI XUẤT PDF
+        // 3. CẤU HÌNH PDF (Giảm lề dọc xuống 5mm để tận dụng diện tích)
         const opt = {
-            margin: [10, 10, 10, 10], // Lề PDF 10mm
+            margin: [5, 10, 5, 10], // Lề [Trên, Trái, Dưới, Phải] tính bằng mm
             filename: tenFile,
             image: { type: "jpeg", quality: 1 },
             html2canvas: {
@@ -849,28 +839,24 @@ tieuDePDF.innerHTML = `
                 format: "a4",
                 orientation: "portrait"
             },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'] }
         };
 
         await html2pdf().set(opt).from(element).save();
 
-        // 9. KHÔI PHỤC LẠI GIAO DIỆN (UI) GỐC & DỌN DẸP
-        element.removeChild(tieuDePDF); // Xóa tiêu đề tạm thời
+        // 4. KHÔI PHỤC GIAO DIỆN GỐC
+        element.removeChild(tieuDePDF);
         element.style.width = oldWidth;
         element.style.maxWidth = oldMaxWidth;
         element.style.overflow = oldOverflow;
         if (vungNut) vungNut.style.display = "flex";
 
-        if (typeof dongCanhBaoUI === "function") {
-            dongCanhBaoUI();
-        }
+        if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
 
     } catch (err) {
         console.error("Lỗi xuất PDF:", err);
         alert("Lỗi xuất PDF:\n" + err.message);
-        if (typeof dongCanhBaoUI === "function") {
-            dongCanhBaoUI();
-        }
+        if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
     }
 }
 
