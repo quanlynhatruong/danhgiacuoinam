@@ -747,237 +747,115 @@
         }
     }
 /* ========================================================= */
-async function f_x_xuat_pdf(){
-
-    try{
-
-        // =========================
-        // LẤY NODE THẬT
-        // =========================
-
-        const element =
-            document.getElementById(
-                "vungThuHai"
-            );
-
-        if(!element){
-
-            alert(
-                "Không tìm thấy vùng dữ liệu."
-            );
-
+/* ========================================================= */
+/* HÀM XUẤT PDF CHUẨN - ÁP DỤNG THUẬT TOÁN ÉP THÔNG SỐ VẬT LÝ */
+/* ========================================================= */
+async function f_x_xuat_pdf() {
+    try {
+        // 1. XÁC ĐỊNH VÙNG DỮ LIỆU THỰC TẾ
+        const element = document.getElementById("vungThuHai");
+        if (!element) {
+            alert("Không tìm thấy vùng dữ liệu đánh giá.");
             return;
-
         }
 
-
-        // =========================
-        // THÔNG BÁO
-        // =========================
-
-        if(
-            typeof hienThiThongBaoUI ===
-            "function"
-        ){
-
-            hienThiThongBaoUI(
-                "Đang tạo PDF..."
-            );
-
-        }
-
-
-        // =========================
-        // TÊN FILE
-        // =========================
-
+        // 2. LẤY ĐỊNH DANH NHÂN SỰ VÀ TÊN FILE
         let tenNV = "VienChuc";
+        const eTen = document.getElementById("theHienChinh");
+        if (eTen) {
+            tenNV = eTen.innerText.trim();
+        }
+        
+        const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
+        const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
-        const eTen =
-            document.getElementById(
-                "theHienChinh"
-            );
-
-        if(eTen){
-
-            tenNV =
-                eTen.innerText.trim();
-
+        // 3. THÔNG BÁO GIAO DIỆN
+        if (typeof hienThiThongBaoUI === "function") {
+            hienThiThongBaoUI("Hệ thống đang thiết lập bản in chuẩn A4...<br>Vui lòng không cuộn chuột trong giây lát.");
         }
 
-        const tenFile =
-            "KetQuaDanhGia_" +
-            tenNV.replace(/\s+/g,"_") +
-            ".pdf";
+        // 4. LƯU LẠI CẤU HÌNH GIAO DIỆN (UI) HIỆN TẠI
+        const oldWidth = element.style.width;
+        const oldOverflow = element.style.overflow;
+        const oldMaxWidth = element.style.maxWidth;
+        const vungNut = document.getElementById("vungNutBam");
 
+        // 5. ÉP CHUẨN VẬT LÝ A4 (190mm) VÀ CHUẨN HÓA BẢNG BIỂU
+        // Tạm thời ẩn nút bấm để bản in sạch sẽ
+        if (vungNut) vungNut.style.display = "none";
+        
+        element.style.width = "190mm";
+        element.style.maxWidth = "190mm";
+        element.style.overflow = "visible";
 
-        // =========================
-        // LƯU STYLE CŨ
-        // =========================
-
-        const oldWidth =
-            element.style.width;
-
-        const oldOverflow =
-            element.style.overflow;
-
-        const oldMaxWidth =
-            element.style.maxWidth;
-
-
-        // =========================
-        // ÉP CHUẨN A4
-        // =========================
-
-        element.style.width =
-            "190mm";
-
-        element.style.maxWidth =
-            "190mm";
-
-        element.style.overflow =
-            "visible";
-
-
-        // =========================
-        // FIX TABLE
-        // =========================
-
-        const tables =
-            element.querySelectorAll(
-                "table"
-            );
-
-        tables.forEach(tb=>{
-
-            tb.style.width =
-                "100%";
-
-            tb.style.tableLayout =
-                "fixed";
-
-            tb.style.borderCollapse =
-                "collapse";
-
-            const cells =
-                tb.querySelectorAll(
-                    "th,td"
-                );
-
-            cells.forEach(c=>{
-
-                c.style.wordBreak =
-                    "break-word";
-
-                c.style.whiteSpace =
-                    "pre-wrap";
-
-                c.style.fontSize =
-                    "13px";
-
+        const tables = element.querySelectorAll("table");
+        tables.forEach(tb => {
+            tb.style.width = "100%";
+            tb.style.tableLayout = "fixed";
+            tb.style.borderCollapse = "collapse";
+            
+            const cells = tb.querySelectorAll("th, td");
+            cells.forEach(c => {
+                c.style.wordBreak = "break-word";
+                c.style.whiteSpace = "pre-wrap";
+                c.style.fontSize = "13px";
+                c.style.border = "1px solid #000";
+                c.style.padding = "6px";
             });
-
+            
+            // Đảm bảo tỷ lệ cột chuẩn như thiết kế ban đầu
+            const firstRow = tb.querySelector("tr");
+            if (firstRow && firstRow.children.length >= 4) {
+                firstRow.children[0].style.width = "5%";   // STT
+                firstRow.children[1].style.width = "35%";  // Tên tiêu chí
+                firstRow.children[2].style.width = "15%";  // Thang giá trị
+                firstRow.children[3].style.width = "45%";  // Kết quả đạt được
+            }
         });
 
+        // 6. CHỜ TRÌNH DUYỆT RENDER LẠI THEO THÔNG SỐ MỚI (500ms)
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // =========================
-        // CHỜ DOM RENDER
-        // =========================
+        // 7. CẤU HÌNH VÀ THỰC THI XUẤT PDF
+        const opt = {
+            margin: [10, 10, 10, 10], // Lề 10mm
+            filename: tenFile,
+            image: { type: "jpeg", quality: 1 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait"
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
 
-        await new Promise(
-            resolve =>
-                setTimeout(resolve,500)
-        );
+        await html2pdf().set(opt).from(element).save();
 
+        // 8. KHÔI PHỤC LẠI GIAO DIỆN (UI) GỐC
+        element.style.width = oldWidth;
+        element.style.maxWidth = oldMaxWidth;
+        element.style.overflow = oldOverflow;
+        if (vungNut) vungNut.style.display = "flex";
 
-        // =========================
-        // XUẤT PDF
-        // =========================
-
-        await html2pdf()
-            .set({
-
-                margin: [10,10,10,10],
-
-                filename: tenFile,
-
-                image: {
-
-                    type: "jpeg",
-
-                    quality: 1
-
-                },
-
-                html2canvas: {
-
-                    scale: 2,
-
-                    useCORS: true,
-
-                    logging: false,
-
-                    scrollX: 0,
-
-                    scrollY: 0
-
-                },
-
-                jsPDF: {
-
-                    unit: "mm",
-
-                    format: "a4",
-
-                    orientation:
-                        "portrait"
-
-                }
-
-            })
-            .from(element)
-            .save();
-
-
-        // =========================
-        // KHÔI PHỤC STYLE
-        // =========================
-
-        element.style.width =
-            oldWidth;
-
-        element.style.maxWidth =
-            oldMaxWidth;
-
-        element.style.overflow =
-            oldOverflow;
-
-
-        // =========================
-        // ĐÓNG THÔNG BÁO
-        // =========================
-
-        if(
-            typeof dongCanhBaoUI ===
-            "function"
-        ){
-
+        // 9. ĐÓNG THÔNG BÁO
+        if (typeof dongCanhBaoUI === "function") {
             dongCanhBaoUI();
-
         }
 
+    } catch (err) {
+        console.error("Lỗi xuất PDF:", err);
+        alert("Lỗi xuất PDF:\n" + err.message);
+        if (typeof dongCanhBaoUI === "function") {
+            dongCanhBaoUI();
+        }
     }
-    catch(err){
-
-        console.error(err);
-
-        alert(
-            "Lỗi xuất PDF:\n" +
-            err.message
-        );
-
-    }
-
 }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
