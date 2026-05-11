@@ -749,21 +749,18 @@
     }
     
     // Đã chỉnh sửa toàn diện hàm này để sửa lỗi cắt trang và căn lề
-    function f_x_xuat_pdf() {
+  function f_x_xuat_pdf() {
         const tenNV = document.getElementById("theHienChinh").innerText || v_l_b;
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        // Tạo khung ảo tĩnh, kích thước cố định để html2canvas tính đúng tỷ lệ thay vì chiều cao ảo
+        // 1. Tạo vùng chứa DOM ảo độc lập (Không dùng thuộc tính position ẩn gây lỗi trắng trang)
         const divIn = document.createElement('div');
         divIn.style.fontFamily = "'Times New Roman', Times, serif";
         divIn.style.color = "#000";
-        divIn.style.width = "1000px"; 
-        divIn.style.position = "absolute";
-        divIn.style.left = "-9999px"; 
-        divIn.style.top = "0";
+        divIn.style.padding = "10px";
 
-        // Bố cục chuẩn mực: Trường trên góc trái, Tiêu đề giữa, Định danh dưới giữa
+        // 2. Bố cục chuẩn mực: Trường trên góc trái, Tiêu đề giữa, Định danh dưới giữa
         divIn.innerHTML = `
             <div style="font-weight: bold; font-size: 15px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
@@ -785,12 +782,11 @@
             </div>
         `;
 
-        // Phải đưa vào Body để trình duyệt tính chiều cao thật, từ đó mới ngắt trang được
-        document.body.appendChild(divIn);
-
+        // KHÔNG appendChild vào document.body nữa để thư viện tự xử lý ngầm an toàn tuyệt đối
         const tbodyPDF = divIn.querySelector('#tbody_pdf_xuat');
         const hangGoc = document.querySelectorAll('#t-b-g tr');
 
+        // 3. Quét trích xuất dữ liệu
         hangGoc.forEach(tr => {
             const tdKieu = tr.cells;
             if(tdKieu.length < 4) return;
@@ -836,6 +832,7 @@
             tbodyPDF.appendChild(trMoi);
         });
 
+        // 4. Quét khối dự kiến đánh giá
         const diemP1 = document.getElementById("vHT1").innerText;
         const diemP2 = document.getElementById("vHT2").innerText;
         const divTong = document.getElementById("vHT3");
@@ -855,8 +852,10 @@
         divKetLuan.style.border = "1px solid #000";
         divKetLuan.style.padding = "15px 20px";
         divKetLuan.style.backgroundColor = "#f0f0f0";
-        // Đảm bảo nguyên phần tổng hợp luôn đi liền khối, không rơi vãi kết quả
+        
+        // Đảm bảo nguyên phần tổng hợp luôn đi liền khối, không rơi vãi sang trang khác
         divKetLuan.style.pageBreakInside = "avoid"; 
+        
         divKetLuan.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="width: 50%;">
@@ -871,22 +870,22 @@
         `;
         divIn.appendChild(divKetLuan);
 
+        // 5. Cấu hình thông số tạo file
         const opt = {
-            margin:       [20, 15, 20, 15], // Căn lề chuẩn văn bản: top 20mm, left 15mm, bottom 20mm, right 15mm
+            margin:       [20, 15, 20, 15], // Căn lề chuẩn văn bản: top 20, left 15, bottom 20, right 15
             filename:     tenFile,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1000 }, // Khớp với chiều rộng divIn
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 2, useCORS: true }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Chìa khóa vàng giải quyết cắt ngang trang
         };
 
         hienThiThongBaoUI("Hệ thống đang tổng hợp dữ liệu và tạo tệp PDF.<br>Tiến trình này sẽ diễn ra trong vài giây...");
         
+        // 6. Kết xuất và lưu
         html2pdf().set(opt).from(divIn).save().then(() => {
-            document.body.removeChild(divIn); // Dọn dẹp DOM ngay sau khi xong
             dongCanhBaoUI();
         }).catch(err => {
-            document.body.removeChild(divIn); // Gặp lỗi cũng phải dọn dẹp
             dongCanhBaoUI();
             hienThiThongBaoUI("Lỗi trích xuất PDF. Vui lòng kiểm tra lại trình duyệt.");
         });
