@@ -819,26 +819,27 @@ function f_x_xuat_pdf() {
         divIn.style.position = "absolute";
         divIn.style.top = "0";
         divIn.style.left = "0";
-        // BẢO HIỂM 1: Cố định thẻ mẹ ở mức 800px thay vì 100% để chống bóp méo tọa độ khi xem trên điện thoại
-        divIn.style.width = "800px"; 
+        divIn.style.width = "100%"; 
+        // BẢO HIỂM 1: Ép thẻ mẹ không được nhỏ hơn 800px, tránh bóp méo thẻ con
+        divIn.style.minWidth = "800px"; 
         divIn.style.minHeight = "100vh";
         divIn.style.backgroundColor = "#ffffff"; 
         divIn.style.zIndex = "999999"; 
         divIn.style.padding = "20px 0"; 
 
         const innerDiv = document.createElement('div');
-        // KÍCH THƯỚC CHUẨN: 780px
+        // KÍCH THƯỚC CHUẨN: Tăng lên 780px để mở rộng không gian sau khi đã giảm lề PDF
         innerDiv.style.width = "780px"; 
-        // BẢO HIỂM 2: Cố định lề X=0 và thêm đệm an toàn padding (chống cắt gọt chữ 2 mép biên)
+        // BẢO HIỂM 2: Hủy căn giữa tự động (margin: 0 auto), neo chặt bảng vào lề trái (X=0)
         innerDiv.style.margin = "0"; 
-        innerDiv.style.padding = "10px 15px"; 
         innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
         innerDiv.style.color = "#000";
         innerDiv.style.backgroundColor = "#ffffff";
         innerDiv.style.boxSizing = "border-box"; 
+        innerDiv.style.padding = "10px"; 
 
         // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed;
-        // TINH CHỈNH TỶ LỆ: STT (5%), Tiêu chí (35%), Thang giá trị (15%), Kết quả (45%)
+        // Tinh chỉnh tỷ lệ cột: Giảm cột Kết quả, Tăng cột Tiêu chí
         innerDiv.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center; margin-bottom: 25px;">
@@ -849,10 +850,10 @@ function f_x_xuat_pdf() {
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 10px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 6px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="38%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="14%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="43%">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
@@ -880,15 +881,14 @@ function f_x_xuat_pdf() {
         // 4. Kết xuất PDF từ innerDiv
         setTimeout(() => {
             const opt = {
-                margin:       10, 
+                margin:       10, // GIẢM LỀ: Từ 15mm xuống 10mm đều 4 cạnh
                 filename:     tenFile,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
                     scrollY: 0,
-                    scrollX: 0,
-                    windowWidth: 800 // Đảm bảo ống kính có tầm nhìn chuẩn
+                    scrollX: 0
                 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'] } 
