@@ -754,7 +754,7 @@
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        // 1. Lưu lại vị trí cuộn hiện tại và ép cuộn lên đỉnh để hệ tọa độ chụp chuẩn 100%
+        // 1. Lưu lại vị trí cuộn hiện tại và ép cuộn lên đỉnh
         const currentScroll = window.scrollY || document.documentElement.scrollTop;
         window.scrollTo(0, 0);
 
@@ -790,14 +790,13 @@
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
             let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            // VÁ LỖI CẮT PHẢI: Bổ sung box-sizing: border-box vào các thẻ td
-            // Sửa lỗi gãy chữ tiếng Việt bằng word-break: normal
+            // Bổ sung word-break: normal để chữ tiếng Việt không bị bẻ gãy sai quy tắc
             htmlBanIn += `
                 <tr style="page-break-inside: avoid; break-inside: avoid; ${cssDong}">
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle; box-sizing: border-box;">${stt}</td>
-                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; word-wrap: break-word; word-break: normal; box-sizing: border-box;">${tieuChi}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle; box-sizing: border-box;">${thangDiem}</td>
-                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; word-break: normal; box-sizing: border-box;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${stt}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">${thangDiem}</td>
+                    <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'}; word-wrap: break-word; overflow-wrap: break-word; word-break: normal;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
                 </tr>
             `;
         });
@@ -821,7 +820,8 @@
         divIn.style.position = "absolute";
         divIn.style.top = "0";
         divIn.style.left = "0";
-        divIn.style.width = "800px"; // Cố định 800px để không bị bóp méo trên điện thoại
+        divIn.style.margin = "0"; // Ép lề thẻ mẹ
+        divIn.style.width = "800px"; 
         divIn.style.minHeight = "100vh";
         divIn.style.backgroundColor = "#ffffff"; 
         divIn.style.zIndex = "999999"; 
@@ -829,42 +829,42 @@
 
         const innerDiv = document.createElement('div');
         innerDiv.style.width = "780px"; 
-        // VÁ LỖI CẮT TRÁI: Dùng margin 0 để neo chặt vào lề trái, tuyệt đối không dùng margin auto
-        innerDiv.style.margin = "0"; 
+        innerDiv.style.margin = "0"; // Ép lề thẻ con
         innerDiv.style.fontFamily = "'Times New Roman', Times, serif";
         innerDiv.style.color = "#000";
         innerDiv.style.backgroundColor = "#ffffff";
         innerDiv.style.boxSizing = "border-box"; 
         innerDiv.style.padding = "10px"; 
 
-        // VÁ LỖI CẮT PHẢI: Ép toàn bộ bảng và thẻ th vào khuôn bằng box-sizing: border-box
-        // Tinh chỉnh tỷ lệ cột: STT(5%), Tiêu chí(33%), Thang điểm(17%), Kết quả(45%)
+        // KHOÁ CỨNG BẢNG BẰNG CSS: table-layout: fixed; và hộp box-sizing
+        // Tỷ lệ cột chuẩn: STT 5%, Tiêu chí 33%, Thang giá trị 17%, Kết quả 45% (Tổng 100%)
         innerDiv.innerHTML = `
-            <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase; box-sizing: border-box;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-            <div style="text-align: center; margin-bottom: 25px; box-sizing: border-box;">
+            <style>#khung_pdf_tam * { box-sizing: border-box !important; }</style>
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
                 <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
             </div>
-            <div style="box-sizing: border-box;">
-                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed; box-sizing: border-box;">
+            <div>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0; box-sizing: border-box;" width="5%">STT</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0; box-sizing: border-box;" width="33%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0; box-sizing: border-box;" width="17%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0; box-sizing: border-box;" width="45%">Kết quả đạt được</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="33%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="17%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 10px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
                         </tr>
                     </thead>
                     <tbody>${htmlBanIn}</tbody>
                 </table>
             </div>
-            <div style="margin-top: 20px; border: 1px solid #000; padding: 15px 20px; background-color: #f0f0f0; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box;">
-                <div style="display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                    <div style="width: 50%; box-sizing: border-box;">
+            <div style="margin-top: 20px; border: 1px solid #000; padding: 15px 20px; background-color: #f0f0f0; page-break-inside: avoid; break-inside: avoid;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="width: 50%;">
                         <div style="font-weight: bold; margin-bottom: 8px; color: #0056b3;">${diemP1}</div>
                         <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
                     </div>
-                    <div style="width: 50%; text-align: right; box-sizing: border-box;">
+                    <div style="width: 50%; text-align: right;">
                         <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
                         <div style="font-weight: bold; margin-top: 8px; color: #b30000;">${tongDiem}</div>
                     </div>
@@ -877,7 +877,7 @@
 
         hienThiThongBaoUI("Hệ thống đang trích xuất PDF...<br>Vui lòng không cuộn chuột lúc này.");
 
-        // 4. Kết xuất PDF từ innerDiv với thông số nguyên bản
+        // 4. Kết xuất PDF từ innerDiv
         setTimeout(() => {
             const opt = {
                 margin:       10, 
@@ -886,10 +886,9 @@
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
-                    scrollY: 0,
-                    scrollX: 0,
-                    windowWidth: 800,
-                    width: 800
+                    // CHỈ GIỮ LẠI windowWidth để đảm bảo không vỡ form trên màn hình nhỏ. 
+                    // Loại bỏ scrollX, scrollY, x, y để máy quét tự động căn lề chuẩn xác.
+                    windowWidth: 800
                 }, 
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'] } 
