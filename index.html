@@ -754,47 +754,9 @@
         const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-        // 1. Tạo khung ảo tính toán kích thước thực
-        const divIn = document.createElement('div');
-        divIn.id = "khung_pdf_tam";
-        divIn.style.fontFamily = "'Times New Roman', Times, serif";
-        divIn.style.color = "#000";
-        divIn.style.width = "1000px";
-        divIn.style.backgroundColor = "#ffffff";
-        
-        // CỐT LÕI SỬA LỖI: Đặt tuyệt đối ở tọa độ (0,0) để không bị khoảng trắng đầu trang
-        divIn.style.position = "absolute";
-        divIn.style.top = "0";
-        divIn.style.left = "0";
-        divIn.style.zIndex = "-9999"; // Ẩn dưới giao diện hiện tại để không làm loạn màn hình
-
-        // Bố cục chuẩn mực
-        divIn.innerHTML = `
-            <div style="font-weight: bold; font-size: 15px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-            <div style="text-align: center; margin-bottom: 25px;">
-                <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-                <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
-            </div>
-            <div>
-                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 16px;">
-                    <thead>
-                        <tr>
-                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
-                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
-                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
-                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody_pdf_xuat"></tbody>
-                </table>
-            </div>
-        `;
-
-        // BẮT BUỘC appendChild để trình duyệt tính toán đúng chiều cao (tránh bị cắt mất nội dung)
-        document.body.appendChild(divIn);
-
-        const tbodyPDF = divIn.querySelector('#tbody_pdf_xuat');
+        // 1. TRÍCH XUẤT DỮ LIỆU SỐNG TỪ UI ĐANG KÍCH HOẠT (Đúng như ý kiến chỉ đạo)
         const hangGoc = document.querySelectorAll('#t-b-g tr');
+        let htmlBanIn = "";
 
         hangGoc.forEach(tr => {
             const tdKieu = tr.cells;
@@ -822,30 +784,23 @@
             }
 
             let isPhan = tr.style.backgroundColor !== "" || stt === "";
-            let trMoi = document.createElement('tr');
-            
-            // Xử lý chống cắt đôi dòng chữ khi sang trang PDF mới
-            trMoi.style.pageBreakInside = "avoid"; 
-            
-            if(isPhan) {
-                trMoi.style.fontWeight = "bold";
-                trMoi.style.backgroundColor = "#f9f9f9";
-            }
+            let cssDong = isPhan ? "font-weight: bold; background-color: #f9f9f9;" : "";
 
-            trMoi.innerHTML = `
-                <td style="border: 1px solid #000; padding: 10px; text-align: center; vertical-align: middle;">${stt}</td>
-                <td style="border: 1px solid #000; padding: 10px; vertical-align: middle;">${tieuChi}</td>
-                <td style="border: 1px solid #000; padding: 10px; text-align: center; vertical-align: middle;">${thangDiem}</td>
-                <td style="border: 1px solid #000; padding: 10px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'};">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+            // Thuộc tính page-break-inside: avoid giúp không bị cắt đôi dòng chữ
+            htmlBanIn += `
+                <tr style="page-break-inside: avoid; ${cssDong}">
+                    <td style="border: 1px solid #000; padding: 10px; text-align: center; vertical-align: middle;">${stt}</td>
+                    <td style="border: 1px solid #000; padding: 10px; vertical-align: middle;">${tieuChi}</td>
+                    <td style="border: 1px solid #000; padding: 10px; text-align: center; vertical-align: middle;">${thangDiem}</td>
+                    <td style="border: 1px solid #000; padding: 10px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'normal' : 'bold'};">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
+                </tr>
             `;
-            tbodyPDF.appendChild(trMoi);
         });
 
         const diemP1 = document.getElementById("vHT1").innerText;
         const diemP2 = document.getElementById("vHT2").innerText;
         const divTong = document.getElementById("vHT3");
-        let xepLoai = "";
-        let tongDiem = "";
+        let xepLoai = "", tongDiem = "";
         
         if(divTong) {
             const divs = divTong.querySelectorAll('div');
@@ -855,50 +810,84 @@
             }
         }
 
-        const divKetLuan = document.createElement('div');
-        divKetLuan.style.marginTop = "20px";
-        divKetLuan.style.border = "1px solid #000";
-        divKetLuan.style.padding = "15px 20px";
-        divKetLuan.style.backgroundColor = "#f0f0f0";
-        divKetLuan.style.pageBreakInside = "avoid"; 
-        divKetLuan.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="width: 50%;">
-                    <div style="font-weight: bold; margin-bottom: 8px; color: #0056b3;">${diemP1}</div>
-                    <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
-                </div>
-                <div style="width: 50%; text-align: right;">
-                    <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
-                    <div style="font-weight: bold; margin-top: 8px; color: #b30000;">${tongDiem}</div>
+        // 2. TẠO KHUNG HIỂN THỊ CHUẨN LUỒNG WEB (Không dùng position absolute hay z-index âm)
+        const divIn = document.createElement('div');
+        divIn.id = "khung_pdf_tam";
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.color = "#000";
+        divIn.style.width = "1000px";
+        divIn.style.margin = "0 auto"; 
+        divIn.style.backgroundColor = "#ffffff";
+        divIn.style.padding = "20px";
+
+        divIn.innerHTML = `
+            <div style="font-weight: bold; font-size: 15px; margin-bottom: 25px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="margin: 0 0 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+            </div>
+            <div>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 16px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="5%">STT</th>
+                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
+                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
+                            <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; font-weight: bold; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
+                        </tr>
+                    </thead>
+                    <tbody>${htmlBanIn}</tbody>
+                </table>
+            </div>
+            <div style="margin-top: 20px; border: 1px solid #000; padding: 15px 20px; background-color: #f0f0f0; page-break-inside: avoid;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="width: 50%;">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: #0056b3;">${diemP1}</div>
+                        <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
+                    </div>
+                    <div style="width: 50%; text-align: right;">
+                        <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
+                        <div style="font-weight: bold; margin-top: 8px; color: #b30000;">${tongDiem}</div>
+                    </div>
                 </div>
             </div>
         `;
-        divIn.appendChild(divKetLuan);
 
-        const opt = {
-            margin:       [20, 15, 20, 15], 
-            filename:     tenFile,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                windowWidth: 1000,
-                scrollY: 0 // Đảm bảo lấy chuẩn từ đỉnh trang
-            }, 
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
-        };
+        // 3. CHIẾN THUẬT: Tạm ẩn UI gốc, hiển thị UI In ấn để đo đúng 100% chiều dài
+        const mainUI = document.getElementById('bo-cuc-he-thong');
+        mainUI.style.display = 'none';
+        document.body.appendChild(divIn);
+        window.scrollTo(0, 0); // Ép cuộn lên đỉnh trang để chụp không bị khoảng trắng
 
-        hienThiThongBaoUI("Hệ thống đang tổng hợp dữ liệu và tạo tệp PDF.<br>Tiến trình này sẽ diễn ra trong vài giây...");
-        
-        html2pdf().set(opt).from(divIn).save().then(() => {
-            document.body.removeChild(divIn); // Xóa ngay sau khi xuất xong
-            dongCanhBaoUI();
-        }).catch(err => {
-            document.body.removeChild(divIn); // Gặp lỗi cũng phải xóa đi
-            dongCanhBaoUI();
-            hienThiThongBaoUI("Lỗi trích xuất PDF. Vui lòng kiểm tra lại trình duyệt.");
-        });
+        hienThiThongBaoUI("Hệ thống đang trích xuất PDF từ giao diện...<br>Vui lòng không thao tác trong 1-2 giây.");
+
+        // 4. Cho trình duyệt 0.5s để vẽ lại (paint) hoàn thiện rồi xuất file
+        setTimeout(() => {
+            const opt = {
+                margin:       [15, 15, 15, 15], 
+                filename:     tenFile,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    windowWidth: 1000
+                }, 
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+            };
+
+            html2pdf().set(opt).from(divIn).save().then(() => {
+                // Xong việc thì xóa khung in và hiện lại hệ thống
+                document.body.removeChild(divIn); 
+                mainUI.style.display = 'flex';
+                dongCanhBaoUI();
+            }).catch(err => {
+                document.body.removeChild(divIn); 
+                mainUI.style.display = 'flex';
+                dongCanhBaoUI();
+                hienThiThongBaoUI("Lỗi trích xuất PDF. Vui lòng thử lại.");
+            });
+        }, 500);
     }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
