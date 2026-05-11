@@ -746,143 +746,128 @@
             hienThiThongBaoUI("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
         }
     }
-    
-    // Đã chỉnh sửa toàn diện hàm này để sửa lỗi cắt trang và căn lề
+/* ========================================================= */
+/* HÀM XUẤT PDF CHUẨN - PHIÊN BẢN TỐI ƯU TOÀN DIỆN */
+/* ========================================================= */
+async function f_x_xuat_pdf() {
+    try {
+        // 1. LẤY THÔNG TIN ĐỊNH DANH FILE
+        const tenNV = document.getElementById("theHienChinh") ? document.getElementById("theHienChinh").innerText.trim() : "VienChuc";
+        const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined') ? v_nam_hoc_hien_tai : (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
+        const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
 
-function f_x_xuat_pdf() {
-    const tenNV = document.getElementById("theHienChinh").innerText || v_l_b;
-    const namHoc = v_nam_hoc_hien_tai || (new Date().getFullYear() + "-" + (new Date().getFullYear() + 1));
-    const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, '_')}_${namHoc}.pdf`;
+        // 2. THÔNG BÁO GIAO DIỆN
+        if (typeof hienThiThongBaoUI === "function") {
+            hienThiThongBaoUI("Hệ thống đang thiết lập bản in chuẩn A4...<br>Vui lòng chờ trong giây lát.");
+        }
 
-    hienThiThongBaoUI("Hệ thống đang thiết lập bản in chuẩn A4. Vui lòng chờ trong giây lát...");
+        // 3. XÁC ĐỊNH VÙNG DỮ LIỆU (VÙNG VIỀN ĐỎ TRÊN UI)
+        const goc = document.getElementById("vungThuHai");
+        if (!goc) {
+            alert("Không tìm thấy vùng dữ liệu đánh giá.");
+            return;
+        }
 
-    // 1. Ép cuộn lên đỉnh để đồng bộ hệ tọa độ ống kính
-    const currentScroll = window.scrollY || document.documentElement.scrollTop;
-    window.scrollTo(0, 0);
+        // 4. TẠO KHUNG IN ẨN ĐỊNH DẠNG VẬT LÝ (210mm)
+        const divIn = document.createElement("div");
+        divIn.id = "pdf-print-area";
+        divIn.style.position = "fixed";
+        divIn.style.left = "-9999px"; // Giấu khỏi màn hình để không gây phiền toái
+        divIn.style.top = "0";
+        divIn.style.width = "210mm"; // Ép đúng chiều ngang giấy A4
+        divIn.style.background = "#ffffff";
+        divIn.style.padding = "10mm"; // Lề in an toàn
+        divIn.style.boxSizing = "border-box";
+        divIn.style.fontFamily = "'Times New Roman', Times, serif";
+        divIn.style.color = "#000";
 
-    // 2. Trích xuất dữ liệu mộc từ giao diện bảng (vùng viền đỏ)
-    const hangGoc = document.querySelectorAll('#t-b-g tr');
-    let htmlBanIn = "";
+        // 5. NHÂN BẢN NỘI DUNG (CLONE)
+        const content = goc.cloneNode(true);
+        content.style.display = "block";
+        content.style.width = "100%";
+        content.style.margin = "0";
+        content.style.padding = "0";
 
-    hangGoc.forEach(tr => {
-        const tdKieu = tr.cells;
-        if(tdKieu.length < 4) return;
+        // 6. XỬ LÝ CÁC THÀNH PHẦN KHÔNG CẦN THIẾT TRONG BẢN IN
+        const nutBam = content.getElementById("vungNutBam");
+        if (nutBam) nutBam.remove(); // Loại bỏ các nút "Lưu", "Xuất PDF" khỏi file PDF
 
-        let stt = tdKieu[0].innerText.trim();
-        let tieuChi = tdKieu[1].innerText.trim();
-        let thangDiem = tdKieu[2].innerText.trim();
-        let ketQua = "";
+        // 7. CHUẨN HÓA CÁC BẢNG TRONG BẢN IN
+        const tables = content.querySelectorAll("table");
+        tables.forEach((tb) => {
+            tb.style.width = "100%";
+            tb.style.borderCollapse = "collapse";
+            tb.style.tableLayout = "fixed"; // Chống vỡ cột
+            tb.style.marginBottom = "20px";
 
-        // Trích xuất kết quả linh hoạt từ Input/Select/Div
-        const inputEl = tdKieu[3].querySelector('input[type="text"], input[type="number"]');
-        const selectEl = tdKieu[3].querySelector('select.o-n-bang');
-        const divKetQua = tdKieu[3].querySelector('.k-k-q'); 
+            const cells = tb.querySelectorAll("th, td");
+            cells.forEach((c) => {
+                c.style.border = "1px solid #000";
+                c.style.padding = "8px 5px";
+                c.style.wordBreak = "break-word"; // Bẻ dòng chữ dài
+                c.style.fontSize = "14px";
+                c.style.verticalAlign = "middle";
+            });
 
-        if (divKetQua) {
-            ketQua = divKetQua.innerText; 
-        } else if (selectEl) {
-            if (selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex].value !== "") {
-                ketQua = selectEl.options[selectEl.selectedIndex].text;
+            // Gán lại tỷ lệ cột chuẩn cho bảng đánh giá
+            const rows = tb.querySelectorAll("tr");
+            if (rows.length > 0) {
+                const firstRow = rows[0].children;
+                if (firstRow.length >= 4) {
+                    firstRow[0].style.width = "6%";   // STT
+                    firstRow[1].style.width = "34%";  // Tên tiêu chí
+                    firstRow[2].style.width = "15%";  // Thang giá trị
+                    firstRow[3].style.width = "45%";  // Kết quả đạt được
+                }
             }
-        } else if (inputEl) {
-            ketQua = inputEl.value;
-        } else {
-            ketQua = tdKieu[3].innerText;
+        });
+
+        // Xử lý các khối tổng điểm (tránh lỗi Flexbox của PDF)
+        const summaryBlock = content.querySelector(".v-t-k");
+        if (summaryBlock) {
+            summaryBlock.style.display = "block";
+            summaryBlock.style.border = "1px solid #000";
+            summaryBlock.style.padding = "15px";
+            summaryBlock.style.backgroundColor = "#f8f9fa";
+            summaryBlock.style.pageBreakInside = "avoid";
         }
 
-        let isPhan = tr.style.backgroundColor !== "" || stt === "";
-        let cssDong = isPhan ? "font-weight: bold; background-color: #f8f9fa; color: #0056b3;" : "";
+        // 8. KẾT XUẤT
+        divIn.appendChild(content);
+        document.body.appendChild(divIn);
 
-        htmlBanIn += `
-            <tr style="page-break-inside: avoid; ${cssDong}">
-                <td style="border: 1px solid #000; padding: 8px 5px; text-align: center; vertical-align: middle;">${stt}</td>
-                <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; word-wrap: break-word;">${tieuChi}</td>
-                <td style="border: 1px solid #000; padding: 8px 5px; text-align: center; vertical-align: middle;">${thangDiem}</td>
-                <td style="border: 1px solid #000; padding: 8px; vertical-align: middle; color: #b91c1c; font-weight: ${isPhan ? 'bold' : 'normal'}; word-wrap: break-word;">${ketQua ? ketQua.replace(/\n/g, '<br>') : ''}</td>
-            </tr>
-        `;
-    });
+        const opt = {
+            margin: 0,
+            filename: tenFile,
+            image: { type: "jpeg", quality: 1 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait"
+            },
+            pagebreak: { mode: ["css", "legacy"] }
+        };
 
-    const diemP1 = document.getElementById("vHT1") ? document.getElementById("vHT1").innerText : "";
-    const diemP2 = document.getElementById("vHT2") ? document.getElementById("vHT2").innerText : "";
-    const divTong = document.getElementById("vHT3");
-    let xepLoai = "CHƯA XẾP LOẠI", tongDiem = "";
-    
-    if(divTong) {
-        const divs = divTong.querySelectorAll('div');
-        if(divs.length >= 2) {
-            xepLoai = divs[0].innerText;
-            tongDiem = divs[1].innerText;
+        await html2pdf().set(opt).from(divIn).save();
+
+        // 9. DỌN DẸP VÀ ĐÓNG THÔNG BÁO
+        document.body.removeChild(divIn);
+        if (typeof dongCanhBaoUI === "function") {
+            dongCanhBaoUI();
         }
+
+    } catch (err) {
+        console.error("Lỗi xuất PDF:", err);
+        if (typeof dongCanhBaoUI === "function") dongCanhBaoUI();
+        alert("Có lỗi xảy ra trong quá trình tạo file PDF. Thầy vui lòng thử lại.");
     }
-
-    // 3. TẠO KHUNG ĐỆM SẠCH (ISOLATED ELEMENT) - CHỈ CHỨA VÙNG IN
-    const elementIn = document.createElement('div');
-    elementIn.style.width = "794px"; // Tương ứng 210mm (khổ A4)
-    elementIn.style.padding = "20px";
-    elementIn.style.backgroundColor = "#fff";
-    elementIn.style.fontFamily = "'Times New Roman', Times, serif";
-    elementIn.style.color = "#000";
-    elementIn.style.boxSizing = "border-box";
-
-    elementIn.innerHTML = `
-        <div style="text-align: center; margin-bottom: 25px;">
-            <div style="font-weight: bold; font-size: 16px; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-            <h2 style="margin: 10px 0; font-size: 22px;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-            <div style="font-size: 16px;">Họ tên: <b>${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
-        </div>
-        
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 15px; table-layout: fixed;">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid #000; padding: 10px 5px; text-align: center; background-color: #f0f0f0;" width="5%">STT</th>
-                    <th style="border: 1px solid #000; padding: 10px 5px; text-align: center; background-color: #f0f0f0;" width="35%">Tên tiêu chí</th>
-                    <th style="border: 1px solid #000; padding: 10px 5px; text-align: center; background-color: #f0f0f0;" width="15%">Thang giá trị</th>
-                    <th style="border: 1px solid #000; padding: 10px 5px; text-align: center; background-color: #f0f0f0;" width="45%">Kết quả đạt được</th>
-                </tr>
-            </thead>
-            <tbody>${htmlBanIn}</tbody>
-        </table>
-
-        <div style="margin-top: 20px; border: 1px solid #000; padding: 15px 20px; background-color: #f8fbff; page-break-inside: avoid;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="width: 50%;">
-                    <div style="font-weight: bold; color: #0056b3; margin-bottom: 8px;">${diemP1}</div>
-                    <div style="font-weight: bold; color: #0056b3;">${diemP2}</div>
-                </div>
-                <div style="width: 50%; text-align: right;">
-                    <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; color: #dc3545;">XẾP LOẠI: ${xepLoai}</div>
-                    <div style="font-weight: bold; margin-top: 8px; color: #b30000;">${tongDiem}</div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // 4. CẤU HÌNH PDF NÂNG CAO (THEO GỢI Ý CHUẨN)
-    const opt = {
-        margin:       [10, 10, 10, 10], // Lề 10mm
-        filename:     tenFile,
-        image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { 
-            scale: 2, 
-            useCORS: true, 
-            letterRendering: true,
-            scrollY: 0,
-            windowWidth: 800 // Ép ống kính nhìn rộng 800px để không cắt lề phải
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['css', 'legacy'] }
-    };
-
-    // 5. THỰC THI XUẤT PDF TỪ PHẦN TỬ ĐỆM
-    html2pdf().set(opt).from(elementIn).save().then(() => {
-        window.scrollTo(0, currentScroll); // Trả lại vị trí cũ cho người dùng
-        dongCanhBaoUI();
-    }).catch(err => {
-        console.error(err);
-        dongCanhBaoUI();
-        hienThiThongBaoUI("Lỗi kết xuất PDF. Thầy vui lòng thử lại trên trình duyệt máy tính.");
-    });
 }
 
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
