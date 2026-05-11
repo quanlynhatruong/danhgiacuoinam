@@ -747,7 +747,7 @@
         }
     }
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - CẬP NHẬT LỀ 1.5CM TRÊN/DƯỚI */
+/* HÀM XUẤT PDF CHUẨN - GIẢM CỠ CHỮ PHẦN KẾT QUẢ CUỐI TRANG */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -765,7 +765,7 @@ async function f_x_xuat_pdf() {
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang thiết lập lề 1.5cm và tạo PDF...<br>Vui lòng không cuộn chuột.");
+            hienThiThongBaoUI("Hệ thống đang thu nhỏ phần kết quả và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
         const oldWidth = element.style.width;
@@ -781,8 +781,8 @@ async function f_x_xuat_pdf() {
         tieuDePDF.innerHTML = `
             <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; margin-bottom: 10px;">TRƯỜNG TH&THCS HỢP THÀNH</div>
             <div style="text-align: center;">
-                <h2 style="margin: 0 0 8px 0; font-size: 15pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-                <div style="font-size: 13pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+                <h2 style="margin: 0 0 8px 0; font-size: 20pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
             </div>
         `;
         element.prepend(tieuDePDF);
@@ -819,11 +819,47 @@ async function f_x_xuat_pdf() {
             }
         });
 
+        // 3. TINH CHỈNH THU NHỎ PHẦN KẾT QUẢ CUỐI TRANG
+        const summaryBlock = element.querySelector(".v-t-k");
+        if (summaryBlock) {
+            summaryBlock.style.marginTop = "15px";
+            summaryBlock.style.padding = "10px 15px";
+            summaryBlock.style.border = "1px solid #000";
+            summaryBlock.style.backgroundColor = "#f0f0f0";
+            summaryBlock.style.display = "flex";
+            summaryBlock.style.justifyContent = "space-between";
+            summaryBlock.style.alignItems = "center";
+            summaryBlock.style.pageBreakInside = "avoid";
+
+            // Giảm cỡ chữ điểm thành phần (Trái)
+            const leftScores = summaryBlock.querySelector("div:nth-child(2)");
+            if (leftScores) {
+                leftScores.style.fontSize = "12px";
+                leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "12px");
+            }
+
+            // Giảm cỡ chữ Xếp loại và Tổng điểm (Phải)
+            const rightRating = summaryBlock.querySelector(".v-d-g");
+            if (rightRating) {
+                rightRating.style.textAlign = "right";
+                const ratingText = rightRating.querySelector("div:first-child");
+                const totalScoreText = rightRating.querySelector("div:last-child");
+                if (ratingText) {
+                    ratingText.style.fontSize = "14px"; // Giảm từ 18-20px xuống 15px
+                    ratingText.style.marginBottom = "3px";
+                }
+                if (totalScoreText) {
+                    totalScoreText.style.fontSize = "13px"; // Giảm xuống 13px
+                    totalScoreText.style.marginTop = "0px";
+                }
+            }
+        }
+
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 3. CẤU HÌNH PDF (Cập nhật lề 15mm ~ 1.5cm cho Trên và Dưới)
+        // 4. CẤU HÌNH PDF (Lề trên/dưới 1.5cm)
         const opt = {
-            margin: [15, 10, 15, 10], // [Trên, Trái, Dưới, Phải] tính bằng mm
+            margin: [15, 10, 15, 10], 
             filename: tenFile,
             image: { type: "jpeg", quality: 1 },
             html2canvas: {
@@ -843,13 +879,31 @@ async function f_x_xuat_pdf() {
 
         await html2pdf().set(opt).from(element).save();
 
-        // 4. KHÔI PHỤC GIAO DIỆN GỐC
+        // 5. KHÔI PHỤC GIAO DIỆN GỐC
         element.removeChild(tieuDePDF);
         element.style.width = oldWidth;
         element.style.maxWidth = oldMaxWidth;
         element.style.overflow = oldOverflow;
-        if (vungNut) vungNut.style.display = "flex";
+        
+        // Khôi phục style cũ của khối kết quả trên web
+        if (summaryBlock) {
+            summaryBlock.style.marginTop = "";
+            summaryBlock.style.padding = "";
+            summaryBlock.style.border = "";
+            summaryBlock.style.backgroundColor = "";
+            summaryBlock.style.display = "";
+            const leftScores = summaryBlock.querySelector("div:nth-child(2)");
+            if (leftScores) leftScores.style.fontSize = "";
+            const rightRating = summaryBlock.querySelector(".v-d-g");
+            if (rightRating) {
+                const ratingText = rightRating.querySelector("div:first-child");
+                const totalScoreText = rightRating.querySelector("div:last-child");
+                if (ratingText) ratingText.style.fontSize = "";
+                if (totalScoreText) totalScoreText.style.fontSize = "";
+            }
+        }
 
+        if (vungNut) vungNut.style.display = "flex";
         if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
 
     } catch (err) {
