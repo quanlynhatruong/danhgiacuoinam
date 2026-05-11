@@ -782,17 +782,18 @@ async function f_x_xuat_pdf() {
         const oldMaxWidth = element.style.maxWidth;
         const vungNut = document.getElementById("vungNutBam");
 
-        // 5. TẠO TIÊU ĐỀ ĐẦU TRANG TẠM THỜI CHO PDF
-        const tieuDePDF = document.createElement("div");
-        tieuDePDF.id = "tieu-de-pdf-tam";
-        tieuDePDF.style.textAlign = "center";
-        tieuDePDF.style.marginBottom = "25px";
-        tieuDePDF.style.fontFamily = "'Times New Roman', serif";
-        tieuDePDF.innerHTML = `
-            <div style="font-weight: bold; font-size: 16pt; text-transform: uppercase;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-            <h2 style="margin: 10px 0; font-size: 20pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
-            <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
-        `;
+       // 5. TẠO TIÊU ĐỀ ĐẦU TRANG TẠM THỜI CHO PDF
+const tieuDePDF = document.createElement("div");
+tieuDePDF.id = "tieu-de-pdf-tam";
+tieuDePDF.style.marginBottom = "25px";
+tieuDePDF.style.fontFamily = "'Times New Roman', serif";
+tieuDePDF.innerHTML = `
+    <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left;">TRƯỜNG TH&THCS HỢP THÀNH</div>
+    <div style="text-align: center;">
+        <h2 style="margin: 10px 0; font-size: 15pt; font-weight: bold; color: #000;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+        <div style="font-size: 14pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+    </div>
+`;
         element.prepend(tieuDePDF);
 
         // 6. ÉP CHUẨN VẬT LÝ A4 (190mm) VÀ CHUẨN HÓA BẢNG BIỂU
