@@ -889,6 +889,8 @@ function f_x_xuat_pdf() {
                     useCORS: true, 
                     scrollY: 0,
                     scrollX: 0,
+                    x: 0,
+                    y: 0,
                     windowWidth: 800,
                     width: 800
                 },
@@ -896,7 +898,7 @@ function f_x_xuat_pdf() {
                 pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
-            html2pdf().set(opt).from(innerDiv).save().then(() => {
+            html2pdf().set(opt).from(divIn).save().then(() => {
                 document.body.removeChild(divIn); 
                 window.scrollTo(0, currentScroll); 
                 dongCanhBaoUI();
