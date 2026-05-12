@@ -748,7 +748,7 @@
     }
 /* ========================================================= */
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - KHỐNG CHẾ CỠ CHỮ TỐI ĐA 14PT */
+/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.5PX VÀ CHỐNG MẤT KẺ NGANG */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -766,7 +766,7 @@ async function f_x_xuat_pdf() {
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang chuẩn hóa cỡ chữ 14pt và tạo PDF...<br>Vui lòng không cuộn chuột.");
+            hienThiThongBaoUI("Hệ thống đang tinh chỉnh nét kẻ và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
         const oldWidth = element.style.width;
@@ -774,7 +774,7 @@ async function f_x_xuat_pdf() {
         const oldMaxWidth = element.style.maxWidth;
         const vungNut = document.getElementById("vungNutBam");
 
-        // 1. TẠO TIÊU ĐỀ ĐẦU TRANG (Khống chế tối đa 14pt)
+        // 1. TẠO TIÊU ĐỀ ĐẦU TRANG 
         const tieuDePDF = document.createElement("div");
         tieuDePDF.id = "tieu-de-pdf-tam";
         tieuDePDF.style.marginBottom = "15px"; 
@@ -788,7 +788,7 @@ async function f_x_xuat_pdf() {
         `;
         element.prepend(tieuDePDF);
 
-        // 2. ÉP CHUẨN VẬT LÝ VÀ TỐI ƯU BẢNG
+        // 2. ÉP CHUẨN VẬT LÝ VÀ TỐI ƯU BẢNG (NÉT 0.5px VÀ KHÓA KẺ NGANG)
         if (vungNut) vungNut.style.display = "none";
         
         element.style.width = "190mm";
@@ -800,13 +800,23 @@ async function f_x_xuat_pdf() {
             tb.style.width = "100%";
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
+            tb.style.border = "0.5px solid #000"; // Viền bảng mảnh 0.5px
+            
+            // Khóa kẻ ngang cho từng dòng để chống mất viền khi cắt trang
+            const rows = tb.querySelectorAll("tr");
+            rows.forEach(r => {
+                r.style.pageBreakInside = "avoid";
+                r.style.breakInside = "avoid";
+                r.style.borderBottom = "0.5px solid #000"; 
+                r.style.borderTop = "0.5px solid #000";
+            });
             
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                c.style.border = "1px solid #000";
+                c.style.border = "0.5px solid #000"; // Viền ô mảnh 0.5px
                 c.style.padding = "4px 3px"; 
                 c.style.color = "#000";
             });
@@ -820,30 +830,28 @@ async function f_x_xuat_pdf() {
             }
         });
 
-        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG (Khống chế tối đa 14pt)
+        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG
         const summaryBlock = element.querySelector(".v-t-k");
         if (summaryBlock) {
             summaryBlock.style.marginTop = "15px";
             summaryBlock.style.padding = "10px 15px";
-            summaryBlock.style.border = "1px solid #000";
+            summaryBlock.style.border = "0.5px solid #000"; // Viền khối tổng mảnh 0.5px
             summaryBlock.style.backgroundColor = "#f0f0f0";
             summaryBlock.style.display = "flex";
             summaryBlock.style.justifyContent = "space-between";
             summaryBlock.style.alignItems = "center";
             summaryBlock.style.pageBreakInside = "avoid";
+            summaryBlock.style.breakInside = "avoid"; 
 
-            // "DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ"
             const titleDukien = summaryBlock.querySelector("h3");
             if (titleDukien) titleDukien.style.fontSize = "13pt";
 
-            // Khối điểm thành phần
             const leftScores = summaryBlock.querySelector("div:nth-child(2)");
             if (leftScores) {
                 leftScores.style.fontSize = "11pt";
                 leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "11pt");
             }
 
-            // Khối Xếp loại và Tổng điểm
             const rightRating = summaryBlock.querySelector(".v-d-g");
             if (rightRating) {
                 rightRating.style.textAlign = "right";
@@ -851,7 +859,7 @@ async function f_x_xuat_pdf() {
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 
                 if (ratingText) {
-                    ratingText.style.fontSize = "14pt"; // Cố định 14pt theo yêu cầu
+                    ratingText.style.fontSize = "14pt";
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
                 }
@@ -865,7 +873,7 @@ async function f_x_xuat_pdf() {
 
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 4. CẤU HÌNH PDF (Lề 1.5cm trên/dưới)
+        // 4. CẤU HÌNH PDF (Lề 1.5cm và Tích hợp công cụ chống ngắt vùng cấm)
         const opt = {
             margin: [15, 10, 15, 10], 
             filename: tenFile,
@@ -882,7 +890,7 @@ async function f_x_xuat_pdf() {
                 format: "a4",
                 orientation: "portrait"
             },
-            pagebreak: { mode: ['css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.v-t-k'] }
         };
 
         await html2pdf().set(opt).from(element).save();
@@ -893,8 +901,24 @@ async function f_x_xuat_pdf() {
         element.style.maxWidth = oldMaxWidth;
         element.style.overflow = oldOverflow;
         
+        // Xóa các thuộc tính CSS tĩnh chống cắt khi trả lại trạng thái web
+        tables.forEach(tb => {
+            tb.style.border = "";
+            const rows = tb.querySelectorAll("tr");
+            rows.forEach(r => {
+                r.style.pageBreakInside = "";
+                r.style.breakInside = "";
+                r.style.borderBottom = "";
+                r.style.borderTop = "";
+            });
+            const cells = tb.querySelectorAll("th, td");
+            cells.forEach(c => {
+                c.style.border = ""; 
+            });
+        });
+
         if (summaryBlock) {
-            summaryBlock.style.cssText = ""; // Xóa style nội dòng để dùng lại CSS của file index.html
+            summaryBlock.style.cssText = ""; 
         }
 
         if (vungNut) vungNut.style.display = "flex";
@@ -906,6 +930,7 @@ async function f_x_xuat_pdf() {
         if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
     }
 }
+
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
