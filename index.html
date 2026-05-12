@@ -747,7 +747,7 @@
         }
     }
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - NÉT KẺ SIÊU MẢNH, NHẠT VÀ GIÃN DÒNG */
+/* HÀM XUẤT PDF CHUẨN - GIÃN DÒNG TỰ ĐỘNG FULL TRANG 1 */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -765,7 +765,7 @@ async function f_x_xuat_pdf() {
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang tinh chỉnh nét kẻ mảnh và tạo PDF...<br>Vui lòng không cuộn chuột.");
+            hienThiThongBaoUI("Hệ thống đang tự động giãn dòng cho vừa trang và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
         // Lưu lại toàn bộ thuộc tính cũ để khôi phục sau khi in
@@ -776,10 +776,10 @@ async function f_x_xuat_pdf() {
         const oldBoxSizing = element.style.boxSizing;
         const vungNut = document.getElementById("vungNutBam");
 
-        // 1. TẠO TIÊU ĐỀ ĐẦU TRANG 
+        // 1. TẠO TIÊU ĐỀ ĐẦU TRANG (Tăng nhẹ margin-bottom để đẩy bảng xuống)
         const tieuDePDF = document.createElement("div");
         tieuDePDF.id = "tieu-de-pdf-tam";
-        tieuDePDF.style.marginBottom = "15px"; 
+        tieuDePDF.style.marginBottom = "25px"; 
         tieuDePDF.style.fontFamily = "'Times New Roman', serif";
         tieuDePDF.innerHTML = `
             <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; margin-bottom: 10px;">TRƯỜNG TH&THCS HỢP THÀNH</div>
@@ -805,7 +805,6 @@ async function f_x_xuat_pdf() {
             tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            // Ép viền bảng nét siêu mảnh (0.25px), màu xám đen (#555) để nhạt bớt
             tb.style.border = "0.25px solid #555"; 
             
             // Khóa toàn bộ 4 cạnh cho từng dòng chống đứt nét
@@ -822,9 +821,12 @@ async function f_x_xuat_pdf() {
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
                 c.style.border = "0.25px solid #555"; 
-                // Tăng khoảng cách lề trong và dòng để GIÃN DÒNG TỰ NHIÊN
-                c.style.padding = "8px 4px"; 
-                c.style.lineHeight = "1.5";
+                
+                // GIÃN DÒNG TỰ ĐỘNG: Tăng padding dọc lên 12px và line-height lên 1.6
+                // Điều này giúp 10 dòng đầu tiên tự động phình to, lấp đầy trang 1 một cách đẹp mắt
+                c.style.padding = "12px 5px"; 
+                c.style.lineHeight = "1.6";
+                
                 c.style.color = "#000";
                 c.style.boxSizing = "border-box"; 
             });
@@ -838,10 +840,10 @@ async function f_x_xuat_pdf() {
             }
         });
 
-        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG (Áp dụng đúng thông số thu nhỏ của thầy)
+        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG
         const summaryBlock = element.querySelector(".v-t-k");
         if (summaryBlock) {
-            summaryBlock.style.marginTop = "15px";
+            summaryBlock.style.marginTop = "20px";
             summaryBlock.style.padding = "10px 15px";
             summaryBlock.style.border = "0.25px solid #555"; 
             summaryBlock.style.backgroundColor = "#f0f0f0";
@@ -852,11 +854,11 @@ async function f_x_xuat_pdf() {
             summaryBlock.style.breakInside = "avoid"; 
 
             const titleDukien = summaryBlock.querySelector("h3");
-            if (titleDukien) titleDukien.style.fontSize = "11pt"; // Hạ xuống 11pt
+            if (titleDukien) titleDukien.style.fontSize = "11pt"; 
 
             const leftScores = summaryBlock.querySelector("div:nth-child(2)");
             if (leftScores) {
-                leftScores.style.fontSize = "10pt"; // Hạ xuống 10pt
+                leftScores.style.fontSize = "10pt"; 
                 leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "10pt");
             }
 
@@ -867,12 +869,12 @@ async function f_x_xuat_pdf() {
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 
                 if (ratingText) {
-                    ratingText.style.fontSize = "12pt"; // Hạ xuống 12pt
+                    ratingText.style.fontSize = "12pt"; 
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
                 }
                 if (totalScoreText) {
-                    totalScoreText.style.fontSize = "10pt"; // Hạ xuống 10pt
+                    totalScoreText.style.fontSize = "10pt"; 
                     totalScoreText.style.fontWeight = "bold";
                     totalScoreText.style.color = "#000";
                 }
@@ -881,7 +883,7 @@ async function f_x_xuat_pdf() {
 
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 4. CẤU HÌNH PDF (Lề 1.5cm và Tích hợp công cụ chống ngắt vùng cấm)
+        // 4. CẤU HÌNH PDF
         const opt = {
             margin: [15, 10, 15, 10], 
             filename: tenFile,
@@ -911,7 +913,6 @@ async function f_x_xuat_pdf() {
         element.style.padding = oldPadding;
         element.style.boxSizing = oldBoxSizing;
         
-        // Xóa các thuộc tính CSS tĩnh khi trả lại trạng thái web
         tables.forEach(tb => {
             tb.style.border = "";
             tb.style.width = "100%";
@@ -944,6 +945,8 @@ async function f_x_xuat_pdf() {
         if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
     }
 }
+
+    
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
