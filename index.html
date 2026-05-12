@@ -747,7 +747,7 @@
         }
     }
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.5PX VÀ BẢO TOÀN LỀ PHẢI */
+/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.1mm VÀ BẢO TOÀN 4 CẠNH */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -796,8 +796,8 @@ async function f_x_xuat_pdf() {
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
         element.style.overflow = "visible";
-        // Bổ sung lớp đệm an toàn 1mm hai bên để bảo vệ dòng kẻ dọc ngoài cùng
-        element.style.padding = "0.1mm"; 
+        // Bổ sung lớp đệm an toàn 2mm hai bên để CHỐNG MẤT dòng kẻ dọc trái và phải
+        element.style.padding = "0 2mm"; 
         element.style.boxSizing = "border-box";
 
         const tables = element.querySelectorAll("table");
@@ -806,15 +806,14 @@ async function f_x_xuat_pdf() {
             tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            tb.style.border = "0.5px solid #000"; // Viền bảng cực mảnh 0.5px
+            tb.style.border = "0.1mm solid #000"; // Viền bảng CỰC MẢNH chuẩn in
             
-            // Khóa kẻ ngang cho từng dòng
+            // Khóa toàn bộ 4 cạnh cho từng dòng
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "avoid";
                 r.style.breakInside = "avoid";
-                r.style.borderBottom = "0.5px solid #000"; 
-                r.style.borderTop = "0.5px solid #000";
+                r.style.border = "0.1mm solid #000"; 
             });
             
             const cells = tb.querySelectorAll("th, td");
@@ -822,7 +821,7 @@ async function f_x_xuat_pdf() {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                c.style.border = "0.5px solid #000"; // Viền ô cực mảnh 0.5px
+                c.style.border = "0.1mm solid #000"; // Nét 0.1mm khắc phục hiện tượng đậm, to
                 c.style.padding = "4px 3px"; 
                 c.style.color = "#000";
                 c.style.boxSizing = "border-box"; 
@@ -842,7 +841,7 @@ async function f_x_xuat_pdf() {
         if (summaryBlock) {
             summaryBlock.style.marginTop = "15px";
             summaryBlock.style.padding = "10px 15px";
-            summaryBlock.style.border = "0.2px solid #000"; // Viền khối tổng mảnh 0.5px
+            summaryBlock.style.border = "0.1mm solid #000"; 
             summaryBlock.style.backgroundColor = "#f0f0f0";
             summaryBlock.style.display = "flex";
             summaryBlock.style.justifyContent = "space-between";
@@ -851,7 +850,7 @@ async function f_x_xuat_pdf() {
             summaryBlock.style.breakInside = "avoid"; 
 
             const titleDukien = summaryBlock.querySelector("h3");
-            if (titleDukien) titleDukien.style.fontSize = "11pt";
+            if (titleDukien) titleDukien.style.fontSize = "13pt";
 
             const leftScores = summaryBlock.querySelector("div:nth-child(2)");
             if (leftScores) {
@@ -866,12 +865,12 @@ async function f_x_xuat_pdf() {
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 
                 if (ratingText) {
-                    ratingText.style.fontSize = "10pt";
+                    ratingText.style.fontSize = "14pt";
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
                 }
                 if (totalScoreText) {
-                    totalScoreText.style.fontSize = "10pt";
+                    totalScoreText.style.fontSize = "12pt";
                     totalScoreText.style.fontWeight = "bold";
                     totalScoreText.style.color = "#000";
                 }
@@ -919,8 +918,7 @@ async function f_x_xuat_pdf() {
             rows.forEach(r => {
                 r.style.pageBreakInside = "";
                 r.style.breakInside = "";
-                r.style.borderBottom = "";
-                r.style.borderTop = "";
+                r.style.border = "";
             });
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
