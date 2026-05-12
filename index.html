@@ -789,6 +789,7 @@ async function f_x_xuat_pdf() {
                     wordBreak: c.style.wordBreak,
                     whiteSpace: c.style.whiteSpace,
                     border: c.style.border,
+                    fontWeight: c.style.fontWeight, // Đã bổ sung lưu trạng thái in đậm
                     boxSizing: c.style.boxSizing,
                     pageBreakInside: c.style.pageBreakInside,
                     breakInside: c.style.breakInside
@@ -839,8 +840,13 @@ async function f_x_xuat_pdf() {
                 c.style.border = "0.1pt solid #999"; 
                 c.style.color = "#000";
                 c.style.boxSizing = "border-box"; 
-                // Định dạng cơ sở chuẩn để chống cắt chữ
-                c.style.fontSize = "11pt"; 
+                
+                // Đã chỉnh sửa: Cỡ chữ 10pt và bỏ in đậm cho nội dung
+                c.style.fontSize = "10pt"; 
+                if(c.tagName === 'TD') {
+                    c.style.fontWeight = "normal";
+                }
+                
                 c.style.padding = "6px 5px"; 
                 c.style.lineHeight = "1.5";
             });
@@ -884,6 +890,7 @@ async function f_x_xuat_pdf() {
                 const ratingText = rightRating.querySelector("div:first-child");
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 if (ratingText) {
+                    // Đã chỉnh sửa: Hạ cỡ chữ phần xếp loại xuống 10pt
                     ratingText.style.fontSize = "10pt"; 
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
@@ -912,7 +919,7 @@ async function f_x_xuat_pdf() {
                     const cells = tb.querySelectorAll("th, td");
                     cells.forEach(c => {
                         c.style.padding = "4px 3px";
-                        c.style.fontSize = "10.5pt";
+                        c.style.fontSize = "9.5pt"; // Thu nhỏ thêm nếu cần ép trang
                         c.style.lineHeight = "1.3";
                     });
                 });
@@ -990,6 +997,7 @@ async function f_x_xuat_pdf() {
             state.el.style.wordBreak = state.wordBreak;
             state.el.style.whiteSpace = state.whiteSpace;
             state.el.style.border = state.border;
+            state.el.style.fontWeight = state.fontWeight; // Đã bổ sung khôi phục in đậm
             state.el.style.boxSizing = state.boxSizing;
             state.el.style.pageBreakInside = state.pageBreakInside;
             state.el.style.breakInside = state.breakInside;
