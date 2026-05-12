@@ -747,7 +747,7 @@
         }
     }
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.5PX VÀ CHỐNG MẤT KẺ NGANG */
+/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.5PX VÀ BẢO TOÀN LỀ PHẢI */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -765,12 +765,15 @@ async function f_x_xuat_pdf() {
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang tinh chỉnh nét kẻ và tạo PDF...<br>Vui lòng không cuộn chuột.");
+            hienThiThongBaoUI("Hệ thống đang tinh chỉnh nét kẻ mảnh và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
+        // Lưu lại toàn bộ thuộc tính cũ để khôi phục sau khi in
         const oldWidth = element.style.width;
         const oldOverflow = element.style.overflow;
         const oldMaxWidth = element.style.maxWidth;
+        const oldPadding = element.style.padding;
+        const oldBoxSizing = element.style.boxSizing;
         const vungNut = document.getElementById("vungNutBam");
 
         // 1. TẠO TIÊU ĐỀ ĐẦU TRANG 
@@ -787,21 +790,25 @@ async function f_x_xuat_pdf() {
         `;
         element.prepend(tieuDePDF);
 
-        // 2. ÉP CHUẨN VẬT LÝ VÀ TỐI ƯU BẢNG (NÉT 0.5px VÀ KHÓA KẺ NGANG)
+        // 2. ÉP CHUẨN VẬT LÝ VÀ TỐI ƯU BẢNG
         if (vungNut) vungNut.style.display = "none";
         
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
         element.style.overflow = "visible";
+        // Bổ sung lớp đệm an toàn 1mm hai bên để bảo vệ dòng kẻ dọc ngoài cùng
+        element.style.padding = "0 1mm"; 
+        element.style.boxSizing = "border-box";
 
         const tables = element.querySelectorAll("table");
         tables.forEach(tb => {
-            tb.style.width = "100%";
+            tb.style.width = "100%"; 
+            tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            tb.style.border = "0.5px solid #000"; // Viền bảng mảnh 0.5px
+            tb.style.border = "0.5px solid #000"; // Viền bảng cực mảnh 0.5px
             
-            // Khóa kẻ ngang cho từng dòng để chống mất viền khi cắt trang
+            // Khóa kẻ ngang cho từng dòng
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "avoid";
@@ -815,9 +822,10 @@ async function f_x_xuat_pdf() {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                c.style.border = "0.5px solid #000"; // Viền ô mảnh 0.5px
+                c.style.border = "0.5px solid #000"; // Viền ô cực mảnh 0.5px
                 c.style.padding = "4px 3px"; 
                 c.style.color = "#000";
+                c.style.boxSizing = "border-box"; 
             });
             
             const firstRow = tb.querySelector("tr");
@@ -899,10 +907,14 @@ async function f_x_xuat_pdf() {
         element.style.width = oldWidth;
         element.style.maxWidth = oldMaxWidth;
         element.style.overflow = oldOverflow;
+        element.style.padding = oldPadding;
+        element.style.boxSizing = oldBoxSizing;
         
-        // Xóa các thuộc tính CSS tĩnh chống cắt khi trả lại trạng thái web
+        // Xóa các thuộc tính CSS tĩnh khi trả lại trạng thái web
         tables.forEach(tb => {
             tb.style.border = "";
+            tb.style.width = "100%";
+            tb.style.margin = "";
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "";
@@ -913,6 +925,7 @@ async function f_x_xuat_pdf() {
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
                 c.style.border = ""; 
+                c.style.boxSizing = "";
             });
         });
 
@@ -929,7 +942,6 @@ async function f_x_xuat_pdf() {
         if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
     }
 }
-
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
 
