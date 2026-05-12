@@ -747,7 +747,7 @@
         }
     }
 /* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - NÉT KẺ MẢNH 0.1mm VÀ BẢO TOÀN 4 CẠNH */
+/* HÀM XUẤT PDF CHUẨN - NÉT KẺ SIÊU MẢNH, NHẠT VÀ GIÃN DÒNG */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -805,18 +805,15 @@ async function f_x_xuat_pdf() {
             tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            // GIẢM ĐỘ DÀY VIỀN BẢNG XUỐNG 0.05mm VÀ MÀU XÁM NHẠT
-            tb.style.border = "0.05mm solid #999999";
+            // Ép viền bảng nét siêu mảnh (0.25px), màu xám đen (#555) để nhạt bớt
+            tb.style.border = "0.25px solid #555"; 
             
+            // Khóa toàn bộ 4 cạnh cho từng dòng chống đứt nét
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "avoid";
                 r.style.breakInside = "avoid";
-                // GIẢM ĐỘ DÀY VÀ ĐỘ ĐẬM DÒNG KẺ
-                r.style.border = "0.05mm solid #999999";
-                // TỰ ĐỘNG GIÃN DÒNG THEO NỘI DUNG
-                r.style.height = "auto";
-                r.style.lineHeight = "1.2";
+                r.style.border = "0.25px solid #555"; 
             });
             
             const cells = tb.querySelectorAll("th, td");
@@ -824,15 +821,12 @@ async function f_x_xuat_pdf() {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                // GIẢM ĐỘ DÀY VIỀN CELL VÀ CHUYỂN SANG MÀU XÁM NHẠT
-                c.style.border = "0.05mm solid #999999";
-                // GIẢM PADDING ĐỂ TIẾT KIỆM KHÔNG GIAN, TRÁNH KHOẢNG TRỐNG THỪA
-                c.style.padding = "2px 3px"; 
+                c.style.border = "0.25px solid #555"; 
+                // Tăng khoảng cách lề trong và dòng để GIÃN DÒNG TỰ NHIÊN
+                c.style.padding = "8px 4px"; 
+                c.style.lineHeight = "1.5";
                 c.style.color = "#000";
-                c.style.boxSizing = "border-box";
-                // TỰ ĐỘNG GIÃN CHIỀU CAO THEO NỘI DUNG
-                c.style.height = "auto";
-                c.style.lineHeight = "1.2";
+                c.style.boxSizing = "border-box"; 
             });
             
             const firstRow = tb.querySelector("tr");
@@ -842,33 +836,14 @@ async function f_x_xuat_pdf() {
                 firstRow.children[2].style.width = "15%";
                 firstRow.children[3].style.width = "45%";
             }
-
-            // Xử lý dòng không có dữ liệu: ẩn dòng kẻ dọc
-            rows.forEach(r => {
-                const tds = r.querySelectorAll("td");
-                if (tds.length > 0) {
-                    let hasData = false;
-                    tds.forEach(td => {
-                        if (td.innerText.trim() !== "" && td.innerText.trim() !== "-- Chọn mức --") {
-                            hasData = true;
-                        }
-                    });
-                    if (!hasData) {
-                        tds.forEach(td => {
-                            td.style.borderLeft = "none";
-                            td.style.borderRight = "none";
-                        });
-                    }
-                }
-            });
         });
 
-        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG
+        // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG (Áp dụng đúng thông số thu nhỏ của thầy)
         const summaryBlock = element.querySelector(".v-t-k");
         if (summaryBlock) {
             summaryBlock.style.marginTop = "15px";
             summaryBlock.style.padding = "10px 15px";
-            summaryBlock.style.border = "0.05mm solid #000"; 
+            summaryBlock.style.border = "0.25px solid #555"; 
             summaryBlock.style.backgroundColor = "#f0f0f0";
             summaryBlock.style.display = "flex";
             summaryBlock.style.justifyContent = "space-between";
@@ -877,11 +852,11 @@ async function f_x_xuat_pdf() {
             summaryBlock.style.breakInside = "avoid"; 
 
             const titleDukien = summaryBlock.querySelector("h3");
-            if (titleDukien) titleDukien.style.fontSize = "10pt";
+            if (titleDukien) titleDukien.style.fontSize = "11pt"; // Hạ xuống 11pt
 
             const leftScores = summaryBlock.querySelector("div:nth-child(2)");
             if (leftScores) {
-                leftScores.style.fontSize = "10pt";
+                leftScores.style.fontSize = "10pt"; // Hạ xuống 10pt
                 leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "10pt");
             }
 
@@ -892,12 +867,12 @@ async function f_x_xuat_pdf() {
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 
                 if (ratingText) {
-                    ratingText.style.fontSize = "12pt";
+                    ratingText.style.fontSize = "12pt"; // Hạ xuống 12pt
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
                 }
                 if (totalScoreText) {
-                    totalScoreText.style.fontSize = "10pt";
+                    totalScoreText.style.fontSize = "10pt"; // Hạ xuống 10pt
                     totalScoreText.style.fontWeight = "bold";
                     totalScoreText.style.color = "#000";
                 }
@@ -946,18 +921,13 @@ async function f_x_xuat_pdf() {
                 r.style.pageBreakInside = "";
                 r.style.breakInside = "";
                 r.style.border = "";
-                r.style.height = "";
-                r.style.lineHeight = "";
             });
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
                 c.style.border = ""; 
                 c.style.boxSizing = "";
-                c.style.borderLeft = "";
-                c.style.borderRight = "";
-                c.style.height = "";
-                c.style.lineHeight = "";
                 c.style.padding = "";
+                c.style.lineHeight = "";
             });
         });
 
