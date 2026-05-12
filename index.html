@@ -796,7 +796,6 @@ async function f_x_xuat_pdf() {
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
         element.style.overflow = "visible";
-        // Bổ sung lớp đệm an toàn 2mm hai bên để CHỐNG MẤT dòng kẻ dọc trái và phải
         element.style.padding = "0 2mm"; 
         element.style.boxSizing = "border-box";
 
@@ -806,14 +805,18 @@ async function f_x_xuat_pdf() {
             tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            tb.style.border = "0.1mm solid #000"; // Viền bảng CỰC MẢNH chuẩn in
+            // GIẢM ĐỘ DÀY VIỀN BẢNG XUỐNG 0.05mm VÀ MÀU XÁM NHẠT
+            tb.style.border = "0.05mm solid #999999";
             
-            // Khóa toàn bộ 4 cạnh cho từng dòng
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "avoid";
                 r.style.breakInside = "avoid";
-                r.style.border = "0.1mm solid #000"; 
+                // GIẢM ĐỘ DÀY VÀ ĐỘ ĐẬM DÒNG KẺ
+                r.style.border = "0.05mm solid #999999";
+                // TỰ ĐỘNG GIÃN DÒNG THEO NỘI DUNG
+                r.style.height = "auto";
+                r.style.lineHeight = "1.2";
             });
             
             const cells = tb.querySelectorAll("th, td");
@@ -821,10 +824,15 @@ async function f_x_xuat_pdf() {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                c.style.border = "0.1mm solid #000"; // Nét 0.1mm khắc phục hiện tượng đậm, to
-                c.style.padding = "4px 3px"; 
+                // GIẢM ĐỘ DÀY VIỀN CELL VÀ CHUYỂN SANG MÀU XÁM NHẠT
+                c.style.border = "0.05mm solid #999999";
+                // GIẢM PADDING ĐỂ TIẾT KIỆM KHÔNG GIAN, TRÁNH KHOẢNG TRỐNG THỪA
+                c.style.padding = "2px 3px"; 
                 c.style.color = "#000";
-                c.style.boxSizing = "border-box"; 
+                c.style.boxSizing = "border-box";
+                // TỰ ĐỘNG GIÃN CHIỀU CAO THEO NỘI DUNG
+                c.style.height = "auto";
+                c.style.lineHeight = "1.2";
             });
             
             const firstRow = tb.querySelector("tr");
@@ -835,7 +843,7 @@ async function f_x_xuat_pdf() {
                 firstRow.children[3].style.width = "45%";
             }
 
-            // Xử lý dòng không có dữ liệu: ẩn dòng kẻ cột trái nếu dòng trống
+            // Xử lý dòng không có dữ liệu: ẩn dòng kẻ dọc
             rows.forEach(r => {
                 const tds = r.querySelectorAll("td");
                 if (tds.length > 0) {
@@ -846,22 +854,13 @@ async function f_x_xuat_pdf() {
                         }
                     });
                     if (!hasData) {
-                        // Dòng không có dữ liệu: chỉ giữ dòng kẻ ngang, bỏ dòng kẻ dọc
                         tds.forEach(td => {
                             td.style.borderLeft = "none";
                             td.style.borderRight = "none";
                         });
-                        // Vẫn giữ border trên và dưới cho dòng (đã set ở trên)
                     }
                 }
             });
-        });
-
-        // Tự động giãn độ rộng dòng cho vừa trang
-        const allRows = element.querySelectorAll("tr");
-        allRows.forEach(r => {
-            r.style.height = "auto";
-            r.style.minHeight = "8mm"; // Đảm bảo dòng không quá hẹp
         });
 
         // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG
@@ -948,7 +947,7 @@ async function f_x_xuat_pdf() {
                 r.style.breakInside = "";
                 r.style.border = "";
                 r.style.height = "";
-                r.style.minHeight = "";
+                r.style.lineHeight = "";
             });
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
@@ -956,6 +955,9 @@ async function f_x_xuat_pdf() {
                 c.style.boxSizing = "";
                 c.style.borderLeft = "";
                 c.style.borderRight = "";
+                c.style.height = "";
+                c.style.lineHeight = "";
+                c.style.padding = "";
             });
         });
 
