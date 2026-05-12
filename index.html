@@ -868,7 +868,7 @@ async function f_x_xuat_pdf() {
         if (summaryBlock) {
             summaryBlock.style.marginTop = "15px";
             summaryBlock.style.padding = "10px 15px";
-            summaryBlock.style.border = "0.1mm solid #000"; 
+            summaryBlock.style.border = "0.05mm solid #000"; 
             summaryBlock.style.backgroundColor = "#f0f0f0";
             summaryBlock.style.display = "flex";
             summaryBlock.style.justifyContent = "space-between";
@@ -877,12 +877,12 @@ async function f_x_xuat_pdf() {
             summaryBlock.style.breakInside = "avoid"; 
 
             const titleDukien = summaryBlock.querySelector("h3");
-            if (titleDukien) titleDukien.style.fontSize = "13pt";
+            if (titleDukien) titleDukien.style.fontSize = "10pt";
 
             const leftScores = summaryBlock.querySelector("div:nth-child(2)");
             if (leftScores) {
-                leftScores.style.fontSize = "11pt";
-                leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "11pt");
+                leftScores.style.fontSize = "10pt";
+                leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "10pt");
             }
 
             const rightRating = summaryBlock.querySelector(".v-d-g");
@@ -892,12 +892,12 @@ async function f_x_xuat_pdf() {
                 const totalScoreText = rightRating.querySelector("div:last-child");
                 
                 if (ratingText) {
-                    ratingText.style.fontSize = "14pt";
+                    ratingText.style.fontSize = "12pt";
                     ratingText.style.fontWeight = "bold";
                     ratingText.style.color = "#000";
                 }
                 if (totalScoreText) {
-                    totalScoreText.style.fontSize = "12pt";
+                    totalScoreText.style.fontSize = "10pt";
                     totalScoreText.style.fontWeight = "bold";
                     totalScoreText.style.color = "#000";
                 }
