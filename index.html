@@ -747,8 +747,7 @@
         }
     }
 /* ========================================================= */
-/* ========================================================= */
-/* HÀM XUẤT PDF CHUẨN - NÉT SIÊU MẢNH (#777), CHỐNG BẺ CHỮ */
+/* HÀM XUẤT PDF CHUẨN - KHẮC PHỤC BẺ CHỮ & ĐÓNG KHUNG TRANG */
 /* ========================================================= */
 async function f_x_xuat_pdf() {
     try {
@@ -766,7 +765,7 @@ async function f_x_xuat_pdf() {
         const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
 
         if (typeof hienThiThongBaoUI === "function") {
-            hienThiThongBaoUI("Hệ thống đang chuẩn hóa nét kẻ và chống bẻ chữ...<br>Vui lòng không cuộn chuột.");
+            hienThiThongBaoUI("Hệ thống đang xử lý tự động giãn dòng và tạo PDF...<br>Vui lòng không cuộn chuột.");
         }
 
         // Lưu lại toàn bộ thuộc tính cũ để khôi phục sau khi in
@@ -797,7 +796,7 @@ async function f_x_xuat_pdf() {
         element.style.width = "190mm";
         element.style.maxWidth = "190mm";
         element.style.overflow = "visible";
-        element.style.padding = "0 2mm"; 
+        element.style.padding = "0"; // Khít lề chuẩn
         element.style.boxSizing = "border-box";
 
         const tables = element.querySelectorAll("table");
@@ -806,14 +805,15 @@ async function f_x_xuat_pdf() {
             tb.style.margin = "0"; 
             tb.style.tableLayout = "fixed";
             tb.style.borderCollapse = "collapse";
-            tb.style.border = "0.1px solid #777"; // Vạch viền tổng cực mảnh và nhạt
+            // Viền cực mảnh và nhạt màu (0.1pt, #999)
+            tb.style.border = "0.1pt solid #999"; 
             
-            // Xóa bỏ lệnh khóa dòng (avoid) để bảng được cắt tự nhiên, chống hiện tượng vạch dọc thừa
+            // Cho phép cắt dòng tự nhiên để lấp đầy trang 1
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
                 r.style.pageBreakInside = "auto";
                 r.style.breakInside = "auto";
-                r.style.border = "0.1px solid #777"; 
+                r.style.border = "0.1pt solid #999"; 
             });
             
             const cells = tb.querySelectorAll("th, td");
@@ -821,10 +821,10 @@ async function f_x_xuat_pdf() {
                 c.style.wordBreak = "break-word";
                 c.style.whiteSpace = "pre-wrap";
                 c.style.fontSize = "11pt"; 
-                c.style.border = "0.1px solid #777"; // Viền ô mảnh và nhạt
-                // Trả lại độ giãn dòng tự nhiên (không kéo giãn quá mức nữa)
-                c.style.padding = "5px 4px"; 
-                c.style.lineHeight = "1.4";
+                c.style.border = "0.1pt solid #999"; 
+                // Tạo khoảng trống hợp lý để thuật toán tìm khe cắt trang
+                c.style.padding = "6px 5px"; 
+                c.style.lineHeight = "1.5";
                 c.style.color = "#000";
                 c.style.boxSizing = "border-box"; 
             });
@@ -843,7 +843,7 @@ async function f_x_xuat_pdf() {
         if (summaryBlock) {
             summaryBlock.style.marginTop = "15px";
             summaryBlock.style.padding = "10px 15px";
-            summaryBlock.style.border = "0.1px solid #777"; 
+            summaryBlock.style.border = "0.1pt solid #999"; 
             summaryBlock.style.backgroundColor = "#f0f0f0";
             summaryBlock.style.display = "flex";
             summaryBlock.style.justifyContent = "space-between";
@@ -881,7 +881,7 @@ async function f_x_xuat_pdf() {
 
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 4. CẤU HÌNH PDF (KÍCH HOẠT AVOID-ALL CHỐNG BẺ CHỮ)
+        // 4. CẤU HÌNH PDF (CHỐNG BẺ CHỮ BẰNG AVOID-ALL)
         const opt = {
             margin: [15, 10, 15, 10], 
             filename: tenFile,
@@ -898,13 +898,29 @@ async function f_x_xuat_pdf() {
                 format: "a4",
                 orientation: "portrait"
             },
-            // Thuật toán 'avoid-all' ép hệ thống tìm dòng trống để cắt, không cắt ngang bụng chữ
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        await html2pdf().set(opt).from(element).save();
+        // 5. XUẤT PDF VÀ VẼ LẠI DÒNG KẺ BỊ KHUYẾT BẰNG THUẬT TOÁN ĐỒ HỌA jSPDF
+        await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+            const totalPages = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setDrawColor(153, 153, 153); // Màu xám nhạt #999 đồng bộ với CSS
+                pdf.setLineWidth(0.1); // Nét vẽ 0.1mm
+                
+                // Đóng viền ngang ở mép trên (từ trang 2 trở đi để bảo vệ vết cắt)
+                if (i > 1) {
+                    pdf.line(10, 15, 200, 15); // Tọa độ: x1(10), y1(15), x2(200), y2(15)
+                }
+                // Đóng viền ngang ở mép dưới (trừ trang cuối cùng chứa khối tổng kết)
+                if (i < totalPages) {
+                    pdf.line(10, 282, 200, 282); // 297mm - 15mm lề = 282mm
+                }
+            }
+        }).save();
 
-        // 5. KHÔI PHỤC GIAO DIỆN GỐC (UI WEB)
+        // 6. KHÔI PHỤC GIAO DIỆN GỐC (UI WEB)
         element.removeChild(tieuDePDF);
         element.style.width = oldWidth;
         element.style.maxWidth = oldMaxWidth;
