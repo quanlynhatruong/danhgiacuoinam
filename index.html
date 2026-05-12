@@ -834,6 +834,34 @@ async function f_x_xuat_pdf() {
                 firstRow.children[2].style.width = "15%";
                 firstRow.children[3].style.width = "45%";
             }
+
+            // Xử lý dòng không có dữ liệu: ẩn dòng kẻ cột trái nếu dòng trống
+            rows.forEach(r => {
+                const tds = r.querySelectorAll("td");
+                if (tds.length > 0) {
+                    let hasData = false;
+                    tds.forEach(td => {
+                        if (td.innerText.trim() !== "" && td.innerText.trim() !== "-- Chọn mức --") {
+                            hasData = true;
+                        }
+                    });
+                    if (!hasData) {
+                        // Dòng không có dữ liệu: chỉ giữ dòng kẻ ngang, bỏ dòng kẻ dọc
+                        tds.forEach(td => {
+                            td.style.borderLeft = "none";
+                            td.style.borderRight = "none";
+                        });
+                        // Vẫn giữ border trên và dưới cho dòng (đã set ở trên)
+                    }
+                }
+            });
+        });
+
+        // Tự động giãn độ rộng dòng cho vừa trang
+        const allRows = element.querySelectorAll("tr");
+        allRows.forEach(r => {
+            r.style.height = "auto";
+            r.style.minHeight = "8mm"; // Đảm bảo dòng không quá hẹp
         });
 
         // 3. TINH CHỈNH PHẦN KẾT QUẢ CUỐI TRANG
@@ -919,11 +947,15 @@ async function f_x_xuat_pdf() {
                 r.style.pageBreakInside = "";
                 r.style.breakInside = "";
                 r.style.border = "";
+                r.style.height = "";
+                r.style.minHeight = "";
             });
             const cells = tb.querySelectorAll("th, td");
             cells.forEach(c => {
                 c.style.border = ""; 
                 c.style.boxSizing = "";
+                c.style.borderLeft = "";
+                c.style.borderRight = "";
             });
         });
 
