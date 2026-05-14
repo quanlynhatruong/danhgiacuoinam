@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png">
-    <title>Kết Quả Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
+    <title>Đang tải hệ thống...</title>
+    
+    <script>
+      document.write('<script src="ketnoi.js?v=' + new Date().getTime() + '"><\/script>');
+    </script>
+    
     <style>
         :root {
             --mau-c: #0056b3;
@@ -69,7 +73,6 @@
             width: 85%;
         }
         
-        /* Đã nâng cấp thành khung viền vàng nổi bật theo đúng hình ảnh cung cấp */
         .thong-tin-user {
             text-align: center;
             color: #ffffff;
@@ -212,15 +215,14 @@
     <div id="bo-cuc-he-thong" class="bo-cuc-tong">
         <div class="khung-trai">
             <div class="khung-logo">
-                <img src="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png" alt="Logo">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="app-logo" alt="Logo">
             </div>
-            <div class="ten-truong-trai">Trường TH&THCS Hợp Thành</div>
+            <div class="ten-truong-trai app-school-name">ĐANG TẢI...</div>
             
             <div class="thong-tin-user">
                 <div style="opacity: 0.9; margin-bottom: 2px;">Xin chào đồng chí:</div>
                 <div class="hl-text" id="ui-ten-hien-thi">...</div>
                 <div style="opacity: 0.9; margin-top: 5px;">Xếp loại: <span class="hl-text" style="font-size: 13px;" id="ui-xep-loai">...</span></div>
-                <!-- Bổ sung tính năng hiển thị vị trí xếp hạng -->
                 <div style="opacity: 0.9; margin-top: 3px;">Đứng thứ: <span class="hl-text" style="font-size: 14px;" id="ui-dung-thu">...</span></div>
                 <div style="opacity: 0.9; margin-top: 3px;">Phân loại: <span class="hl-text" style="font-size: 13px;" id="ui-phan-loai">...</span></div>
                 <div style="opacity: 0.9; margin-top: 3px;">Năm học: <span class="hl-text" style="font-size: 13px;" id="ui-nam-hoc">...</span></div>
@@ -251,7 +253,7 @@
             <div class="k-header-sticky">
                 <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
                 <div class="k-dau">
-                    <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
+                    <h2><span class="app-school-name-up">ĐANG TẢI...</span></h2>
                     <h1>KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC</h1>
                     <div style="margin-top: 10px; display: inline-flex; align-items: center; background: #e9ecef; padding: 5px 15px; border-radius: 20px;">
                         <label for="locNamHoc" style="font-weight: bold; color: var(--mau-c); margin-right: 10px; font-size: 15px;">Năm học:</label>
@@ -280,10 +282,11 @@
             </div>
         </div>
     </div>
+    
+    <script>applyDGConfig();</script>
 
     <script>
         let v_dl_toan_bo = [];
-        const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
 
         window.addEventListener('DOMContentLoaded', () => {
             let quyenAdmin = sessionStorage.getItem("HTDG_IS_ADMIN") === "true";
@@ -297,7 +300,6 @@
                 document.getElementById("menu-tieu-chi-nv").style.display = quyenAdmin ? "flex" : "none";
             }
             
-            // Kích hoạt đồng thời tải dữ liệu chung và dữ liệu cá nhân
             dienThongTinNguoiDung();
             taiDuLieuKetQua();
 
@@ -317,6 +319,7 @@
             }
 
             try {
+                const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
                 const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(d_danh)}&z_p_c=${nhom}`);
                 const t_k = await res.json();
                 
@@ -326,7 +329,6 @@
                     document.getElementById("ui-phan-loai").innerText = t_k.y_role || "CHƯA RÕ";
                     document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || "CHƯA RÕ";
                     
-                    // Cập nhật xếp loại lên menu sau khi có thông tin người dùng
                     capNhatXepLoaiMenuTrai(ten);
                 }
             } catch (e) {
@@ -334,14 +336,11 @@
             }
         }
 
-        // Đã cập nhật toàn diện hàm này: Lọc và sắp xếp để lấy chính xác STT của người dùng trong bảng dữ liệu
         function capNhatXepLoaiMenuTrai(tenGoi) {
             let namChon = document.getElementById("locNamHoc").value;
-            // Nếu dropdown chưa có giá trị, lấy tạm giá trị đang hiển thị
             if (!namChon) {
                 namChon = document.getElementById("ui-nam-hoc").innerText;
             } else {
-                // Đồng bộ năm học hiển thị theo năm đang lọc
                 document.getElementById("ui-nam-hoc").innerText = namChon;
             }
 
@@ -349,16 +348,14 @@
 
             let xepLoai = "CHƯA ĐÁNH GIÁ";
             let phanLoai = document.getElementById("ui-phan-loai").innerText;
-            let dungThu = "--"; // Mặc định hiển thị nếu năm đó người dùng không có kết quả
+            let dungThu = "--"; 
 
             if (v_dl_toan_bo && v_dl_toan_bo.length > 0) {
-                // 1. Lọc danh sách riêng cho năm học được chọn
                 let danhSachTheoNam = v_dl_toan_bo.filter(item => {
                     let checkNam = item.n_hoc ? item.n_hoc.trim() : "";
                     return checkNam === namChon;
                 });
                 
-                // 2. Tái tạo thao tác sắp xếp (sort) giống hệt hàm hienThiBangKetQua
                 danhSachTheoNam.sort((a, b) => {
                     let parseA = phanTichXepLoai(a.x_l_q || "");
                     let parseB = phanTichXepLoai(b.x_l_q || "");
@@ -369,16 +366,14 @@
                     }
                 });
 
-                // 3. Tra cứu vị trí index để quy ra số thứ tự (STT)
                 let userIndex = danhSachTheoNam.findIndex(item => item.t_v_c === tenGoi);
                 
                 if (userIndex !== -1) {
                     let userRecord = danhSachTheoNam[userIndex];
                     xepLoai = userRecord.x_l_q || "CHƯA ĐÁNH GIÁ";
                     phanLoai = userRecord.p_l || phanLoai;
-                    dungThu = userIndex + 1; // Số thứ tự đứng trong bảng
+                    dungThu = userIndex + 1; 
                 } else {
-                    // Nếu năm nay không có dữ liệu, dò tìm lại ở năm khác để giữ nguyên chức danh Phân loại
                     let userAnyYear = v_dl_toan_bo.find(item => item.t_v_c === tenGoi);
                     if (userAnyYear && userAnyYear.p_l) {
                         phanLoai = userAnyYear.p_l;
@@ -386,7 +381,6 @@
                 }
             }
             
-            // Gán giá trị sau khi xử lý thành công
             document.getElementById("ui-xep-loai").innerText = xepLoai;
             document.getElementById("ui-dung-thu").innerText = dungThu;
             document.getElementById("ui-phan-loai").innerText = phanLoai;
@@ -399,6 +393,7 @@
 
         async function taiDuLieuKetQua() {
             try {
+                const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
                 const res = await fetch(`${z_y_a}?z_p_a=l_k_q`);
                 const t_k = await res.json();
                 if (t_k.status === 'success') {
@@ -452,7 +447,6 @@
             
             hienThiBangKetQua(duLieuLoc);
 
-            // Đồng bộ lại toàn bộ thông tin cá nhân (STT, Xếp loại, Năm) ngay khi có thay đổi bộ lọc
             let ten = document.getElementById("ui-ten-hien-thi").innerText;
             capNhatXepLoaiMenuTrai(ten);
         }
