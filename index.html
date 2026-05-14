@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png">
-    <title>Hệ Thống Đánh Giá Xếp Loại Viên Chức - TH&THCS Hợp Thành</title>
+    <title>Đang tải hệ thống...</title>
+    
+    <script>
+      document.write('<script src="ketnoi.js?v=' + new Date().getTime() + '"><\/script>');
+    </script>
+    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -111,9 +115,9 @@
 
 <div id="khung-xac-thuc">
     <div class="hop-xac-thuc">
-        <img src="https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png" width="80" alt="Logo" style="margin-bottom: 15px;">
-        <h2 style="color: #b91c1c; margin: 0; text-transform: uppercase;">Hệ Thống Đánh Giá Viên Chức</h2>
-        <h3 style="color: #0056b3; margin: 10px 0 25px 0;">Trường TH&THCS Hợp Thành</h3>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="app-logo" width="80" alt="Logo" style="margin-bottom: 15px;">
+        <h2 class="app-title-name-up" style="color: #b91c1c; margin: 0; text-transform: uppercase;">ĐANG TẢI...</h2>
+        <h3 class="app-school-name" style="color: #0056b3; margin: 10px 0 25px 0;">ĐANG TẢI...</h3>
         
         <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
             <label for="oChonNhom" style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">1. Chọn đối tượng đánh giá:</label>
@@ -123,7 +127,7 @@
             </select>
             
             <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
-            <div id="g_id_onload" data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
+            <div id="g_id_onload" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
             <div style="display: flex; justify-content: center;">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
             </div>
@@ -134,7 +138,7 @@
         </div>
         
         <div style="font-size: 13px; color: #888; text-align: center;">Hệ thống nạp dữ liệu tự động theo định danh chuẩn.</div>
-        <div style="margin-top: 15px; font-size: 14px; color: #888; font-weight: bold;">Thiết kế và phát triển<br>Hoàng Ngọc Lâm</div>
+        <div style="margin-top: 15px; font-size: 14px; color: #888; font-weight: bold;">Thiết kế và phát triển<br><span class="app-author-name">ĐANG TẢI...</span></div>
     </div>
 </div>
 
@@ -142,9 +146,9 @@
     
     <div class="khung-trai">
         <div class="khung-logo">
-            <img src="https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png" alt="Logo">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="app-logo" alt="Logo">
         </div>
-        <div class="ten-truong-trai">Trường TH&THCS Hợp Thành</div>
+        <div class="ten-truong-trai app-school-name">ĐANG TẢI...</div>
         
         <div id="vungThongTin" style="display: none; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.2); width: 99%; padding: 0px 0px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; text-align: center;">
             <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 0px;">Dữ liệu:</div>
@@ -188,8 +192,8 @@
             <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
             
             <div class="k-dau">
-                <h2>TRƯỜNG TH&THCS HỢP THÀNH</h2>
-                <h1>Hệ Thống Đánh Giá Xếp Loại Viên Chức</h1>
+                <h2><span class="app-school-name-up">ĐANG TẢI...</span></h2>
+                <h1 class="app-title-name-up">ĐANG TẢI...</h1>
                 
                 <div id="vungHienThiNamHoc"><p><i>(Áp dụng từ năm học 2025-2026)</i></p></div>
                 <div id="vungChonAdmin" style="display: none; margin-top: 8px;">
@@ -279,6 +283,8 @@
     <button class="n-dong-cb" onclick="dongCanhBaoUI()">Đóng</button>
 </div>
 
+<script>applyDGConfig();</script>
+
 <script>
     let v_che_do_xem_admin = false;
     let v_che_do_khach = false; 
@@ -366,6 +372,7 @@
 
     async function f_x_load_guest_template(p_n) {
         try {
+            const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
             let repId = "";
             if (danhSachVienChucAdmin.length === 0) {
                 const resList = await fetch(`${z_y_a}?z_p_a=l_d_s`);
@@ -451,7 +458,6 @@
         location.reload();
     }
 
-    const z_y_a = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
     let v_l_a = "", v_l_b = "", v_l_c = {};
     let v_l_d = "", v_l_e = "", v_l_f = "";
     
@@ -466,7 +472,8 @@
         
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
-        
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+
         if (!p_c) {
             if (v_che_do_khach) return; 
             hienThiThongBaoUI("Hệ thống chưa xác định được định danh!");
@@ -545,6 +552,7 @@
 
     async function f_x_load_users() {
         try {
+            const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
             const res = await fetch(`${z_y_a}?z_p_a=l_d_s`);
             const t_k = await res.json();
             if (t_k.status === 'success') {
@@ -569,6 +577,7 @@
     async function f_x_admin_chon_user() {
         const selectObj = document.getElementById("oChonUserAdmin");
         const selectedId = selectObj.value;
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
 
         if (!selectedId) return; 
 
@@ -728,6 +737,8 @@
 
     async function f_x_i() {
         const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        
         m_d.forEach(d_k => {
             const v_c_1 = d_k.querySelector(".m-cot-mot"), v_c_2 = d_k.cells[2], v_c_3 = d_k.querySelector(".o-n-bang");
             if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
@@ -798,15 +809,15 @@ async function f_x_xuat_pdf() {
             });
         });
 
-        // 2. TẠO TIÊU ĐỀ ĐẦU TRANG CÓ LOGO (Đã xử lý an toàn chống lỗi CORS)
+        // 2. TẠO TIÊU ĐỀ ĐẦU TRANG CÓ LOGO (Đã xử lý lấy từ ketnoi.js)
         const tieuDePDF = document.createElement("div");
         tieuDePDF.id = "tieu-de-pdf-tam";
         tieuDePDF.style.marginBottom = "15px"; 
         tieuDePDF.style.fontFamily = "'Times New Roman', serif";
         tieuDePDF.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; padding-top: 5px;">TRƯỜNG TH&THCS HỢP THÀNH</div>
-                <img src="https://i.ibb.co/S46wLjDt/logo-tr-ng-TH-THCS-Hop-Thanh3-removebg-preview.png" style="width: 55px; height: auto;">
+                <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; padding-top: 5px;">${typeof DG_TEN_TRUONG_UP !== 'undefined' ? DG_TEN_TRUONG_UP : 'TRƯỜNG'}</div>
+                <img src="${typeof DG_LINK_LOGO !== 'undefined' ? DG_LINK_LOGO : ''}" style="width: 55px; height: auto;">
             </div>
             <div style="text-align: center;">
                 <h2 style="margin: 0 0 8px 0; font-size: 14pt; font-weight: bold; color: #000; text-transform: uppercase;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
@@ -841,7 +852,6 @@ async function f_x_xuat_pdf() {
             
             const rows = tb.querySelectorAll("tr");
             rows.forEach(r => {
-                // Khôi phục lệnh avoid cho từng dòng để chống bẻ đôi chữ một cách tự nhiên
                 r.style.pageBreakInside = "avoid";
                 r.style.breakInside = "avoid";
                 r.style.border = "0.1pt solid #999"; 
@@ -956,7 +966,7 @@ async function f_x_xuat_pdf() {
 
         await new Promise(resolve => setTimeout(resolve, 300)); 
 
-        // 5. CẤU HÌNH VÀ XUẤT PDF (Gỡ bỏ avoid-all để khôi phục Layout chuẩn)
+        // 5. CẤU HÌNH VÀ XUẤT PDF
         const opt = {
             margin: [15, 10, 15, 10], 
             filename: tenFile,
@@ -972,7 +982,6 @@ async function f_x_xuat_pdf() {
             pagebreak: { mode: ['css', 'legacy'] } 
         };
 
-        // KÍCH HOẠT THUẬT TOÁN VẼ BÙ KHUNG VIỀN CHO TRANG BỊ CẮT VÀ SỬA LỖI LƯU
         const worker = html2pdf().set(opt).from(element);
         await worker.toPdf().get('pdf').then(function(pdf) {
             const totalPages = pdf.internal.getNumberOfPages();
@@ -984,7 +993,7 @@ async function f_x_xuat_pdf() {
                 if (i < totalPages) { pdf.line(10, 282, 200, 282); }
             }
         });
-        await worker.save(); // Chạy độc lập để tránh lỗi "Có lỗi xảy ra..."
+        await worker.save(); 
 
         // 6. KHÔI PHỤC LẠI TRẠNG THÁI GIAO DIỆN GỐC
         element.removeChild(tieuDePDF);
@@ -1096,6 +1105,7 @@ async function f_x_xuat_pdf() {
         }
 
         oNhap.value = '';
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
 
         const welcomeMsg = document.getElementById('aiWelcomeMsg');
         if (welcomeMsg) {
