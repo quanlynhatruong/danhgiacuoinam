@@ -312,7 +312,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
-        const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID"); // Lưu giữ nguyên vẹn chức danh (value mới)
+        const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
         if (savedNhom) {
             document.getElementById('oChonNhom').value = savedNhom;
             f_x_hien_nut_login();
@@ -359,7 +359,7 @@
         const d_danh = payload[kAttr];
         
         sessionStorage.setItem("HTDG_ACCOUNT_ID", d_danh);
-        sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon); // Lưu tên chức vụ thay vì tên nhóm
+        sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
         showMainUI(d_danh);
     }
 
@@ -455,7 +455,6 @@
             return;
         }
         
-        // Đọc data-nhom để xác định file mẫu cần gọi
         const p_n = objNhom.options[objNhom.selectedIndex].getAttribute("data-nhom");
         document.getElementById('hienThiNhom').innerText = (p_n === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
         
@@ -513,7 +512,6 @@
         const objNhom = document.getElementById("oChonNhom");
         const optChon = objNhom.options[objNhom.selectedIndex];
         
-        // Cụm tham số tương tác với GAS backend
         const p_n = optChon.getAttribute("data-nhom"); 
         const chucVuChon = objNhom.value.toLowerCase();
         
@@ -537,10 +535,10 @@
             if (t_k.status === 'success') {
                 let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
                 
-                // ĐỐI CHIẾU CHÉO NGHIÊM NGẶT VỚI CỘT D (Bỏ qua đối với tài khoản cấp quản trị Admin)
+                // KIỂM TRA LỖI SAO CHỨC VỤ TRONG CÙNG NHÓM (CẬP NHẬT TRÍCH XUẤT CỘT D)
                 const chucVuThucTe = (t_k.y_role || "").toLowerCase();
                 if (!quyenAdmin && chucVuChon !== "" && !chucVuThucTe.includes(chucVuChon)) {
-                    hienThiThongBaoUI(`<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Sai đối tượng đánh giá!<br>Chức danh của bạn trên hệ thống là <b>${t_k.y_role || 'Chưa cập nhật'}</b> chứ không phải <b>${optChon.text}</b>.<br>Vui lòng ấn Đóng để chọn lại đúng chức danh.`, f_x_logout);
+                    hienThiThongBaoUI(`<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá.<br>Chức danh ghi nhận trên hệ thống (Cột D) là: <span style="color:#b91c1c; font-size:18px;"><b>${t_k.y_role || 'Chưa cập nhật'}</b></span>.<br>Vui lòng ấn Đóng để chọn lại chính xác đối tượng này.`, f_x_logout);
                     f_x_j(false);
                     return;
                 }
@@ -571,8 +569,8 @@
                 document.getElementById("vungThongTin").style.display = "flex";
                 f_x_h();
             } else if (t_k_khac.status === 'success') {
-                let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
-                hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai nhóm đối tượng đánh giá!<br>Tài khoản của bạn được phân loại thuộc khối <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
+                // KIỂM TRA LỖI SAO CHỨC VỤ KHÁC NHÓM (CẬP NHẬT TRÍCH XUẤT CỘT D)
+                hienThiThongBaoUI(`<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá.<br>Chức danh ghi nhận trên hệ thống (Cột D) là: <span style="color:#b91c1c; font-size:18px;"><b>${t_k_khac.y_role || 'Chưa cập nhật'}</b></span>.<br>Vui lòng ấn Đóng để chọn lại chính xác đối tượng này.`, f_x_logout);
                 f_x_j(false);
                 return;
             } else { 
