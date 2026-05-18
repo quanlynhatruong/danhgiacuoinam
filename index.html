@@ -121,8 +121,9 @@
         
         <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
             <label for="oChonNhom" style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">1. Chọn đối tượng đánh giá:</label>
-            <select id="oChonNhom" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
-               <option value="giaovien">TỔ TRƯỞNG</option>
+            <select id="oChonNhom" onchange="f_x_thay_doi_nhom()" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
+                <option value="" disabled selected>-- Chọn đối tượng đánh giá --</option>
+                <option value="giaovien">TỔ TRƯỞNG</option>
                 <option value="giaovien">TỔ PHÓ</option>
                 <option value="giaovien">TỔNG PHỤ TRÁCH</option>
                 <option value="giaovien">GIÁO VIÊN</option>
@@ -131,10 +132,12 @@
                 <option value="nhanvien">NHÂN VIÊN</option>
             </select>
             
-            <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
-            <div id="g_id_onload" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
-            <div style="display: flex; justify-content: center;">
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+            <div id="vung-xac-thuc-gmail" style="display: none;">
+                <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
+                <div id="g_id_onload" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
+                <div style="display: flex; justify-content: center;">
+                    <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+                </div>
             </div>
             
             <div style="margin-top: 20px; display: flex; justify-content: center; border-top: 1px dashed #b8daff; padding-top: 15px;">
@@ -237,7 +240,7 @@
                 </div>
                 
                 <div class="v-d-g" id="vHT3" style="flex: 1.2;">
-                    <div style="font-size: 20px; font-weight: bold; color: #dc3545; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
+                    <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
                     <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: 0</div>
                 </div>
             </div>
@@ -300,7 +303,10 @@
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-        if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
+        if (savedNhom) {
+            document.getElementById('oChonNhom').value = savedNhom;
+            f_x_thay_doi_nhom(); // Tự kích hoạt hiển thị nếu có bộ nhớ cấu hình nhóm cũ
+        }
         if (loggedUser) showMainUI(loggedUser);
         
         const tbg = document.getElementById("t-b-g");
@@ -416,13 +422,18 @@
     }
 
     async function f_x_vao_khach() {
+        const objNhom = document.getElementById('oChonNhom');
+        const p_n = objNhom.value;
+        if (!p_n) {
+            hienThiThongBaoUI("Vui lòng chọn đối tượng đánh giá trước khi truy cập hệ thống!");
+            return;
+        }
+
         v_che_do_khach = true;
         document.getElementById('khung-xac-thuc').style.display = 'none';
         document.getElementById('bo-cuc-he-thong').style.display = 'flex';
         document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
         
-        const objNhom = document.getElementById('oChonNhom');
-        const p_n = objNhom.value;
         document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         
         document.getElementById("vungThongTin").style.display = "flex";
@@ -733,7 +744,7 @@
             k_q = f_x_m_chinh(mangDuLieuGom);
         }
 
-        // --- Cập nhật: Gọi hàm tính điểm thưởng/phạt và cộng dồn vào phần 2 ---
+        // --- Gọi hàm tính điểm thưởng/phạt và cộng dồn vào phần 2 ---
         let diemThuongPhat = f_x_tinh_diem_thuong_phat(mangDuLieuGom);
         k_q.diemP2 = k_q.diemP2 + diemThuongPhat;
         k_q.tongDiem = k_q.diemP1 + k_q.diemP2;
@@ -777,6 +788,17 @@
             }
         });
         return diemThem;
+    }
+
+    // Hàm 3: Kiểm tra hiển thị vùng xác thực Gmail khi chọn xong chức vụ
+    function f_x_thay_doi_nhom() {
+        const nhom = document.getElementById('oChonNhom').value;
+        const vungGmail = document.getElementById('vung-xac-thuc-gmail');
+        if (nhom) {
+            vungGmail.style.display = 'block';
+        } else {
+            vungGmail.style.display = 'none';
+        }
     }
 
     async function f_x_i() {
