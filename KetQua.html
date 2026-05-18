@@ -366,11 +366,32 @@
                     }
                 });
 
+                // ==========================================
+                // THUẬT TOÁN ĐIỀU CHỈNH 20% CHỈ TIÊU XUẤT SẮC
+                // ==========================================
+                let tongSoHoanThanhTot = 0;
+                danhSachTheoNam.forEach(item => {
+                    let p = phanTichXepLoai(item.x_l_q || "");
+                    // Lấy tổng số người đạt mức Tốt và Xuất sắc
+                    if (p.muc === 3 || p.muc === 4) tongSoHoanThanhTot++;
+                });
+                let chiTieuXuatSac = Math.floor(tongSoHoanThanhTot * 0.2);
+                // ==========================================
+
                 let userIndex = danhSachTheoNam.findIndex(item => item.t_v_c === tenGoi);
                 
                 if (userIndex !== -1) {
                     let userRecord = danhSachTheoNam[userIndex];
+                    let parseUser = phanTichXepLoai(userRecord.x_l_q || "");
+                    
                     xepLoai = userRecord.x_l_q || "CHƯA ĐÁNH GIÁ";
+                    
+                    // Nếu người này đạt mức Xuất sắc nhưng số thứ tự index vượt hoặc bằng chỉ tiêu cho phép
+                    // thì thay thế chữ "xuất sắc" thành "tốt" (giữ nguyên điểm số)
+                    if (parseUser.muc === 4 && userIndex >= chiTieuXuatSac) {
+                        xepLoai = xepLoai.replace(/xuất sắc/i, "tốt");
+                    }
+
                     phanLoai = userRecord.p_l || phanLoai;
                     dungThu = userIndex + 1; 
                 } else {
@@ -462,19 +483,45 @@
                 }
             });
 
+            // ==========================================
+            // THUẬT TOÁN ĐIỀU CHỈNH 20% CHỈ TIÊU XUẤT SẮC
+            // ==========================================
+            let tongSoHoanThanhTot = 0;
+            d_l.forEach(item => {
+                let p = phanTichXepLoai(item.x_l_q || "");
+                if (p.muc === 3 || p.muc === 4) tongSoHoanThanhTot++;
+            });
+            let chiTieuXuatSac = Math.floor(tongSoHoanThanhTot * 0.2);
+            // ==========================================
+
             const k_b = document.getElementById("bang-ket-qua");
             let html = "";
             d_l.forEach((item, index) => {
                 let colorCode = "#333";
-                let rawStr = item.x_l_q ? item.x_l_q.toLowerCase() : "";
-                if (rawStr.includes("xuất sắc")) colorCode = "#dc3545";
-                else if (rawStr.includes("tốt")) colorCode = "#0056b3";
+                
+                // Khởi tạo biến để chuẩn bị cho việc can thiệp chuỗi hiển thị
+                let ketQuaHienThi = item.x_l_q || "";
+                let parseHienTai = phanTichXepLoai(ketQuaHienThi);
+                
+                // Phân tích và xử lý giao diện hiển thị
+                if (parseHienTai.muc === 4) {
+                    if (index < chiTieuXuatSac) {
+                        // Nằm trong hạn mức chỉ tiêu, giữ nguyên màu đỏ Xuất sắc
+                        colorCode = "#dc3545";
+                    } else {
+                        // Vượt quá chỉ tiêu, chuyển hiển thị từ Xuất sắc sang Tốt (Điểm giữ nguyên)
+                        ketQuaHienThi = ketQuaHienThi.replace(/xuất sắc/i, "tốt");
+                        colorCode = "#0056b3"; // Đổi về màu xanh của Tốt
+                    }
+                } else if (parseHienTai.muc === 3) {
+                    colorCode = "#0056b3"; // Màu xanh chuẩn cho Tốt
+                }
                 
                 html += `<tr>
                     <td style="text-align: center; font-weight: bold;">${index + 1}</td>
                     <td style="font-weight: bold; color: #1e1e1e;">${item.t_v_c || ""}</td>
                     <td style="text-align: center; color: #555; font-weight: 500;">${item.p_l || ""}</td>
-                    <td style="color: ${colorCode}; font-weight: 500; white-space: pre-line;">${item.x_l_q || ""}</td>
+                    <td style="color: ${colorCode}; font-weight: 500; white-space: pre-line;">${ketQuaHienThi}</td>
                 </tr>`;
             });
             if (html === "") html = `<tr><td colspan="4" style="text-align:center;">Chưa có viên chức nào nộp đánh giá trong năm học này</td></tr>`;
