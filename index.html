@@ -305,7 +305,7 @@
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
         if (savedNhom) {
             document.getElementById('oChonNhom').value = savedNhom;
-            f_x_thay_doi_nhom(); // Tự kích hoạt hiển thị nếu có bộ nhớ cấu hình nhóm cũ
+            f_x_thay_doi_nhom(); 
         }
         if (loggedUser) showMainUI(loggedUser);
         
@@ -661,11 +661,15 @@
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
-            let valD = item.x_d; // Nhận hệ số từ cột D do máy chủ GAS chuyển về
             
-            // --- Áp dụng quy tắc hiển thị vào cột thang điểm ---
+            // Xử lý thông minh lấy Cột D và quy đổi chuẩn dấu phẩy thập phân
+            let valD = item.x_d; 
+            if (valD !== undefined && valD !== null && valD !== "") {
+                valD = valD.toString().trim().replace(',', '.'); 
+            }
+            
+            // Áp dụng quy tắc hiển thị vào cột thang điểm 
             tg = f_x_lay_thang_gia_tri_thuong_phat(item.x_a, tg, valD);
-            // ----------------------------------------------------
             
             let kq = item.x_c || "";
             let html = "";
@@ -730,16 +734,19 @@
                 let e_s = d_k.querySelector("select.o-n-bang");
                 let attrHeSo = c_x_2.getAttribute("data-heso");
                 
+                // Tiền xử lý dữ liệu nhập (đề phòng người dùng nhập dấu phẩy thay vì chấm)
+                let rawVal = c_x_2.value.toString().replace(',', '.').replace(/[^\d\.\-]/g, '');
+                
                 mangDuLieuGom.push({
-                    ten: c_x_1.innerText.toLowerCase(),
+                    ten: c_x_1.innerText.trim(),
                     giaTri: c_x_2.value.toLowerCase(),
-                    so: parseFloat(c_x_2.value.replace(/[^\d\.]/g, '')) || 0,
+                    so: parseFloat(rawVal) || 0,
                     isSelect: e_s !== null,
                     selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
                     isDongBo: d_k.querySelector(".h-dong-bo") !== null,
                     quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
                     hasHeSoD: (attrHeSo !== null && attrHeSo !== ""),
-                    heSoD: parseFloat(attrHeSo) || 0
+                    heSoD: attrHeSo ? parseFloat(attrHeSo) : 0
                 });
             }
         });
@@ -773,42 +780,25 @@
     // CÁC HÀM XỬ LÝ VIẾT RIÊNG THEO NGUYÊN TẮC: "Thay đổi hàm nào viết riêng hàm đó"
     // ====================================================================
 
-    // Hàm 1: Áp dụng ghi quy tắc thưởng phạt vào cột thang điểm dựa trên hệ số Cột D
+    // Hàm 1: Bỏ hoàn toàn bắt từ khóa - Thay bằng Cột D hoàn toàn (Có xử lý hiển thị chuẩn VN)
     function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc, heSoVal) {
-        let hasHeSo = (heSoVal !== undefined && heSoVal !== null && heSoVal !== "");
-        if (hasHeSo) {
+        if (heSoVal !== undefined && heSoVal !== null && heSoVal !== "") {
             let hs = parseFloat(heSoVal);
             if (!isNaN(hs) && hs !== 0) {
-                return "1% = " + hs + " điểm";
+                // Hiển thị lại bằng dấu phẩy cho giao diện Việt Nam
+                return "1% = " + hs.toString().replace('.', ',') + " điểm";
             }
-            return tgGoc; // Giữ nguyên giá trị gốc (VD: %) nếu hệ số ở cột D là 0
         }
-        
-        // Logic dự phòng (fallback) nếu dòng đó không có thông tin Cột D
-        let ten = (tenTieuChi || "").toLowerCase();
-        if (ten.includes("vở sạch chữ đẹp")) return "1% = 0,5 điểm";
-        if (ten.includes("học sinh") && ten.includes("xuất sắc")) return "1% = 1 điểm";
-        if (ten.includes("chưu hoàn thành") || ten.includes("chưa hoàn thành")) return "1% = -1 điểm";
-        return tgGoc;
+        return tgGoc; 
     }
 
-    // Hàm 2: Tự động tính toán điểm cộng/trừ linh hoạt theo khai báo ở Cột D
+    // Hàm 2: Tự động tính toán điểm bằng đối chiếu chéo tuyệt đối sang thẻ mang hệ số Cột D
     function f_x_tinh_diem_thuong_phat(mangDuLieuGom) {
         let diemThem = 0;
         mangDuLieuGom.forEach(item => {
-            // Tuân thủ ưu tiên tuyệt đối nếu có hệ số khai báo ở Cột D
-            if (item.hasHeSoD) {
+            // Không xét tên nữa, chỉ quét tuyệt đối: Thẻ nào chứa data-heso thì thực thi nhân
+            if (item.hasHeSoD && !isNaN(item.heSoD)) {
                 diemThem += item.so * item.heSoD;
-            } else {
-                // Tương thích ngược (dự phòng)
-                let ten = item.ten;
-                if (ten.includes("vở sạch chữ đẹp")) {
-                    diemThem += item.so * 0.5;
-                } else if (ten.includes("học sinh") && ten.includes("xuất sắc")) {
-                    diemThem += item.so * 1;
-                } else if (ten.includes("chưu hoàn thành") || ten.includes("chưa hoàn thành")) {
-                    diemThem += item.so * -1;
-                }
             }
         });
         return diemThem;
