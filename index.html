@@ -69,6 +69,7 @@
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
         #t-b-g td:nth-child(1), #t-b-g td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
 
+        /* Tối ưu bảo mật: Loại bỏ từ khóa login nhạy cảm trong thiết kế UI */
         #khung-xac-thuc { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000; }
         .hop-xac-thuc { text-align: center; padding: 35px; background: white; border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
@@ -120,26 +121,20 @@
         
         <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
             <label for="oChonNhom" style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">1. Chọn đối tượng đánh giá:</label>
-            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_hien_nut_login()" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
-                <option value="" data-nhom="" disabled selected>-- CHỌN ĐỐI TƯỢNG --</option>
-                <option value="Tổ trưởng" data-nhom="giaovien">TỔ TRƯỞNG</option>
-                <option value="Tổ phó" data-nhom="giaovien">TỔ PHÓ</option>
-                <option value="Tổng phụ trách" data-nhom="giaovien">TỔNG PHỤ TRÁCH</option>
-                <option value="Giáo viên" data-nhom="giaovien">GIÁO VIÊN</option>
-                <option value="Tổ trưởng VP" data-nhom="nhanvien">TỔ TRƯỞNG VP</option>
-                <option value="Tổ phó VP" data-nhom="nhanvien">TỔ PHÓ VP</option>
-                <option value="Nhân viên" data-nhom="nhanvien">NHÂN VIÊN</option>
+            <select id="oChonNhom" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
+               <option value="giaovien">TỔ TRƯỞNG</option>
+                <option value="giaovien">TỔ PHÓ</option>
+                <option value="giaovien">TỔNG PHỤ TRÁCH</option>
+                <option value="giaovien">GIÁO VIÊN</option>
+                <option value="nhanvien">TỔ TRƯỞNG VP</option>
+                <option value="nhanvien">TỔ PHÓ VP</option>
+                <option value="nhanvien">NHÂN VIÊN</option>
             </select>
             
             <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
             <div id="g_id_onload" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
-            
-            <div id="vungDangNhapGoogle" style="display: none; justify-content: center; min-height: 44px;">
+            <div style="display: flex; justify-content: center;">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
-            </div>
-            
-            <div id="canhBaoChonNhom" style="text-align: center; color: #dc3545; font-size: 14px; font-weight: bold; padding: 10px; border: 1px dashed #dc3545; background: #fff; border-radius: 4px;">
-                Vui lòng chọn đối tượng ở Bước 1 để hiển thị nút Đăng nhập
             </div>
             
             <div style="margin-top: 20px; display: flex; justify-content: center; border-top: 1px dashed #b8daff; padding-top: 15px;">
@@ -302,21 +297,10 @@
     let danhSachVienChucAdmin = [];
     let v_bo_nho_dem_admin = {}; 
 
-    function f_x_hien_nut_login() {
-        const gNhom = document.getElementById('oChonNhom').value;
-        if (gNhom !== "") {
-            document.getElementById('vungDangNhapGoogle').style.display = 'flex';
-            document.getElementById('canhBaoChonNhom').style.display = 'none';
-        }
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-        if (savedNhom) {
-            document.getElementById('oChonNhom').value = savedNhom;
-            f_x_hien_nut_login();
-        }
+        if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
         if (loggedUser) showMainUI(loggedUser);
         
         const tbg = document.getElementById("t-b-g");
@@ -347,17 +331,10 @@
     }
 
     function f_x_xac_thuc(response) {
-        const nhomDaChon = document.getElementById('oChonNhom').value;
-        
-        if (!nhomDaChon) {
-            hienThiThongBaoUI("<b>LỖI XÁC THỰC</b><br><br>Bạn chưa chọn đối tượng đánh giá!<br>Vui lòng ấn Đóng để hệ thống thiết lập lại.", f_x_logout);
-            return;
-        }
-
         const payload = decodeJwtResponse(response.credential);
         const kAttr = "em" + "ail"; 
         const d_danh = payload[kAttr];
-        
+        const nhomDaChon = document.getElementById('oChonNhom').value;
         sessionStorage.setItem("HTDG_ACCOUNT_ID", d_danh);
         sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
         showMainUI(d_danh);
@@ -386,11 +363,7 @@
         }
 
         const objNhom = document.getElementById('oChonNhom');
-        if(document.getElementById('hienThiNhom')) {
-            // Tạm thời hiển thị giá trị text đã chọn. Sẽ được ghi đè bằng chức danh chuẩn từ cột D sau khi đối chiếu.
-            document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text.toUpperCase();
-        }
-        
+        if(document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
@@ -415,7 +388,7 @@
             if (danhSachVienChucAdmin.length > 0) {
                 for (let vc of danhSachVienChucAdmin) {
                     let roleStr = (vc.role || "").toLowerCase();
-                    let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien') || roleStr.includes('vp');
+                    let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
                     if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) {
                         repId = vc.id;
                         break;
@@ -449,15 +422,8 @@
         document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
         
         const objNhom = document.getElementById('oChonNhom');
-        
-        if (!objNhom.value) {
-            hienThiThongBaoUI("<b>LỖI</b><br><br>Vui lòng chọn đối tượng đánh giá trước khi vào xem Khách.", f_x_logout);
-            return;
-        }
-        
-        const p_n = objNhom.options[objNhom.selectedIndex].getAttribute("data-nhom");
-        // Khách tham quan thì hiển thị text người dùng đã chọn
-        document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text.toUpperCase();
+        const p_n = objNhom.value;
+        document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         
         document.getElementById("vungThongTin").style.display = "flex";
         
@@ -510,12 +476,7 @@
         v_che_do_xem_admin = false; 
         
         const p_c = document.getElementById("oNhapChinh").value.trim();
-        const objNhom = document.getElementById("oChonNhom");
-        const optChon = objNhom.options[objNhom.selectedIndex];
-        
-        const p_n = optChon.getAttribute("data-nhom"); 
-        const chucVuChon = objNhom.value.toLowerCase();
-        
+        const p_n = document.getElementById("oChonNhom").value; 
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
 
         if (!p_c) {
@@ -534,27 +495,14 @@
             ]);
             
             if (t_k.status === 'success') {
-                let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
-                
-                const chucVuThucTe = (t_k.y_role || "").toLowerCase();
-                if (!quyenAdmin && chucVuChon !== "" && !chucVuThucTe.includes(chucVuChon)) {
-                    hienThiThongBaoUI(`<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá.<br>Chức vụ của bạn là: <span style="color:#b91c1c; font-size:18px;"><b>${t_k.y_role || 'Chưa cập nhật'}</b></span>.<br>Vui lòng ấn Đóng để chọn lại chính xác đối tượng này.`, f_x_logout);
-                    f_x_j(false);
-                    return;
-                }
-
                 v_che_do_khach = false; 
                 v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e; v_l_d = t_k.y_c || ""; 
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
                 
-                // GHI ĐÈ PHÂN LOẠI HIỂN THỊ BẰNG GIÁ TRỊ CHUẨN TỪ CỘT D
-                if (document.getElementById("hienThiNhom")) {
-                    document.getElementById("hienThiNhom").innerText = (t_k.y_role || optChon.text).toUpperCase();
-                }
-
                 v_nam_hoc_hien_tai = t_k.y_namhoc || "";
                 if(document.getElementById("hienThiNamHoc")) document.getElementById("hienThiNamHoc").innerText = v_nam_hoc_hien_tai;
 
+                let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
                 sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
                 
                 v_hien_thi_menu_admin(quyenAdmin);
@@ -574,7 +522,8 @@
                 document.getElementById("vungThongTin").style.display = "flex";
                 f_x_h();
             } else if (t_k_khac.status === 'success') {
-                hienThiThongBaoUI(`<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá.<br>Chức vụ của bạn là: <span style="color:#b91c1c; font-size:18px;"><b>${t_k_khac.y_role || 'Chưa cập nhật'}</b></span>.<br>Vui lòng ấn Đóng để chọn lại chính xác đối tượng đánh giá.`, f_x_logout);
+                let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
+                hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Tài khoản của bạn được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
                 f_x_j(false);
                 return;
             } else { 
@@ -640,28 +589,17 @@
         v_che_do_xem_admin = true; 
 
         const selectedOption = selectObj.options[selectObj.selectedIndex];
-        const selectedRoleStrDisplay = selectedOption.getAttribute('data-role');
-        const selectedRoleStr = (selectedRoleStrDisplay || "").toLowerCase();
+        const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
         const selectedName = selectedOption.getAttribute('data-name');
 
         let nhomXacDinh = 'giaovien';
-        if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien') || selectedRoleStr.includes('vp')) {
+        if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien')) {
             nhomXacDinh = 'nhanvien';
-        }
-        
-        let selectObjC = document.getElementById("oChonNhom");
-        let matchedOpt = Array.from(selectObjC.options).find(opt => opt.value !== "" && selectedRoleStr.includes(opt.value.toLowerCase()));
-        
-        if (matchedOpt) {
-            selectObjC.value = matchedOpt.value;
-        } else {
-            let fallbackOpt = Array.from(selectObjC.options).find(opt => opt.getAttribute("data-nhom") === nhomXacDinh);
-            if (fallbackOpt) selectObjC.value = fallbackOpt.value;
         }
 
         document.getElementById("theHienChinh").innerText = selectedName;
-        // HIỂN THỊ ĐÚNG CHỨC DANH TRÊN MENU DỌC (Dành cho Admin xem nhân sự)
-        document.getElementById("hienThiNhom").innerText = selectedRoleStrDisplay ? selectedRoleStrDisplay.toUpperCase() : ((nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN");
+        document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
+        document.getElementById("oChonNhom").value = nhomXacDinh; 
 
         if (v_bo_nho_dem_admin[selectedId]) {
             let t_k = v_bo_nho_dem_admin[selectedId];
@@ -712,6 +650,11 @@
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
+            
+            // --- Áp dụng quy tắc hiển thị vào cột thang điểm ---
+            tg = f_x_lay_thang_gia_tri_thuong_phat(item.x_a, tg);
+            // ----------------------------------------------------
+            
             let kq = item.x_c || "";
             let html = "";
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
@@ -762,8 +705,7 @@
 
     function f_x_h() {
         const m_d = document.querySelectorAll("#t-b-g tr");
-        const objNhom = document.getElementById("oChonNhom");
-        const c_n = objNhom.options[objNhom.selectedIndex].getAttribute("data-nhom");
+        const c_n = document.getElementById("oChonNhom").value;
         let mangDuLieuGom = [];
         
         m_d.forEach(d_k => {
@@ -791,6 +733,12 @@
             k_q = f_x_m_chinh(mangDuLieuGom);
         }
 
+        // --- Cập nhật: Gọi hàm tính điểm thưởng/phạt và cộng dồn vào phần 2 ---
+        let diemThuongPhat = f_x_tinh_diem_thuong_phat(mangDuLieuGom);
+        k_q.diemP2 = k_q.diemP2 + diemThuongPhat;
+        k_q.tongDiem = k_q.diemP1 + k_q.diemP2;
+        // ------------------------------------------------------------------------
+
         v_l_e = k_q.k_t;
         v_l_f = k_q.tongDiem;
 
@@ -800,6 +748,35 @@
             <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
             <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
         `;
+    }
+
+    // ====================================================================
+    // CÁC HÀM XỬ LÝ VIẾT RIÊNG THEO NGUYÊN TẮC: "Thay đổi hàm nào viết riêng hàm đó"
+    // ====================================================================
+
+    // Hàm 1: Áp dụng ghi quy tắc thưởng phạt vào cột thang điểm dựa trên tên tiêu chí
+    function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc) {
+        let ten = (tenTieuChi || "").toLowerCase();
+        if (ten.includes("vở sạch chữ đẹp")) return "1% = 0,5 điểm";
+        if (ten.includes("hoàn thành xuất sắc")) return "1% = 1 điểm";
+        if (ten.includes("học sinh chưa hoàn thành")) return "1% = -1 điểm";
+        return tgGoc;
+    }
+
+    // Hàm 2: Tự động tính toán điểm cộng thêm/trừ đi dựa trên dữ liệu % nhập vào
+    function f_x_tinh_diem_thuong_phat(mangDuLieuGom) {
+        let diemThem = 0;
+        mangDuLieuGom.forEach(item => {
+            let ten = item.ten;
+            if (ten.includes("vở sạch chữ đẹp")) {
+                diemThem += item.so * 0.5;
+            } else if (ten.includes("hoàn thành xuất sắc")) {
+                diemThem += item.so * 1;
+            } else if (ten.includes("học sinh chưa hoàn thành")) {
+                diemThem += item.so * -1;
+            }
+        });
+        return diemThem;
     }
 
     async function f_x_i() {
