@@ -305,7 +305,7 @@
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
         if (savedNhom) {
             document.getElementById('oChonNhom').value = savedNhom;
-            f_x_thay_doi_nhom(); // Tự kích hoạt hiển thị nếu có bộ nhớ cấu hình nhóm cũ
+            f_x_thay_doi_nhom(); 
         }
         if (loggedUser) showMainUI(loggedUser);
         
@@ -661,15 +661,11 @@
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
+            let valD = item.x_d; // Nhận hệ số từ cột D do máy chủ GAS chuyển về
             
-            // Xử lý thông minh lấy Cột D và quy đổi chuẩn dấu phẩy thập phân
-            let valD = item.x_d; 
-            if (valD !== undefined && valD !== null && valD !== "") {
-                valD = valD.toString().trim().replace(',', '.'); 
-            }
-            
-            // Áp dụng quy tắc hiển thị vào cột thang điểm 
+            // --- Áp dụng quy tắc hiển thị vào cột thang điểm ---
             tg = f_x_lay_thang_gia_tri_thuong_phat(item.x_a, tg, valD);
+            // ----------------------------------------------------
             
             let kq = item.x_c || "";
             let html = "";
@@ -703,7 +699,6 @@
             let h_s = "";
             if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
             
-            // CHÚ Ý: GIỮ NGUYÊN GỐC toLowerCase() CHO VIỆC GHÉP VÀO DOM ĐỂ HÀM NGOÀI NHẬN DIỆN ĐÚNG
             khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
         });
         
@@ -733,28 +728,16 @@
             let c_x_2 = d_k.querySelector(".o-n-bang");
             if (c_x_1 && c_x_2) {
                 let e_s = d_k.querySelector("select.o-n-bang");
-                let attrHeSo = c_x_2.getAttribute("data-heso");
                 
-                // Khắc phục dấu phẩy chuẩn Việt Nam cho thuật toán nhân hệ số
-                let heSoChuan = 0;
-                if (attrHeSo !== null && attrHeSo !== "") {
-                    heSoChuan = parseFloat(attrHeSo.toString().replace(',', '.'));
-                }
-                
-                let rawVal = c_x_2.value.toString().replace(',', '.').replace(/[^\d\.\-]/g, '');
-                let soChuan = parseFloat(rawVal) || 0;
-                
+                // PHỤC HỒI NGUYÊN TRẠNG GÓI DỮ LIỆU CŨ ĐỂ HÀM NGOÀI XẾP LOẠI ĐÚNG 100%
                 mangDuLieuGom.push({
-                    ten: c_x_1.innerText.toLowerCase(), // PHỤC HỒI NGUYÊN GỐC (Tránh lỗi vỡ hàm bên ngoài)
-                    giaTri: c_x_2.value.toLowerCase(),  // PHỤC HỒI NGUYÊN GỐC
-                    so: parseFloat(c_x_2.value.replace(/[^\d\.]/g, '')) || 0, // PHỤC HỒI NGUYÊN GỐC
-                    soChuanToanHoc: soChuan, // Trường cấp số liệu chuẩn riêng cho tính điểm thưởng/phạt
+                    ten: c_x_1.innerText.toLowerCase(),
+                    giaTri: c_x_2.value.toLowerCase(),
+                    so: parseFloat(c_x_2.value.replace(/[^\d\.]/g, '')) || 0,
                     isSelect: e_s !== null,
                     selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
                     isDongBo: d_k.querySelector(".h-dong-bo") !== null,
-                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
-                    hasHeSoD: (attrHeSo !== null && attrHeSo !== ""),
-                    heSoD: isNaN(heSoChuan) ? 0 : heSoChuan
+                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : ''
                 });
             }
         });
@@ -767,14 +750,30 @@
             k_q = f_x_m_chinh(mangDuLieuGom);
         }
 
-        // --- Gọi hàm tính điểm thưởng/phạt theo đúng Cột D ---
-        let diemThuongPhat = f_x_tinh_diem_thuong_phat(mangDuLieuGom);
-        
-        // Khắc phục triệt để lỗi cộng dồn chuỗi chữ (ví dụ 251.1 + 216 -> 251.1216)
+        // TÁCH BIỆT HOÀN TOÀN TÍNH TOÁN CỘT D ĐỂ KHÔNG LÀM HỎNG MẢNG XẾP LOẠI BÊN TRÊN
+        let diemThuongPhat = 0;
+        m_d.forEach(d_k => {
+            let c_x_2 = d_k.querySelector(".o-n-bang");
+            if (c_x_2) {
+                let attrHeSo = c_x_2.getAttribute("data-heso");
+                if (attrHeSo !== null && attrHeSo !== "") {
+                    // Khắc phục dấu phẩy chuẩn Việt Nam
+                    let heSoChuan = parseFloat(attrHeSo.toString().replace(',', '.'));
+                    let valStr = c_x_2.value.toString().replace(',', '.').replace(/[^\d\.\-]/g, '');
+                    let soChuan = parseFloat(valStr);
+                    
+                    if (!isNaN(heSoChuan) && heSoChuan !== 0 && !isNaN(soChuan)) {
+                        diemThuongPhat += (soChuan * heSoChuan);
+                    }
+                }
+            }
+        });
+
+        // XỬ LÝ TOÁN HỌC ÉP KIỂU SỐ (NGĂN CHẶN LỖI CỘNG CHUỖI VĂN BẢN 251.1 + 216 = 251.1216)
         let diemP1_so = parseFloat(k_q.diemP1) || 0;
         let diemP2_so = parseFloat(k_q.diemP2) || 0;
         
-        // Dùng Math.round để tránh lỗi số thực dài vô tận (vd: 0.30000000004)
+        // Sử dụng Math.round để tránh sai số thập phân vô tận
         k_q.diemP2 = Math.round((diemP2_so + diemThuongPhat) * 100) / 100;
         k_q.tongDiem = Math.round((diemP1_so + k_q.diemP2) * 100) / 100;
         // ------------------------------------------------------------------------
@@ -790,11 +789,7 @@
         `;
     }
 
-    // ====================================================================
-    // CÁC HÀM XỬ LÝ VIẾT RIÊNG THEO NGUYÊN TẮC: "Thay đổi hàm nào viết riêng hàm đó"
-    // ====================================================================
-
-    // Hàm 1: Bỏ hoàn toàn bắt từ khóa - Thay bằng Cột D hoàn toàn (Có xử lý hiển thị chuẩn VN)
+    // Hàm Áp dụng ghi quy tắc thưởng phạt vào cột thang điểm dựa trên hệ số Cột D
     function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc, heSoVal) {
         if (heSoVal !== undefined && heSoVal !== null && heSoVal !== "") {
             let hs = parseFloat(heSoVal.toString().replace(',', '.'));
@@ -804,18 +799,6 @@
             }
         }
         return tgGoc; 
-    }
-
-    // Hàm 2: Tự động tính toán điểm bằng đối chiếu chéo tuyệt đối sang thẻ mang hệ số Cột D
-    function f_x_tinh_diem_thuong_phat(mangDuLieuGom) {
-        let diemThem = 0;
-        mangDuLieuGom.forEach(item => {
-            // Không quét tên chữ nữa, chỉ quét tuyệt đối: Thẻ nào có heSoD khác 0 thì thực thi nhân
-            if (item.hasHeSoD && item.heSoD !== 0) {
-                diemThem += item.soChuanToanHoc * item.heSoD;
-            }
-        });
-        return diemThem;
     }
 
     // Hàm 3: Kiểm tra hiển thị vùng xác thực Gmail khi chọn xong chức vụ
