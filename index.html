@@ -305,7 +305,7 @@
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
         if (savedNhom) {
             document.getElementById('oChonNhom').value = savedNhom;
-            f_x_thay_doi_nhom(); 
+            f_x_thay_doi_nhom(); // Tự kích hoạt hiển thị nếu có bộ nhớ cấu hình nhóm cũ
         }
         if (loggedUser) showMainUI(loggedUser);
         
@@ -703,6 +703,7 @@
             let h_s = "";
             if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
             
+            // CHÚ Ý: GIỮ NGUYÊN GỐC toLowerCase() CHO VIỆC GHÉP VÀO DOM ĐỂ HÀM NGOÀI NHẬN DIỆN ĐÚNG
             khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
         });
         
@@ -734,19 +735,26 @@
                 let e_s = d_k.querySelector("select.o-n-bang");
                 let attrHeSo = c_x_2.getAttribute("data-heso");
                 
-                // Tiền xử lý dữ liệu nhập (đề phòng người dùng nhập dấu phẩy thay vì chấm)
+                // Khắc phục dấu phẩy chuẩn Việt Nam cho thuật toán nhân hệ số
+                let heSoChuan = 0;
+                if (attrHeSo !== null && attrHeSo !== "") {
+                    heSoChuan = parseFloat(attrHeSo.toString().replace(',', '.'));
+                }
+                
                 let rawVal = c_x_2.value.toString().replace(',', '.').replace(/[^\d\.\-]/g, '');
+                let soChuan = parseFloat(rawVal) || 0;
                 
                 mangDuLieuGom.push({
-                    ten: c_x_1.innerText.trim(),
-                    giaTri: c_x_2.value.toLowerCase(),
-                    so: parseFloat(rawVal) || 0,
+                    ten: c_x_1.innerText.toLowerCase(), // PHỤC HỒI NGUYÊN GỐC (Tránh lỗi vỡ hàm bên ngoài)
+                    giaTri: c_x_2.value.toLowerCase(),  // PHỤC HỒI NGUYÊN GỐC
+                    so: parseFloat(c_x_2.value.replace(/[^\d\.]/g, '')) || 0, // PHỤC HỒI NGUYÊN GỐC
+                    soChuanToanHoc: soChuan, // Trường cấp số liệu chuẩn riêng cho tính điểm thưởng/phạt
                     isSelect: e_s !== null,
                     selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
                     isDongBo: d_k.querySelector(".h-dong-bo") !== null,
                     quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
                     hasHeSoD: (attrHeSo !== null && attrHeSo !== ""),
-                    heSoD: attrHeSo ? parseFloat(attrHeSo) : 0
+                    heSoD: isNaN(heSoChuan) ? 0 : heSoChuan
                 });
             }
         });
@@ -759,16 +767,22 @@
             k_q = f_x_m_chinh(mangDuLieuGom);
         }
 
-        // --- Gọi hàm tính điểm thưởng/phạt và cộng dồn vào phần 2 ---
+        // --- Gọi hàm tính điểm thưởng/phạt theo đúng Cột D ---
         let diemThuongPhat = f_x_tinh_diem_thuong_phat(mangDuLieuGom);
-        k_q.diemP2 = k_q.diemP2 + diemThuongPhat;
-        k_q.tongDiem = k_q.diemP1 + k_q.diemP2;
+        
+        // Khắc phục triệt để lỗi cộng dồn chuỗi chữ (ví dụ 251.1 + 216 -> 251.1216)
+        let diemP1_so = parseFloat(k_q.diemP1) || 0;
+        let diemP2_so = parseFloat(k_q.diemP2) || 0;
+        
+        // Dùng Math.round để tránh lỗi số thực dài vô tận (vd: 0.30000000004)
+        k_q.diemP2 = Math.round((diemP2_so + diemThuongPhat) * 100) / 100;
+        k_q.tongDiem = Math.round((diemP1_so + k_q.diemP2) * 100) / 100;
         // ------------------------------------------------------------------------
 
         v_l_e = k_q.k_t;
         v_l_f = k_q.tongDiem;
 
-        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
+        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${diemP1_so}`;
         document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
         document.getElementById("vHT3").innerHTML = `
             <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
@@ -783,7 +797,7 @@
     // Hàm 1: Bỏ hoàn toàn bắt từ khóa - Thay bằng Cột D hoàn toàn (Có xử lý hiển thị chuẩn VN)
     function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc, heSoVal) {
         if (heSoVal !== undefined && heSoVal !== null && heSoVal !== "") {
-            let hs = parseFloat(heSoVal);
+            let hs = parseFloat(heSoVal.toString().replace(',', '.'));
             if (!isNaN(hs) && hs !== 0) {
                 // Hiển thị lại bằng dấu phẩy cho giao diện Việt Nam
                 return "1% = " + hs.toString().replace('.', ',') + " điểm";
@@ -796,9 +810,9 @@
     function f_x_tinh_diem_thuong_phat(mangDuLieuGom) {
         let diemThem = 0;
         mangDuLieuGom.forEach(item => {
-            // Không xét tên nữa, chỉ quét tuyệt đối: Thẻ nào chứa data-heso thì thực thi nhân
-            if (item.hasHeSoD && !isNaN(item.heSoD)) {
-                diemThem += item.so * item.heSoD;
+            // Không quét tên chữ nữa, chỉ quét tuyệt đối: Thẻ nào có heSoD khác 0 thì thực thi nhân
+            if (item.hasHeSoD && item.heSoD !== 0) {
+                diemThem += item.soChuanToanHoc * item.heSoD;
             }
         });
         return diemThem;
