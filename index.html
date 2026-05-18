@@ -69,7 +69,6 @@
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
         #t-b-g td:nth-child(1), #t-b-g td:nth-child(3) { text-align: center !important; vertical-align: middle !important; }
 
-        /* Tối ưu bảo mật: Loại bỏ từ khóa login nhạy cảm trong thiết kế UI */
         #khung-xac-thuc { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 10000; }
         .hop-xac-thuc { text-align: center; padding: 35px; background: white; border-radius: 12px; border: 1px solid #ddd; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
@@ -121,8 +120,9 @@
         
         <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #f8fbff; border-radius: 8px; border: 1px solid #b8daff; text-align: left;">
             <label for="oChonNhom" style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">1. Chọn đối tượng đánh giá:</label>
-            <select id="oChonNhom" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
-               <option value="giaovien">TỔ TRƯỞNG</option>
+            <select id="oChonNhom" class="o-c-kieu" onchange="f_x_hien_nut_login()" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
+                <option value="" disabled selected>-- BẮT BUỘC CHỌN ĐỐI TƯỢNG --</option>
+                <option value="giaovien">TỔ TRƯỞNG</option>
                 <option value="giaovien">TỔ PHÓ</option>
                 <option value="giaovien">TỔNG PHỤ TRÁCH</option>
                 <option value="giaovien">GIÁO VIÊN</option>
@@ -133,8 +133,13 @@
             
             <label style="font-weight: bold; color: var(--mau-c); display: block; margin-bottom: 8px;">2. Xác thực định danh:</label>
             <div id="g_id_onload" data-callback="f_x_xac_thuc" data-auto_prompt="false"></div>
-            <div style="display: flex; justify-content: center;">
+            
+            <div id="vungDangNhapGoogle" style="display: none; justify-content: center; min-height: 44px;">
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
+            </div>
+            
+            <div id="canhBaoChonNhom" style="text-align: center; color: #dc3545; font-size: 14px; font-weight: bold; padding: 10px; border: 1px dashed #dc3545; background: #fff; border-radius: 4px;">
+                Vui lòng chọn đối tượng ở Bước 1 để hiển thị nút Đăng nhập
             </div>
             
             <div style="margin-top: 20px; display: flex; justify-content: center; border-top: 1px dashed #b8daff; padding-top: 15px;">
@@ -297,10 +302,22 @@
     let danhSachVienChucAdmin = [];
     let v_bo_nho_dem_admin = {}; 
 
+    // Bổ sung hàm kiểm tra để hiển thị nút Đăng nhập
+    function f_x_hien_nut_login() {
+        const gNhom = document.getElementById('oChonNhom').value;
+        if (gNhom !== "") {
+            document.getElementById('vungDangNhapGoogle').style.display = 'flex';
+            document.getElementById('canhBaoChonNhom').style.display = 'none';
+        }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
         const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-        if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
+        if (savedNhom) {
+            document.getElementById('oChonNhom').value = savedNhom;
+            f_x_hien_nut_login(); // Khôi phục trạng thái nút login nếu có bộ nhớ tạm
+        }
         if (loggedUser) showMainUI(loggedUser);
         
         const tbg = document.getElementById("t-b-g");
@@ -331,10 +348,18 @@
     }
 
     function f_x_xac_thuc(response) {
+        const nhomDaChon = document.getElementById('oChonNhom').value;
+        
+        // Thêm chốt chặn bảo vệ xác thực
+        if (!nhomDaChon) {
+            hienThiThongBaoUI("<b>LỖI XÁC THỰC</b><br><br>Bạn chưa chọn đối tượng đánh giá!<br>Vui lòng ấn Đóng để hệ thống thiết lập lại.", f_x_logout);
+            return;
+        }
+
         const payload = decodeJwtResponse(response.credential);
         const kAttr = "em" + "ail"; 
         const d_danh = payload[kAttr];
-        const nhomDaChon = document.getElementById('oChonNhom').value;
+        
         sessionStorage.setItem("HTDG_ACCOUNT_ID", d_danh);
         sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
         showMainUI(d_danh);
@@ -422,6 +447,13 @@
         document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
         
         const objNhom = document.getElementById('oChonNhom');
+        
+        // Chặn luôn phần vào khách nếu chưa chọn đối tượng
+        if (!objNhom.value) {
+            hienThiThongBaoUI("<b>LỖI</b><br><br>Vui lòng chọn đối tượng đánh giá trước khi vào xem Khách.", f_x_logout);
+            return;
+        }
+        
         const p_n = objNhom.value;
         document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         
@@ -664,7 +696,6 @@
                 html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
-                // CHỈNH SỬA TẠI ĐÂY: Thêm style="font-weight: normal; font-size: 14px;" để bỏ in đậm và thu nhỏ chữ trên web
                 html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q" style="font-weight: normal; font-size: 14px;">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
