@@ -9,7 +9,7 @@ var DG_LINK_LOGO = "https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png";
 var DG_TEN_TRUONG = "Trường TH&THCS Hợp Thành";
 var DG_TEN_TRUONG_UP = "TRƯỜNG TH&THCS HỢP THÀNH";
 
-var DG_TEN_PM = "Hệ Thống Đánh Giá Xếp Loại Viên Chức";
+var DG_TEN_PM = "Hệ Thống Đánh Giá Xếp Loại Cuối năm";
 var DG_TEN_PM_UP = "HỆ THỐNG ĐÁNH GIÁ XẾP LOẠI CUỐI NĂM";
 var DG_TAC_GIA = "Hoàng Ngọc Lâm";
 var DG_TAC_GIA_UP = "HOÀNG NGỌC LÂM";
