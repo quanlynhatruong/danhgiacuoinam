@@ -4,7 +4,7 @@
    ========================================================================== */
 
 var DG_CONFIG_GAS_URL = "https://script.google.com/macros/s/AKfycbynhXlUEopWNlbpbRaD3e50Y0xwevEXIK53VpmOEWMZfhsSnfqxvFctSPeNMRc7709aHw/exec";
-var DG_LINK_LOGO = "https://i.ibb.co/XkjLVJFt/logo-TH-THCS-v3.png"; 
+var DG_LINK_LOGO = "https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png"; 
 
 var DG_TEN_TRUONG = "Trường TH&THCS Hợp Thành";
 var DG_TEN_TRUONG_UP = "TRƯỜNG TH&THCS HỢP THÀNH";
