@@ -234,13 +234,13 @@
                     <div style="font-size: 14px; color: #555;"><i>(Xếp loại xuất sắc phải có 30% các tiêu chí phần 2 vượt chỉ tiêu)</i></div>
                 </div>
                 
-                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #d9534f; font-size: 18px; line-height: 1.6;">
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #0056b3; font-size: 18px; line-height: 1.6;">
                     <div id="vHT1" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: 0</div>
                     <div id="vHT2" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: 0</div>
                 </div>
                 
                 <div class="v-d-g" id="vHT3" style="flex: 1.2;">
-                    <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #dc3545; text-transform: uppercase; white-space: nowrap;">CHƯA HOÀN THÀNH NHIỆM VỤ</div>
                     <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: 0</div>
                 </div>
             </div>
@@ -568,7 +568,7 @@
 
     async function f_x_load_users() {
         try {
-            const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+            const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_FALLBACK_URL : DG_CONFIG_GAS_URL;
             const res = await fetch(`${z_y_a}?z_p_a=l_d_s`);
             const t_k = await res.json();
             if (t_k.status === 'success') {
@@ -661,9 +661,10 @@
 
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
+            let valD = item.x_d; // Nhận hệ số từ cột D do máy chủ GAS chuyển về
             
             // --- Áp dụng quy tắc hiển thị vào cột thang điểm ---
-            tg = f_x_lay_thang_gia_tri_thuong_phat(item.x_a, tg);
+            tg = f_x_lay_thang_gia_tri_thuong_phat(item.x_a, tg, valD);
             // ----------------------------------------------------
             
             let kq = item.x_c || "";
@@ -671,25 +672,28 @@
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
             let isFirstDataRow = false;
             
+            // Khởi tạo thuộc tính chứa giá trị hệ số để gài vào thẻ HTML
+            let strHeSo = (valD !== undefined && valD !== null && valD !== "") ? `data-heso="${valD}"` : "";
+
             if (!l_p && !p_k) { isFirstDataRow = true; p_k = true; kq = v_l_d !== "" ? v_l_d : kq; }
             let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
 
             if (l_m) {
                 kq = v_l_d !== "" ? v_l_d : kq; 
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
-                html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
+                html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" ${strHeSo} value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
             } 
             else if (tg === "THANHTICH_HS_DONG") {
-                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q" style="font-weight: normal; font-size: 14px;">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
+                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q" style="font-weight: normal; font-size: 14px;">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" ${strHeSo} id="h_a_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
-                html = `<select class="o-n-bang k-hoat-t">` + t_c + tg.split(",").map(opt => {
+                html = `<select class="o-n-bang k-hoat-t" ${strHeSo}>` + t_c + tg.split(",").map(opt => {
                     let [n, d] = opt.split("|");
                     return `<option value="${n.trim()}" data-p="${d.trim()}" ${kq.includes(n.trim())?'selected':''}>${n.trim()} (${d.trim()}đ)</option>`;
                 }).join("") + `</select>`;
             } else {
-                if (isFirstDataRow) html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
-                else html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
+                if (isFirstDataRow) html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" ${strHeSo} value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
+                else html = `<input type="text" class="o-n-bang k-hoat-t" ${strHeSo} value="${kq}">`;
             }
 
             let h_s = "";
@@ -724,6 +728,8 @@
             let c_x_2 = d_k.querySelector(".o-n-bang");
             if (c_x_1 && c_x_2) {
                 let e_s = d_k.querySelector("select.o-n-bang");
+                let attrHeSo = c_x_2.getAttribute("data-heso");
+                
                 mangDuLieuGom.push({
                     ten: c_x_1.innerText.toLowerCase(),
                     giaTri: c_x_2.value.toLowerCase(),
@@ -731,7 +737,9 @@
                     isSelect: e_s !== null,
                     selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
                     isDongBo: d_k.querySelector(".h-dong-bo") !== null,
-                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : ''
+                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
+                    hasHeSoD: (attrHeSo !== null && attrHeSo !== ""),
+                    heSoD: parseFloat(attrHeSo) || 0
                 });
             }
         });
@@ -765,26 +773,42 @@
     // CÁC HÀM XỬ LÝ VIẾT RIÊNG THEO NGUYÊN TẮC: "Thay đổi hàm nào viết riêng hàm đó"
     // ====================================================================
 
-    // Hàm 1: Áp dụng ghi quy tắc thưởng phạt vào cột thang điểm dựa trên tên tiêu chí
-    function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc) {
+    // Hàm 1: Áp dụng ghi quy tắc thưởng phạt vào cột thang điểm dựa trên hệ số Cột D
+    function f_x_lay_thang_gia_tri_thuong_phat(tenTieuChi, tgGoc, heSoVal) {
+        let hasHeSo = (heSoVal !== undefined && heSoVal !== null && heSoVal !== "");
+        if (hasHeSo) {
+            let hs = parseFloat(heSoVal);
+            if (!isNaN(hs) && hs !== 0) {
+                return "1% = " + hs + " điểm";
+            }
+            return tgGoc; // Giữ nguyên giá trị gốc (VD: %) nếu hệ số ở cột D là 0
+        }
+        
+        // Logic dự phòng (fallback) nếu dòng đó không có thông tin Cột D
         let ten = (tenTieuChi || "").toLowerCase();
         if (ten.includes("vở sạch chữ đẹp")) return "1% = 0,5 điểm";
-        if (ten.includes("hoàn thành xuất sắc")) return "1% = 1 điểm";
-        if (ten.includes("học sinh chưa hoàn thành")) return "1% = -1 điểm";
+        if (ten.includes("học sinh") && ten.includes("xuất sắc")) return "1% = 1 điểm";
+        if (ten.includes("chưu hoàn thành") || ten.includes("chưa hoàn thành")) return "1% = -1 điểm";
         return tgGoc;
     }
 
-    // Hàm 2: Tự động tính toán điểm cộng thêm/trừ đi dựa trên dữ liệu % nhập vào
+    // Hàm 2: Tự động tính toán điểm cộng/trừ linh hoạt theo khai báo ở Cột D
     function f_x_tinh_diem_thuong_phat(mangDuLieuGom) {
         let diemThem = 0;
         mangDuLieuGom.forEach(item => {
-            let ten = item.ten;
-            if (ten.includes("vở sạch chữ đẹp")) {
-                diemThem += item.so * 0.5;
-            } else if (ten.includes("hoàn thành xuất sắc")) {
-                diemThem += item.so * 1;
-            } else if (ten.includes("học sinh chưa hoàn thành")) {
-                diemThem += item.so * -1;
+            // Tuân thủ ưu tiên tuyệt đối nếu có hệ số khai báo ở Cột D
+            if (item.hasHeSoD) {
+                diemThem += item.so * item.heSoD;
+            } else {
+                // Tương thích ngược (dự phòng)
+                let ten = item.ten;
+                if (ten.includes("vở sạch chữ đẹp")) {
+                    diemThem += item.so * 0.5;
+                } else if (ten.includes("học sinh") && ten.includes("xuất sắc")) {
+                    diemThem += item.so * 1;
+                } else if (ten.includes("chưu hoàn thành") || ten.includes("chưa hoàn thành")) {
+                    diemThem += item.so * -1;
+                }
             }
         });
         return diemThem;
