@@ -366,34 +366,52 @@
                     }
                 });
 
-                // ==========================================
-                // THUẬT TOÁN ĐIỀU CHỈNH 20% CHỈ TIÊU XUẤT SẮC
-                // ==========================================
-                let tongSoHoanThanhTot = 0;
+                // =======================================================
+                // THUẬT TOÁN ĐIỀU CHỈNH CHỈ TIÊU 20% THEO NHÓM CHỨC DANH
+                // =======================================================
+                let counts = { totruong: 0, topho: 0, giaovien: 0, nhanvien: 0, khac: 0 };
                 danhSachTheoNam.forEach(item => {
+                    let g = phanNhomChucDanh(item.p_l);
                     let p = phanTichXepLoai(item.x_l_q || "");
-                    // Lấy tổng số người đạt mức Tốt và Xuất sắc
-                    if (p.muc === 3 || p.muc === 4) tongSoHoanThanhTot++;
+                    if (p.muc === 3 || p.muc === 4) counts[g]++;
                 });
-                let chiTieuXuatSac = Math.floor(tongSoHoanThanhTot * 0.2);
-                // ==========================================
+
+                let chiTieu = {
+                    totruong: Math.floor(counts.totruong * 0.2),
+                    topho: Math.floor(counts.topho * 0.2),
+                    giaovien: Math.floor(counts.giaovien * 0.2),
+                    nhanvien: Math.floor(counts.nhanvien * 0.2),
+                    khac: 0
+                };
+
+                let groupCounters = { totruong: 0, topho: 0, giaovien: 0, nhanvien: 0, khac: 0 };
+                // =======================================================
 
                 let userIndex = danhSachTheoNam.findIndex(item => item.t_v_c === tenGoi);
                 
                 if (userIndex !== -1) {
-                    let userRecord = danhSachTheoNam[userIndex];
-                    let parseUser = phanTichXepLoai(userRecord.x_l_q || "");
-                    
-                    xepLoai = userRecord.x_l_q || "CHƯA ĐÁNH GIÁ";
-                    
-                    // Nếu người này đạt mức Xuất sắc nhưng số thứ tự index vượt hoặc bằng chỉ tiêu cho phép
-                    // thì thay thế chữ "xuất sắc" thành "tốt" (giữ nguyên điểm số)
-                    if (parseUser.muc === 4 && userIndex >= chiTieuXuatSac) {
-                        xepLoai = xepLoai.replace(/xuất sắc/i, "tốt");
-                    }
+                    for (let i = 0; i < danhSachTheoNam.length; i++) {
+                        let item = danhSachTheoNam[i];
+                        let g = phanNhomChucDanh(item.p_l);
+                        let currentXl = item.x_l_q || "";
+                        let p = phanTichXepLoai(currentXl);
 
-                    phanLoai = userRecord.p_l || phanLoai;
-                    dungThu = userIndex + 1; 
+                        if (item.t_v_c === tenGoi) {
+                            xepLoai = currentXl;
+                            if (p.muc === 4) {
+                                if (groupCounters[g] >= chiTieu[g]) {
+                                    xepLoai = currentXl.replace(/xuất sắc/i, "tốt");
+                                }
+                            }
+                            phanLoai = item.p_l || phanLoai;
+                            dungThu = i + 1; 
+                            break;
+                        }
+
+                        if (p.muc === 4 || p.muc === 3) {
+                            groupCounters[g]++;
+                        }
+                    }
                 } else {
                     let userAnyYear = v_dl_toan_bo.find(item => item.t_v_c === tenGoi);
                     if (userAnyYear && userAnyYear.p_l) {
@@ -483,38 +501,47 @@
                 }
             });
 
-            // ==========================================
-            // THUẬT TOÁN ĐIỀU CHỈNH 20% CHỈ TIÊU XUẤT SẮC
-            // ==========================================
-            let tongSoHoanThanhTot = 0;
+            // =======================================================
+            // THUẬT TOÁN ĐIỀU CHỈNH CHỈ TIÊU 20% THEO NHÓM CHỨC DANH
+            // =======================================================
+            let counts = { totruong: 0, topho: 0, giaovien: 0, nhanvien: 0, khac: 0 };
             d_l.forEach(item => {
+                let g = phanNhomChucDanh(item.p_l);
                 let p = phanTichXepLoai(item.x_l_q || "");
-                if (p.muc === 3 || p.muc === 4) tongSoHoanThanhTot++;
+                if (p.muc === 3 || p.muc === 4) counts[g]++;
             });
-            let chiTieuXuatSac = Math.floor(tongSoHoanThanhTot * 0.2);
-            // ==========================================
+
+            let chiTieu = {
+                totruong: Math.floor(counts.totruong * 0.2),
+                topho: Math.floor(counts.topho * 0.2),
+                giaovien: Math.floor(counts.giaovien * 0.2),
+                nhanvien: Math.floor(counts.nhanvien * 0.2),
+                khac: 0
+            };
+
+            let groupCounters = { totruong: 0, topho: 0, giaovien: 0, nhanvien: 0, khac: 0 };
+            // =======================================================
 
             const k_b = document.getElementById("bang-ket-qua");
             let html = "";
             d_l.forEach((item, index) => {
                 let colorCode = "#333";
+                let g = phanNhomChucDanh(item.p_l);
                 
-                // Khởi tạo biến để chuẩn bị cho việc can thiệp chuỗi hiển thị
                 let ketQuaHienThi = item.x_l_q || "";
                 let parseHienTai = phanTichXepLoai(ketQuaHienThi);
                 
-                // Phân tích và xử lý giao diện hiển thị
                 if (parseHienTai.muc === 4) {
-                    if (index < chiTieuXuatSac) {
-                        // Nằm trong hạn mức chỉ tiêu, giữ nguyên màu đỏ Xuất sắc
+                    if (groupCounters[g] < chiTieu[g]) {
                         colorCode = "#dc3545";
                     } else {
-                        // Vượt quá chỉ tiêu, chuyển hiển thị từ Xuất sắc sang Tốt (Điểm giữ nguyên)
                         ketQuaHienThi = ketQuaHienThi.replace(/xuất sắc/i, "tốt");
-                        colorCode = "#0056b3"; // Đổi về màu xanh của Tốt
+                        colorCode = "#0056b3";
                     }
+                    groupCounters[g]++;
                 } else if (parseHienTai.muc === 3) {
-                    colorCode = "#0056b3"; // Màu xanh chuẩn cho Tốt
+                    colorCode = "#0056b3";
+                    groupCounters[g]++;
                 }
                 
                 html += `<tr>
@@ -542,6 +569,15 @@
                 diem = parseFloat(match[1].replace(',', '.'));
             }
             return { muc: muc, diem: diem };
+        }
+
+        function phanNhomChucDanh(p_l_str) {
+            let str = p_l_str ? p_l_str.toLowerCase().trim() : "";
+            if (str.includes("tổ trưởng") || str.includes("to truong")) return "totruong";
+            if (str.includes("tổ phó") || str.includes("to pho")) return "topho";
+            if (str.includes("giáo viên") || str.includes("giao vien")) return "giaovien";
+            if (str.includes("nhân viên") || str.includes("nhan vien")) return "nhanvien";
+            return "khac";
         }
     </script>
 </body>
