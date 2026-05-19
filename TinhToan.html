@@ -50,11 +50,12 @@
             let h_s = "";
             if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
             
+            // Bảo toàn và đồng bộ toàn bộ dữ liệu cấu hình ma trận từ trang tính vào thuộc tính DOM hàng
             khoiDOM += `<tr style="${l_p ? 'background:#f1f8ff;font-weight:bold;color:var(--mau-c);' : ''}" 
                             data-loai-dong="${l_p ? 'phan' : 'tieuchi'}"
                             data-ten-tieuchi="${item.x_a || ''}"
-                            data-quy-diem="${item.x_b || ''}"
-                            data-he-so-c="${item.x_c || ''}"
+                            data-quy-diem="${tg}"
+                            data-he-so-c="${item.x_b || ''}"
                             data-chi-tieu="${item.x_d || ''}"
                             data-cond-xs="${item.x_e || ''}"
                             data-cond-htt="${item.x_f || ''}"
@@ -82,6 +83,7 @@
         }
     }
 
+    // Hàm phân tích logic đối chiếu điều kiện động thời gian thực từ cột E đến cột G
     function checkConditionDynamic(valThucTe, textDieuKien) {
         if (!textDieuKien || textDieuKien.trim() === "") return false;
         
@@ -100,6 +102,7 @@
                 if (!isNaN(condNum)) {
                     if (inputNum >= condNum) return true;
                 } else {
+                    // Đối chiếu cấp bậc dựa trên chuỗi quy chuẩn hệ thống
                     let hierarchy = ["trường", "cấp trường", "xã", "cấp xã", "cụm", "nhì cụm", "nhất xã", "tỉnh", "cấp tỉnh", "quốc gia"];
                     let idxInput = hierarchy.findIndex(h => inputStr.includes(h));
                     let idxCond = hierarchy.findIndex(h => cleanCond.includes(h));
@@ -112,6 +115,7 @@
         return false;
     }
 
+    // Hàm xử lý tính điểm và trích xuất xếp loại thành phần của từng hàng đơn lẻ
     function xuLyTinhToanDong(row, valThucTe, inputElement) {
         let diemCuaDong = 0;
         let xepLoaiCuaDong = "CHT"; 
@@ -119,19 +123,28 @@
         let rawQuyDiem = row.getAttribute("data-quy-diem") || "";
         let rawHeSoC = row.getAttribute("data-he-so-c") || "";
 
+        // Tính điểm: Nếu có dấu phân tách | thì trích xuất điểm từ option thả xuống
         if (rawQuyDiem.includes("|")) {
             if (inputElement.tagName === "SELECT" && inputElement.selectedIndex !== -1) {
                 diemCuaDong = parseFloat(inputElement.options[inputElement.selectedIndex].getAttribute("data-p")) || 0;
             }
         } else {
+            // Đối với các tiêu chí định lượng, bóc tách giá trị số để thực hiện phép nhân trực tiếp
             let matchHeSo = rawHeSoC.match(/([\+\-]?\d+)/);
             if (matchHeSo) {
                 let heSoNhan = parseFloat(matchHeSo[1]) || 0;
                 let giaTriNhap = parseFloat(valThucTe) || 0;
                 diemCuaDong = giaTriNhap * heSoNhan;
+            } else if (rawQuyDiem === "THANHTICH_HS_DONG") {
+                // Kế thừa kết quả từ khối xử lý bảng phụ Quy chế thành tích học sinh
+                let m_d_1 = valThucTe.match(/=\s*([\d\.]+)\s*điểm/g);
+                if (m_d_1) {
+                    m_d_1.forEach(m => diemCuaDong += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
+                }
             }
         }
 
+        // Kiểm tra điều kiện xếp loại tuần tự (Cascading Logic): Xuất sắc trước, Chưa hoàn thành sau cùng
         let condXS = row.getAttribute("data-cond-xs") || "";
         let condHTT = row.getAttribute("data-cond-htt") || "";
         let condHT = row.getAttribute("data-cond-ht") || "";
@@ -156,11 +169,10 @@
         let totalCriteriaCount = 0;
         let xsCount = 0, httCount = 0, htCount = 0, chtCount = 0;
         
-        const rows = document.querySelectorAll("#t-b-g tr:not([data-loai-dong='phan'])");
         let currentSection = "Phần 1";
-        let nodeIndex = 0;
+        const rows = document.querySelectorAll("#t-b-g tr");
 
-        document.querySelectorAll("#t-b-g tr").forEach(row => {
+        rows.forEach(row => {
             if (row.getAttribute("data-loai-dong") === "phan") {
                 let textPhan = row.querySelector(".m-cot-mot").innerText;
                 if (textPhan.toUpperCase().includes("PHẦN 2")) currentSection = "Phần 2";
@@ -181,14 +193,13 @@
             else if (res.xepLoai === "HTT") httCount++;
             else if (res.xepLoai === "HT") htCount++;
             else chtCount++;
-            
-            nodeIndex++;
         });
 
         let tongDiem = diemP1 + diemP2;
         let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ";
         let k_m = "#dc3545";
 
+        // Áp dụng bộ lọc tỷ lệ tiêu chí để chốt danh hiệu cuối cùng của năm học
         if (chtCount === 0 && (xsCount >= totalCriteriaCount * 0.5)) {
             k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745";
         } else if (chtCount === 0 && ((xsCount + httCount) >= totalCriteriaCount * 0.7)) {
@@ -210,8 +221,9 @@
         let xsCount = 0, httCount = 0, htCount = 0, chtCount = 0;
 
         let currentSection = "Phần 1";
+        const rows = document.querySelectorAll("#t-b-g tr");
 
-        document.querySelectorAll("#t-b-g tr").forEach(row => {
+        rows.forEach(row => {
             if (row.getAttribute("data-loai-dong") === "phan") {
                 let textPhan = row.querySelector(".m-cot-mot").innerText;
                 if (textPhan.toUpperCase().includes("PHẦN 2")) currentSection = "Phần 2";
@@ -270,7 +282,6 @@
 
         let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 
-        // Kiểm tra đối tượng để phân phối chính xác luồng xử lý
         if (c_n === "giaovien") {
             k_q = f_x_l_chinh(mangDuLieuGom);
         } else if (c_n === "nhanvien") {
