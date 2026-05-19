@@ -405,7 +405,6 @@
                     let blankData = t_k_admin.y_d.map(item => ({ ...item, x_c: "" }));
                     f_x_e(blankData);
                     
-                    // KÍCH HOẠT TÍNH TOÁN NGAY SAU KHI DỰNG XONG MA TRẬN MẪU CHO KHÁCH
                     if (typeof f_x_h === "function") f_x_h();
                 } else {
                     document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
@@ -524,7 +523,6 @@
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 document.getElementById("vungThongTin").style.display = "flex";
                 
-                // KÍCH HOẠT TÍNH TOÁN NGAY SAU KHI NGƯỜI DÙNG ĐĂNG NHẬP THÀNH CÔNG VÀ TẢI XONG BẢNG
                 if (typeof f_x_h === "function") f_x_h();
             } else if (t_k_khac.status === 'success') {
                 let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
@@ -614,7 +612,6 @@
             v_l_d = t_k.y_c || "";
             f_x_e(t_k.y_d); 
             
-            // KÍCH HOẠT TÍNH TOÁN LẬP TỨC CHO DỮ LIỆU ĐÃ LƯU TRONG BỘ NHỚ ĐỆM CACHE ADMIN
             if (typeof f_x_h === "function") f_x_h();
             return;
         }
@@ -634,7 +631,6 @@
 
                 f_x_e(t_k.y_d); 
                 
-                // KÍCH HOẠT TÍNH TOÁN NGAY SAU KHI ADMIN CHỌN NHÂN SỰ VÀ TẢI MỚI DỮ LIỆU THÀNH CÔNG
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 hienThiThongBaoUI(t_k.message);
