@@ -261,7 +261,7 @@
             </div>
         </div>
         <div class="ai-modal-footer">
-            <textarea id="aiQueryInput" placeholder="Ví dụ: Tiêu chí xếp loại của giáo viên thế nào?" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:4px; resize:none; height:45px; font-family:inherit; font-size: 15px("></textarea>
+            <textarea id="aiQueryInput" placeholder="Ví dụ: Tiêu chí xếp loại của giáo viên thế nào?" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:4px; resize:none; height:45px; font-family:inherit; font-size: 15px;"></textarea>
             <button onclick="guiCauHoiAI()" id="btnSendAI" style="background:var(--mau-c); color:white; border:none; padding:0 25px; border-radius:4px; font-weight:bold; cursor:pointer; font-size: 15px;">Hỏi AI</button>
         </div>
     </div>
@@ -287,8 +287,6 @@
     <button class="n-dong-cb" onclick="dongCanhBaoUI()">Đóng</button>
 </div>
 
-<?!= HtmlService.createHtmlOutputFromFile('TinhToan').getContent(); ?>
-
 <script>applyDGConfig();</script>
 
 <script>
@@ -312,6 +310,7 @@
             if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
         });
 
+        // ĐÃ PHỤC HỒI: Chạy ngầm tập lệnh tính toán theo cấu trúc module gốc
         Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
     });
 
@@ -376,13 +375,23 @@
         if (document.getElementById("menu-tieu-chi-nv")) document.getElementById("menu-tieu-chi-nv").style.display = kieu;
     }
 
+    const fetchAPI = async (url) => {
+        const response = await fetch(url);
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.error("LỖI MÁY CHỦ TRẢ VỀ:", text);
+            throw new Error("LỖI 500: URL Máy chủ Google Apps Script bị sai, HOẶC đồng chí chưa Triển khai phiên bản mới (New Version) đúng chuẩn.");
+        }
+    };
+
     async function f_x_load_guest_template(p_n) {
         try {
             const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
             let repId = "";
             if (danhSachVienChucAdmin.length === 0) {
-                const resList = await fetch(`${z_y_a}?z_p_a=l_d_s`);
-                const tkList = await resList.json();
+                const tkList = await fetchAPI(`${z_y_a}?z_p_a=l_d_s`);
                 if (tkList.status === 'success' && tkList.data) danhSachVienChucAdmin = tkList.data;
             }
 
@@ -398,13 +407,11 @@
             }
 
             if (repId) {
-                const resAdmin = await fetch(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(repId)}&z_p_c=${p_n}`);
-                const t_k_admin = await resAdmin.json();
+                const t_k_admin = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(repId)}&z_p_c=${p_n}`);
                 
                 if (t_k_admin.status === 'success' && t_k_admin.y_d) {
                     let blankData = t_k_admin.y_d.map(item => ({ ...item, x_c: "" }));
                     f_x_e(blankData);
-                    
                     if (typeof f_x_h === "function") f_x_h();
                 } else {
                     document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
@@ -413,7 +420,7 @@
                 document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu.</td></tr>";
             }
         } catch (e) {
-            document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi kết nối tải mẫu tiêu chí.</td></tr>";
+            document.getElementById("t-b-g").innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
         }
     }
 
@@ -428,7 +435,6 @@
         document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         
         document.getElementById("vungThongTin").style.display = "flex";
-        
         document.getElementById("vungThuNhat").classList.add("a-di");
         document.getElementById("vungThuHai").classList.remove("a-di");
         
@@ -467,7 +473,6 @@
 
     let v_l_a = "", v_l_b = "", v_l_c = {};
     let v_l_d = "", v_l_e = "", v_l_f = "";
-    
     let v_nam_hoc_hien_tai = ""; 
 
     function f_x_c() {
@@ -476,7 +481,6 @@
 
     async function f_x_d() {
         v_che_do_xem_admin = false; 
-        
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
@@ -492,8 +496,8 @@
             const p_n_khac = (p_n === 'giaovien') ? 'nhanvien' : 'giaovien';
             
             const [t_k, t_k_khac] = await Promise.all([
-                fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`).then(r => r.json()),
-                fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}`).then(r => r.json())
+                fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`),
+                fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}`)
             ]);
             
             if (t_k.status === 'success') {
@@ -533,7 +537,6 @@
                 v_che_do_khach = true;
                 document.getElementById('theHienChinh').innerText = "Tài khoản không hợp lệ";
                 document.getElementById("vungThongTin").style.display = "flex";
-                
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 let nutLuu = document.getElementById("vungNutBam");
@@ -553,7 +556,7 @@
                 hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
             }
         } catch (err) { 
-            hienThiThongBaoUI("Kết nối tới máy chủ bị gián đoạn. Vui lòng tải lại trang.", f_x_logout); 
+            hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">${err.message}</span>`, f_x_logout); 
         }
         f_x_j(false);
     }
@@ -561,8 +564,7 @@
     async function f_x_load_users() {
         try {
             const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-            const res = await fetch(`${z_y_a}?z_p_a=l_d_s`);
-            const t_k = await res.json();
+            const t_k = await fetchAPI(`${z_y_a}?z_p_a=l_d_s`);
             if (t_k.status === 'success') {
                 danhSachVienChucAdmin = t_k.data;
                 const selectObj = document.getElementById("oChonUserAdmin");
@@ -618,8 +620,7 @@
 
         f_x_j(true);
         try {
-            const res = await fetch(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(selectedId)}&z_p_c=${nhomXacDinh}`);
-            const t_k = await res.json();
+            const t_k = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(selectedId)}&z_p_c=${nhomXacDinh}`);
 
             if (t_k.status === 'success') {
                 v_bo_nho_dem_admin[selectedId] = t_k; 
@@ -667,19 +668,6 @@
     
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
-
-    async function f_x_k(c_t_t) {
-        try {
-            const r_n = await fetch(c_t_t);
-            if (!r_n.ok) throw new Error("Loi " + c_t_t);
-            const c_l = await r_n.text();
-            const c_q = /<script>([\s\S]*?)<\/script>/i;
-            const m_q = c_l.match(c_q);
-            if (m_q && m_q[1]) {
-                const k_t = document.createElement('script'); k_t.textContent = m_q[1]; document.body.appendChild(k_t);
-            }
-        } catch (loi) { console.error(loi); }
-    }
 
     function moKhungChatAI() {
         document.getElementById('aiChatModal').style.display = 'flex';
@@ -764,8 +752,7 @@
 
         try {
             const urlGoiAI = `${z_y_a}?z_p_a=h_o_i_a_i&z_p_b=${encodeURIComponent(cauHoi)}&t=${new Date().getTime()}`;
-            const response = await fetch(urlGoiAI);
-            const res = await response.json();
+            const res = await fetchAPI(urlGoiAI);
 
             nutGui.disabled = false;
             nutGui.innerHTML = "Hỏi AI";
@@ -805,6 +792,365 @@
             guiCauHoiAI();
         }
     });
+
+    let v_timer_h = null;
+    function v_f_x_h_debounce() {
+        clearTimeout(v_timer_h);
+        v_timer_h = setTimeout(f_x_h, 250); 
+    }
+
+    function f_x_e(m_n) {
+        const k_b = document.getElementById("t-b-g");
+        let d_d = 1;
+        let p_k = false; 
+        let khoiDOM = "";
+
+        m_n.forEach((item, index) => {
+            let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
+            let qd = item.x_quy_diem || ""; 
+            let kq = item.x_c || ""; 
+            let html = "";
+            let l_p = !tg && item.x_a && !item.x_a.toLowerCase().includes("phê bình");
+            let isFirstDataRow = false;
+            
+            if (!l_p && !p_k) { isFirstDataRow = true; p_k = true; kq = v_l_d !== "" ? v_l_d : kq; }
+            let l_m = (item.x_a && item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng")) || tg.toLowerCase().includes("bình quân cả năm");
+
+            if (l_m) {
+                kq = v_l_d !== "" ? v_l_d : kq; 
+                if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
+                html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
+            } 
+            else if (tg === "THANHTICH_HS_DONG") {
+                html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q" style="font-weight: normal; font-size: 14px;">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
+            } else if (tg.includes("|")) {
+                let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
+                html = `<select class="o-n-bang k-hoat-t" required>`;
+                html += t_c + tg.split(",").map(opt => {
+                    let [n, d] = opt.split("|");
+                    return `<option value="${n.trim()}" data-p="${d.trim()}" ${kq.trim().toLowerCase() === n.trim().toLowerCase() ? 'selected' : ''}>${n.trim()} (${d.trim()}đ)</option>`;
+                }).join("") + `</select>`;
+            } else {
+                if (isFirstDataRow) html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
+                else html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
+            }
+
+            let h_s = "";
+            if (!l_p && item.x_a && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
+            
+            khoiDOM += `<tr style="${l_p ? 'background:#f1f8ff;font-weight:bold;color:var(--mau-c);' : ''}" 
+                            data-loai-dong="${l_p ? 'phan' : 'tieuchi'}"
+                            data-ten-tieuchi="${item.x_a || ''}"
+                            data-thang-gia-tri="${tg}"
+                            data-quy-diem="${qd}"
+                            data-chi-tieu="${item.x_d || ''}"
+                            data-cond-xs="${item.x_e || ''}"
+                            data-cond-htt="${item.x_f || ''}"
+                            data-cond-ht="${item.x_g || ''}">
+                            <td style="text-align: center; vertical-align: middle;">${l_p ? "" : h_s}</td>
+                            <td class="m-cot-mot" style="vertical-align: middle;">${item.x_a || ''}</td>
+                            <td style="text-align: center; vertical-align: middle;">${tg === 'THANHTICH_HS_DONG' ? 'Quy chế' : qd}</td>
+                            <td style="vertical-align: middle;">${l_p ? "" : html}</td>
+                        </tr>`;
+        });
+        
+        k_b.innerHTML = khoiDOM; 
+
+        if (v_che_do_xem_admin || v_che_do_khach) {
+            document.querySelectorAll("#t-b-g input, #t-b-g select, #t-b-g button").forEach(el => {
+                el.disabled = true;
+                if (el.tagName === 'INPUT' || el.tagName === 'SELECT') el.style.backgroundColor = "#e9ecef";
+                el.style.cursor = "not-allowed";
+            });
+            let nutLuu = document.getElementById("vungNutBam");
+            if (nutLuu) nutLuu.style.display = "none";
+        } else {
+            let nutLuu = document.getElementById("vungNutBam");
+            if (nutLuu) nutLuu.style.display = "flex";
+        }
+    }
+
+    function f_x_h() {
+        const c_n = document.getElementById("oChonNhom").value;
+        let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
+
+        if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
+            k_q = f_x_l_chinh();
+        } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
+            k_q = f_x_m_chinh();
+        }
+
+        v_l_e = k_q.k_t;
+        v_l_f = k_q.tongDiem;
+
+        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
+        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
+        document.getElementById("vHT3").innerHTML = `
+            <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
+            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
+        `;
+    }
+
+    async function f_x_xuat_pdf() {
+        try {
+            const element = document.getElementById("vungThuHai");
+            if (!element) {
+                alert("Không tìm thấy vùng dữ liệu đánh giá.");
+                return;
+            }
+
+            let tenNV = "VienChuc";
+            const eTen = document.getElementById("theHienChinh");
+            if (eTen) { tenNV = eTen.innerText.trim(); }
+            
+            const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
+            const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
+
+            if (typeof hienThiThongBaoUI === "function") {
+                hienThiThongBaoUI("Hệ thống đang tự động căn chỉnh, chèn Logo và xuất PDF...<br>Vui lòng không cuộn chuột.");
+            }
+
+            const oldWidth = element.style.width;
+            const oldOverflow = element.style.overflow;
+            const oldMaxWidth = element.style.maxWidth;
+            const oldPadding = element.style.padding;
+            const oldBoxSizing = element.style.boxSizing;
+            const vungNut = document.getElementById("vungNutBam");
+
+            const cellStates = [];
+            const tables = element.querySelectorAll("table");
+            tables.forEach(tb => {
+                const cells = tb.querySelectorAll("th, td, tr");
+                cells.forEach(c => {
+                    cellStates.push({
+                        el: c,
+                        padding: c.style.padding,
+                        fontSize: c.style.fontSize,
+                        lineHeight: c.style.lineHeight,
+                        wordBreak: c.style.wordBreak,
+                        whiteSpace: c.style.whiteSpace,
+                        border: c.style.border,
+                        fontWeight: c.style.fontWeight, 
+                        boxSizing: c.style.boxSizing,
+                        pageBreakInside: c.style.pageBreakInside,
+                        breakInside: c.style.breakInside
+                    });
+                });
+            });
+
+            const tieuDePDF = document.createElement("div");
+            tieuDePDF.id = "tieu-de-pdf-tam";
+            tieuDePDF.style.marginBottom = "15px"; 
+            tieuDePDF.style.fontFamily = "'Times New Roman', serif";
+            tieuDePDF.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div style="font-weight: bold; font-size: 12pt; text-transform: uppercase; text-align: left; padding-top: 5px;">${typeof DG_TEN_TRUONG_UP !== 'undefined' ? DG_TEN_TRUONG_UP : 'TRƯỜNG'}</div>
+                    <img src="${typeof DG_LINK_LOGO !== 'undefined' ? DG_LINK_LOGO : ''}" style="width: 55px; height: auto;">
+                </div>
+                <div style="text-align: center;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 14pt; font-weight: bold; color: #000; text-transform: uppercase;">KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI VIÊN CHỨC</h2>
+                    <div style="font-size: 12pt; color: #000;">Họ tên: <b style="text-transform: uppercase;">${tenNV}</b> - Năm học: <b>${namHoc}</b></div>
+                </div>
+            `;
+            element.prepend(tieuDePDF);
+
+            const logoImg = tieuDePDF.querySelector('img');
+            if (logoImg) {
+                await new Promise((resolve) => {
+                    if (logoImg.complete) resolve();
+                    else { logoImg.onload = resolve; logoImg.onerror = resolve; }
+                });
+            }
+
+            if (vungNut) vungNut.style.display = "none";
+            element.style.width = "190mm";
+            element.style.maxWidth = "190mm";
+            element.style.overflow = "visible";
+            element.style.padding = "0 2mm"; 
+            element.style.boxSizing = "border-box";
+
+            tables.forEach(tb => {
+                tb.style.width = "100%"; 
+                tb.style.margin = "0"; 
+                tb.style.tableLayout = "fixed";
+                tb.style.borderCollapse = "collapse";
+                tb.style.border = "0.1pt solid #999"; 
+                
+                const rows = tb.querySelectorAll("tr");
+                rows.forEach(r => {
+                    r.style.pageBreakInside = "avoid";
+                    r.style.breakInside = "avoid";
+                    r.style.border = "0.1pt solid #999"; 
+                });
+                
+                const cells = tb.querySelectorAll("th, td");
+                cells.forEach(c => {
+                    c.style.wordBreak = "break-word";
+                    c.style.whiteSpace = "pre-wrap";
+                    c.style.border = "0.1pt solid #999"; 
+                    c.style.color = "#000";
+                    c.style.boxSizing = "border-box"; 
+                    
+                    c.style.fontSize = "10pt"; 
+                    if(c.tagName === 'TD') {
+                        c.style.fontWeight = "normal";
+                    }
+                    
+                    c.style.padding = "6px 5px"; 
+                    c.style.lineHeight = "1.5";
+                });
+                
+                const firstRow = tb.querySelector("tr");
+                if (firstRow && firstRow.children.length >= 4) {
+                    firstRow.children[0].style.width = "5%";
+                    firstRow.children[1].style.width = "35%";
+                    firstRow.children[2].style.width = "15%";
+                    firstRow.children[3].style.width = "45%";
+                }
+            });
+
+            const summaryBlock = element.querySelector(".v-t-k");
+            let summaryOldCSS = "";
+            if (summaryBlock) {
+                summaryOldCSS = summaryBlock.style.cssText;
+                summaryBlock.style.marginTop = "15px";
+                summaryBlock.style.padding = "10px 15px";
+                summaryBlock.style.border = "0.1pt solid #999"; 
+                summaryBlock.style.backgroundColor = "#f0f0f0";
+                summaryBlock.style.display = "flex";
+                summaryBlock.style.justifyContent = "space-between";
+                summaryBlock.style.alignItems = "center";
+                summaryBlock.style.pageBreakInside = "avoid";
+                summaryBlock.style.breakInside = "avoid"; 
+
+                const titleDukien = summaryBlock.querySelector("h3");
+                if (titleDukien) titleDukien.style.fontSize = "11pt"; 
+
+                const leftScores = summaryBlock.querySelector("div:nth-child(2)");
+                if (leftScores) {
+                    leftScores.style.fontSize = "10pt"; 
+                    leftScores.querySelectorAll("div").forEach(d => d.style.fontSize = "10pt");
+                }
+
+                const rightRating = summaryBlock.querySelector(".v-d-g");
+                if (rightRating) {
+                    rightRating.style.textAlign = "right";
+                    const ratingText = rightRating.querySelector("div:first-child");
+                    const totalScoreText = rightRating.querySelector("div:last-child");
+                    if (ratingText) {
+                        ratingText.style.fontSize = "10pt"; 
+                        ratingText.style.fontWeight = "bold";
+                        ratingText.style.color = "#000";
+                    }
+                    if (totalScoreText) {
+                        totalScoreText.style.fontSize = "10pt"; 
+                        totalScoreText.style.fontWeight = "bold";
+                        totalScoreText.style.color = "#000";
+                    }
+                }
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 300)); 
+
+            let pageWidth = element.getBoundingClientRect().width; 
+            let pageHeight = pageWidth * 1.405; 
+            let totalHeight = element.scrollHeight;
+            let pages = Math.ceil(totalHeight / pageHeight);
+            let overflow = totalHeight % pageHeight;
+
+            if (pages > 1 && overflow > 0) {
+                if (overflow < pageHeight * 0.15) {
+                    tables.forEach(tb => {
+                        const cells = tb.querySelectorAll("th, td");
+                        cells.forEach(c => {
+                            c.style.padding = "4px 3px";
+                            c.style.fontSize = "9.5pt"; 
+                            c.style.lineHeight = "1.3";
+                        });
+                    });
+                } 
+                else if (overflow > pageHeight * 0.4 && overflow < pageHeight * 0.85) {
+                    tables.forEach(tb => {
+                        const cells = tb.querySelectorAll("th, td");
+                        cells.forEach(c => {
+                            c.style.padding = "9px 5px";
+                            c.style.lineHeight = "1.6";
+                        });
+                    });
+                }
+            } else if (pages === 1 && totalHeight < pageHeight * 0.85) {
+                tables.forEach(tb => {
+                    const cells = tb.querySelectorAll("th, td");
+                    cells.forEach(c => {
+                        c.style.padding = "10px 5px";
+                        c.style.lineHeight = "1.7";
+                    });
+                });
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 300)); 
+
+            const opt = {
+                margin: [15, 10, 15, 10], 
+                filename: tenFile,
+                image: { type: "jpeg", quality: 1 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                pagebreak: { mode: ['css', 'legacy'] } 
+            };
+
+            const worker = html2pdf().set(opt).from(element);
+            await worker.toPdf().get('pdf').then(function(pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setDrawColor(153, 153, 153); 
+                    pdf.setLineWidth(0.1); 
+                    if (i > 1) { pdf.line(10, 15, 200, 15); }
+                    if (i < totalPages) { pdf.line(10, 282, 200, 282); }
+                }
+            });
+            await worker.save(); 
+
+            element.removeChild(tieuDePDF);
+            element.style.width = oldWidth;
+            element.style.maxWidth = oldMaxWidth;
+            element.style.overflow = oldOverflow;
+            element.style.padding = oldPadding;
+            element.style.boxSizing = oldBoxSizing;
+            
+            cellStates.forEach(state => {
+                state.el.style.padding = state.padding;
+                state.el.style.fontSize = state.fontSize;
+                state.el.style.lineHeight = state.lineHeight;
+                state.el.style.wordBreak = state.wordBreak;
+                state.el.style.whiteSpace = state.whiteSpace;
+                state.el.style.border = state.border;
+                state.el.style.fontWeight = state.fontWeight; 
+                state.el.style.boxSizing = state.boxSizing;
+                state.el.style.pageBreakInside = state.pageBreakInside;
+                state.el.style.breakInside = state.breakInside;
+            });
+
+            if (summaryBlock) {
+                summaryBlock.style.cssText = summaryOldCSS; 
+            }
+
+            if (vungNut) vungNut.style.display = "flex";
+            if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
+
+        } catch (err) {
+            console.error("Lỗi xuất PDF:", err);
+            alert("Có lỗi xảy ra trong quá trình tạo file PDF. Thầy vui lòng thử lại.\nChi tiết mã lỗi: " + err.message);
+            if (typeof dongCanhBaoUI === "function") { dongCanhBaoUI(); }
+        }
+    }
 </script>
 </body>
 </html>
