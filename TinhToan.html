@@ -1,12 +1,11 @@
 <script>
     // =========================================================
     // KHỐI THUẬT TOÁN ĐÁNH GIÁ, TÍNH ĐIỂM VÀ KẾT XUẤT DỮ LIỆU
-    // Cập nhật: Phân tách hoàn chỉnh 2 khối Giáo viên và Nhân viên
+    // Cập nhật: Sửa lỗi ánh xạ cột, phân tách chuẩn định lượng Cột C
     // =========================================================
     
     let v_timer_h = null;
 
-    // Hàm kiểm soát độ trễ khi người dùng nhập dữ liệu từ bàn phím
     function v_f_x_h_debounce() {
         clearTimeout(v_timer_h);
         v_timer_h = setTimeout(f_x_h, 250); 
@@ -19,9 +18,9 @@
         let khoiDOM = "";
 
         m_n.forEach((item, index) => {
-            let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
-            let kq = item.x_c || "";
-            let html = "";
+            let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim(); // Thang giá trị (Cột B)
+            let qd = item.x_quy_diem || ""; // Quy điểm thực tế (Cột C)
+            let kq = item.x_c || ""; // Kết quả người dùng nhập
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
             let isFirstDataRow = false;
             
@@ -50,19 +49,19 @@
             let h_s = "";
             if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
             
-            // Bảo toàn và đồng bộ toàn bộ dữ liệu cấu hình ma trận từ trang tính vào thuộc tính DOM hàng
+            // Gán chuẩn 7 cột dữ liệu tương ứng phục vụ quét động
             khoiDOM += `<tr style="${l_p ? 'background:#f1f8ff;font-weight:bold;color:var(--mau-c);' : ''}" 
                             data-loai-dong="${l_p ? 'phan' : 'tieuchi'}"
                             data-ten-tieuchi="${item.x_a || ''}"
-                            data-quy-diem="${tg}"
-                            data-he-so-c="${item.x_b || ''}"
+                            data-thang-gia-tri="${tg}"
+                            data-quy-diem="${qd}"
                             data-chi-tieu="${item.x_d || ''}"
                             data-cond-xs="${item.x_e || ''}"
                             data-cond-htt="${item.x_f || ''}"
                             data-cond-ht="${item.x_g || ''}">
                             <td style="text-align: center; vertical-align: middle;">${l_p ? "" : h_s}</td>
                             <td class="m-cot-mot" style="vertical-align: middle;">${item.x_a}</td>
-                            <td style="text-align: center; vertical-align: middle;">${tg === 'THANHTICH_HS_DONG' ? 'Quy chế' : tg}</td>
+                            <td style="text-align: center; vertical-align: middle;">${tg === 'THANHTICH_HS_DONG' ? 'Quy chế' : qd}</td>
                             <td style="vertical-align: middle;">${l_p ? "" : html}</td>
                         </tr>`;
         });
@@ -83,13 +82,15 @@
         }
     }
 
-    // Hàm phân tích logic đối chiếu điều kiện động thời gian thực từ cột E đến cột G
     function checkConditionDynamic(valThucTe, textDieuKien) {
         if (!textDieuKien || textDieuKien.trim() === "") return false;
         
         let subConditions = textDieuKien.split("||");
         let inputStr = valThucTe.toString().trim().toLowerCase();
-        let inputNum = parseFloat(valThucTe) || 0;
+        
+        // Trích xuất số thông minh từ dữ liệu thực tế người dùng nhập
+        let matchNumInput = valThucTe.toString().match(/(\d+([.,]\d+)?)/);
+        let inputNum = matchNumInput ? parseFloat(matchNumInput[1].replace(',', '.')) : 0;
 
         for (let subCond of subConditions) {
             let cond = subCond.trim().toLowerCase();
@@ -97,12 +98,12 @@
 
             if (cond.startsWith(">=")) {
                 let cleanCond = cond.substring(2).trim();
-                let condNum = parseFloat(cleanCond);
+                let matchNumCond = cleanCond.match(/(\d+([.,]\d+)?)/);
+                let condNum = matchNumCond ? parseFloat(matchNumCond[1].replace(',', '.')) : NaN;
                 
                 if (!isNaN(condNum)) {
                     if (inputNum >= condNum) return true;
                 } else {
-                    // Đối chiếu cấp bậc dựa trên chuỗi quy chuẩn hệ thống
                     let hierarchy = ["trường", "cấp trường", "xã", "cấp xã", "cụm", "nhì cụm", "nhất xã", "tỉnh", "cấp tỉnh", "quốc gia"];
                     let idxInput = hierarchy.findIndex(h => inputStr.includes(h));
                     let idxCond = hierarchy.findIndex(h => cleanCond.includes(h));
@@ -115,28 +116,25 @@
         return false;
     }
 
-    // Hàm xử lý tính điểm và trích xuất xếp loại thành phần của từng hàng đơn lẻ
     function xuLyTinhToanDong(row, valThucTe, inputElement) {
         let diemCuaDong = 0;
         let xepLoaiCuaDong = "CHT"; 
 
+        let rawThangGiaTri = row.getAttribute("data-thang-gia-tri") || "";
         let rawQuyDiem = row.getAttribute("data-quy-diem") || "";
-        let rawHeSoC = row.getAttribute("data-he-so-c") || "";
 
-        // Tính điểm: Nếu có dấu phân tách | thì trích xuất điểm từ option thả xuống
-        if (rawQuyDiem.includes("|")) {
+        // 1. Nhận diện tính điểm thành phần chuẩn hóa từ Cột C
+        if (rawThangGiaTri.includes("|")) {
             if (inputElement.tagName === "SELECT" && inputElement.selectedIndex !== -1) {
                 diemCuaDong = parseFloat(inputElement.options[inputElement.selectedIndex].getAttribute("data-p")) || 0;
             }
         } else {
-            // Đối với các tiêu chí định lượng, bóc tách giá trị số để thực hiện phép nhân trực tiếp
-            let matchHeSo = rawHeSoC.match(/([\+\-]?\d+)/);
+            let matchHeSo = rawQuyDiem.match(/([\+\-]?\d+)/);
             if (matchHeSo) {
                 let heSoNhan = parseFloat(matchHeSo[1]) || 0;
                 let giaTriNhap = parseFloat(valThucTe) || 0;
                 diemCuaDong = giaTriNhap * heSoNhan;
-            } else if (rawQuyDiem === "THANHTICH_HS_DONG") {
-                // Kế thừa kết quả từ khối xử lý bảng phụ Quy chế thành tích học sinh
+            } else if (rawThangGiaTri === "THANHTICH_HS_DONG") {
                 let m_d_1 = valThucTe.match(/=\s*([\d\.]+)\s*điểm/g);
                 if (m_d_1) {
                     m_d_1.forEach(m => diemCuaDong += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
@@ -144,7 +142,7 @@
             }
         }
 
-        // Kiểm tra điều kiện xếp loại tuần tự (Cascading Logic): Xuất sắc trước, Chưa hoàn thành sau cùng
+        // 2. Kiểm tra điều kiện xếp loại tuần tự (Cascading Logic)
         let condXS = row.getAttribute("data-cond-xs") || "";
         let condHTT = row.getAttribute("data-cond-htt") || "";
         let condHT = row.getAttribute("data-cond-ht") || "";
@@ -160,9 +158,6 @@
         return { diem: diemCuaDong, xepLoai: xepLoaiCuaDong };
     }
 
-    // =========================================================
-    // KHỐI 1: THUẬT TOÁN ĐÁNH GIÁ DÀNH RIÊNG CHO GIÁO VIÊN
-    // =========================================================
     function f_x_l_chinh(mangDuLieuGom) {
         let diemP1 = 0;
         let diemP2 = 0;
@@ -199,7 +194,6 @@
         let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ";
         let k_m = "#dc3545";
 
-        // Áp dụng bộ lọc tỷ lệ tiêu chí để chốt danh hiệu cuối cùng của năm học
         if (chtCount === 0 && (xsCount >= totalCriteriaCount * 0.5)) {
             k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745";
         } else if (chtCount === 0 && ((xsCount + httCount) >= totalCriteriaCount * 0.7)) {
@@ -211,9 +205,6 @@
         return { diemP1, diemP2, tongDiem, k_t, k_m };
     }
 
-    // =========================================================
-    // KHỐI 2: THUẬT TOÁN ĐÁNH GIÁ DÀNH RIÊNG CHO NHÂN VIÊN
-    // =========================================================
     function f_x_m_chinh(mangDuLieuGom) {
         let diemP1 = 0;
         let diemP2 = 0;
@@ -261,7 +252,6 @@
         return { diemP1, diemP2, tongDiem, k_t, k_m };
     }
 
-    // Hàm điều phối tổng hợp toàn bảng tính và cập nhật kết quả giao diện
     function f_x_h() {
         const rows = document.querySelectorAll("#t-b-g tr");
         const c_n = document.getElementById("oChonNhom").value;
