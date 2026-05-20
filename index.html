@@ -285,7 +285,7 @@
 </div>
 
 <script>
-// ========== CÁC HÀM CỐT LÕI (được nhúng sẵn, có thể bị ghi đè bởi file ngoài) ==========
+// ========== CÁC HÀM CỐT LÕI (có thể bị ghi đè bởi file ngoài) ==========
 function f_x_f_gv(idx) {
     const v_c = document.getElementById(`h_c_${idx}`).value;
     const v_s = parseInt(document.getElementById(`h_g_${idx}`).value);
@@ -340,10 +340,82 @@ function f_x_l_chinh(dataRows) {
             else { diemP1 = diemThangGoc; }
         }
     });
+
     let datXS = true, datTot = true, datHT = true;
+
+    // Hàm phân tích điều kiện giải thưởng (hỗ trợ các mô tả như "Giải Nhất xã", ">= Giải Nhì cụm", ">= giải 3 tỉnh")
+    const evalPrizeCondition = (cond, valStr, row) => {
+        if (!row.ten.includes("thành tích") && !row.quyChe.includes("Quy chế")) return null; // không áp dụng
+        const lines = valStr.split('\n');
+        // Tính bestScore và cũng lưu danh sách các giải đã đạt (để kiểm tra chính xác)
+        let bestScore = 0;
+        const prizes = []; // mỗi phần tử: {score, cap, hang}
+        lines.forEach(line => {
+            let g = 0, c = 0;
+            if(line.includes("nhất")) g = 4;
+            else if(line.includes("nhì")) g = 3;
+            else if(line.includes("ba")) g = 2;
+            else if(line.includes("kk")) g = 1;
+            if(line.includes("quốc gia")) c = 3;
+            else if(line.includes("tỉnh")) c = 2;
+            else if(line.includes("xã") || line.includes("cụm")) c = 1;
+            if (g > 0 && c > 0) {
+                let score = c * 10 + g;
+                prizes.push({score, cap: c, hang: g});
+                if(score > bestScore) bestScore = score;
+            }
+        });
+
+        // Phân tích điều kiện
+        cond = cond.trim();
+        let op = ""; // mặc định không có toán tử -> kiểm tra chính xác giải
+        let rest = cond;
+        const opMatch = cond.match(/^(>=|<=|>|<|==)\s*/);
+        if (opMatch) {
+            op = opMatch[1];
+            rest = cond.substring(opMatch[0].length).trim();
+        }
+
+        // Xác định cấp và hạng từ rest
+        let cap = 0, hang = 0;
+        const lowerRest = rest.toLowerCase();
+        if (lowerRest.includes("quốc gia")) cap = 3;
+        else if (lowerRest.includes("tỉnh")) cap = 2;
+        else if (lowerRest.includes("xã") || lowerRest.includes("cụm")) cap = 1;
+        if (lowerRest.includes("nhất")) hang = 4;
+        else if (lowerRest.includes("nhì")) hang = 3;
+        else if (lowerRest.includes("ba") || lowerRest.includes("giải 3")) hang = 2;
+        else if (lowerRest.includes("kk") || lowerRest.includes("khuyến khích")) hang = 1;
+
+        if (cap === 0 || hang === 0) return null; // không phải dạng giải thưởng
+
+        const requiredScore = cap * 10 + hang;
+
+        if (op === "") {
+            // không toán tử: phải có đúng giải đó (tồn tại ít nhất 1 dòng khớp cấp và hạng)
+            return prizes.some(p => p.cap === cap && p.hang === hang);
+        } else {
+            // có toán tử: so sánh với bestScore
+            switch (op) {
+                case ">=": return bestScore >= requiredScore;
+                case ">": return bestScore > requiredScore;
+                case "<=": return bestScore <= requiredScore;
+                case "<": return bestScore < requiredScore;
+                case "==": return bestScore === requiredScore;
+                default: return false;
+            }
+        }
+    };
+
     const evalCondition = (cond, valNum, valStr, row) => {
         cond = cond.trim().toLowerCase();
         if (cond === "" || cond === "any") return true;
+
+        // Thử ưu tiên kiểm tra điều kiện giải thưởng
+        const prizeResult = evalPrizeCondition(cond, valStr, row);
+        if (prizeResult !== null) return prizeResult;
+
+        // Các xử lý khác giữ nguyên
         let isNumericCond = cond.match(/^[><=]+[\d\.]+$/);
         if (isNumericCond) {
             if (cond.startsWith(">=")) return valNum >= parseFloat(cond.replace(">=", ""));
@@ -352,7 +424,8 @@ function f_x_l_chinh(dataRows) {
             if (cond.startsWith("<")) return valNum < parseFloat(cond.replace("<", ""));
             if (cond.startsWith("==")) return valNum === parseFloat(cond.replace("==", ""));
         }
-        if (cond.match(/^[\d\.]+$/)) return valNum === parseFloat(cond);
+        if (cond.match(/^[\d\.]+$/)) return valNum === parseFloat(cond); 
+
         if (cond.startsWith(">=") && isNaN(cond.replace(">=", ""))) {
             let hierarchy = [
                 ["yếu", "kém", "chưa đạt", "không có", "chưa hoàn thành"],
@@ -367,7 +440,9 @@ function f_x_l_chinh(dataRows) {
             hierarchy.forEach((arr, idx) => { if(arr.some(w => valStr.includes(w))) currentLevel = idx; });
             if (targetLevel !== -1 && currentLevel !== -1) return currentLevel >= targetLevel;
         }
+
         if (row.ten.includes("thành tích") || row.quyChe.includes("Quy chế")) {
+            // Các xử lý cũ cho thành tích (có thể giữ lại để tương thích ngược)
             let lines = valStr.split('\n');
             let bestScore = 0, countTinh = 0;
             lines.forEach(line => {
@@ -394,8 +469,10 @@ function f_x_l_chinh(dataRows) {
             if (cond.includes(">=")) return bestScore >= targetScore;
             return bestScore === targetScore;
         }
+
         return valStr.includes(cond);
     };
+
     const evalCell = (cellFormula, valNum, valStr, row) => {
         if (!cellFormula) return true;
         let parts = cellFormula.split("||");
@@ -412,18 +489,22 @@ function f_x_l_chinh(dataRows) {
         }
         return false;
     };
+
     dataRows.forEach(r => {
         if (r.ten === "" || r.ten.includes("phần 1") || r.ten.includes("phần 2")) return;
         if (r.g_xs && !evalCell(r.g_xs, r.so, r.giaTri, r)) datXS = false;
         if (r.g_htt && !evalCell(r.g_htt, r.so, r.giaTri, r)) datTot = false;
         if (r.g_ht && !evalCell(r.g_ht, r.so, r.giaTri, r)) datHT = false;
     });
+
     if (isCHTThang) { datXS = false; datTot = false; datHT = false; }
+
     let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ";
     let k_m = "#dc3545";
     if (datXS) { k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745"; }
     else if (datTot) { k_t = "HOÀN THÀNH TỐT NHIỆM VỤ"; k_m = "#007bff"; }
     else if (datHT) { k_t = "HOÀN THÀNH NHIỆM VỤ"; k_m = "#fd7e14"; }
+
     let k_t_t = diemP1 + diemP2;
     return {
         diemP1: diemP1 % 1 === 0 ? diemP1 : diemP1.toFixed(1),
@@ -469,12 +550,11 @@ let v_che_do_xem_admin = false;
 let v_che_do_khach = false; 
 let danhSachVienChucAdmin = [];
 let v_bo_nho_dem_admin = {}; 
-let v_l_c = {}; // lưu trữ cấu hình điểm từ server
+let v_l_c = {};
 
 // ========== KHỞI ĐỘNG ==========
 function hienThiNutGoogle() {
-    const vungGoogle = document.getElementById("vungXacThucGoogle");
-    if (vungGoogle) vungGoogle.style.display = "block";
+    document.getElementById("vungXacThucGoogle").style.display = "block";
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -483,37 +563,29 @@ window.addEventListener('DOMContentLoaded', () => {
     
     ketnoiScript.onload = function() {
         if (typeof applyDGConfig === 'function') applyDGConfig();
-
         var gsiScript = document.createElement('script');
         gsiScript.src = "https://accounts.google.com/gsi/client";
-        gsiScript.async = true;
-        gsiScript.defer = true;
+        gsiScript.async = true; gsiScript.defer = true;
         document.head.appendChild(gsiScript);
-
         var html2pdfScript = document.createElement('script');
         html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
         document.head.appendChild(html2pdfScript);
-
         khoiDongHeThong();
     };
-    
     ketnoiScript.onerror = function() {
         document.querySelector('.app-title-name-up').innerText = "LỖI KẾT NỐI MÁY CHỦ";
         alert("Hệ thống bảo mật từ chối nạp cấu hình. Vui lòng kiểm tra lại đường dẫn tệp ketnoi.js!");
     };
-    
     document.head.appendChild(ketnoiScript);
 });
 
 function khoiDongHeThong() {
     const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
     const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-    
     if (savedNhom) {
         document.getElementById('oChonNhom').value = savedNhom;
         hienThiNutGoogle();
     }
-    
     if (loggedUser) showMainUI(loggedUser);
     
     const tbg = document.getElementById("t-b-g");
@@ -524,14 +596,12 @@ function khoiDongHeThong() {
         tbg.addEventListener('input', function(e) {
             if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
         });
-        // *** Tự động cập nhật điểm khi nhấn nút Thêm/Xóa ***
         tbg.addEventListener('click', function(e) {
             if (e.target && e.target.tagName === 'BUTTON' && (e.target.classList.contains('n-xanh-b') || e.target.classList.contains('n-do'))) {
                 setTimeout(() => { if (typeof f_x_h === 'function') f_x_h(); }, 150);
             }
         });
     }
-    // Tải file tiêu chí ngoài (nếu có) để ghi đè, nhưng code trên vẫn là fallback
     Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
 }
 
