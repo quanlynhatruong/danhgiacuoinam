@@ -386,14 +386,14 @@ function khoiDongHeThong() {
         });
     }
     
-    // Đã phân luồng nạp thêm tệp danhgiaGV.html để tự động gọi logic Giáo viên
     Promise.all([f_x_k('danhgiaGV.html'), f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
 }
 
 function f_x_k(url) {
     return fetch(url).then(r => r.text()).then(txt => {
         let script = document.createElement('script');
-        script.textContent = txt;
+        let cleanTxt = txt.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '');
+        script.textContent = cleanTxt;
         document.body.appendChild(script);
     }).catch(() => {});
 }
@@ -616,8 +616,9 @@ async function f_x_d() {
             
             if (typeof f_x_h === "function") f_x_h();
         } else if (t_k_khac.status === 'success') {
-            let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
-            hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Tài khoản của bạn được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
+            // Đã cập nhật logic lấy chức vụ thực tế từ cột D (y_role)
+            let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN");
+            hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Chức vụ của bạn trên hệ thống là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
             f_x_j(false);
             return;
         } else { 
