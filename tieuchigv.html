@@ -36,26 +36,33 @@ function f_x_l_chinh(dataRows) {
     let diemThangGoc = 0;
     let isXSThang = false, isTotThang = false, isHTThang = false, isCHTThang = false;
 
-    // BƯỚC 1: ĐỘNG CƠ TÍNH ĐIỂM DỰA VÀO CỘT C
+    // BƯỚC 1: TÍNH ĐIỂM
     dataRows.forEach(r => {
-        let v_str = r.giaTri;
-        let v_num = r.so;
+        let v_str = r.giaTri || ""; // Đảm bảo không undefined
+        let v_num = r.so || 0;       // Ép về 0 nếu trống
 
+        // 1.1 Tính điểm Dropdown
         if (r.isSelect) diemP2 += r.selectDataP;
 
+        // 1.2 Tính điểm toán học (Cột C: (+1), (-1)...)
         if (r.q_d) {
             let qd = r.q_d.replace(/\s/g, '');
             if (qd.startsWith('(+') || qd.startsWith('(-')) {
-                let heSo = parseFloat(qd.match(/[\+\-]\d+(\.\d+)?/)[0]);
-                diemP2 += (v_num * heSo);
+                let match = qd.match(/[\+\-]\d+(\.\d+)?/);
+                if(match) {
+                    let heSo = parseFloat(match[0]);
+                    diemP2 += (v_num * heSo);
+                }
             }
         }
 
-        if (r.quyChe === 'Quy chế T.Tích' || r.quyChe === 'Quy chế' || r.ten.includes("thành tích")) {
+        // 1.3 Thành tích học sinh
+        if (r.ten.includes("thành tích") || r.quyChe.includes("Quy chế")) {
             let m_d_1 = v_str.match(/=\s*([\d\.]+)\s*điểm/g);
             if (m_d_1) m_d_1.forEach(m => diemP2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
         }
 
+        // 1.4 Điểm tháng (Phần 1)
         if (r.isDongBo || r.ten.includes("tháng")) {
             diemThangGoc = v_num;
             if (v_str.includes("xuất sắc")) { isXSThang = true; isHTThang = true; diemP1 = 100 + diemThangGoc; }
@@ -65,8 +72,8 @@ function f_x_l_chinh(dataRows) {
             else { diemP1 = diemThangGoc; }
         }
     });
-
-    // BƯỚC 2: ĐỘNG CƠ THẨM ĐỊNH LOGIC (D, E, F, G)
+    
+   // BƯỚC 2: ĐỘNG CƠ THẨM ĐỊNH LOGIC (D, E, F, G)
     let datXS = true, datTot = true, datHT = true;
 
     const evalCondition = (cond, valNum, valStr, row) => {
