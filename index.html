@@ -584,7 +584,7 @@ async function f_x_d() {
         } else if (t_k.status === 'wrong_role' || t_k_khac.status === 'wrong_role') {
             // Thông báo lỗi nếu chọn sai chức vụ thực tế ở Cột D
             let chucVuDung = t_k.y_role || t_k_khac.y_role || "";
-            hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai chức vụ!<br>Chức vụ của đồng chí trên hệ thống (Cột D) là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để chọn đúng chức vụ của mình.", f_x_logout);
+            hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai chức vụ!<br>Chức vụ của đồng chí là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để chọn đúng chức vụ của mình.", f_x_logout);
             f_x_j(false);
             return;
             
