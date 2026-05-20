@@ -1,8 +1,5 @@
 <script>
-function f_x_a_nv(chuoi, bThuc) { 
-    return new RegExp(bThuc, 'i').test(chuoi); 
-}
-
+function f_x_a_nv(chuoi, bThuc) { return new RegExp(bThuc, 'i').test(chuoi); }
 function f_x_b_nv(chuoiKN, mucDo) {
     if (!chuoiKN || f_x_a_nv(chuoiKN, /không có|không kiêm|khong co|khong kiem/i)) return true; 
     if (mucDo === 'XS') return f_x_a_nv(chuoiKN, /tốt|xuất sắc|tot|xuat sac/i);
@@ -12,61 +9,33 @@ function f_x_b_nv(chuoiKN, mucDo) {
 }
 
 window.f_x_m_chinh = function(dataRows) {
-    let m_k_a = { a: 0, b: '', c: '', d: '', e: 0, f: '', g: '', h: '', i: '', j: 0, k: 0, l: 0, m: 0, n: false, o: 0 };
-    let m_k_b = { a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false, i: false, j: false, k: false, l: false };
-    let diemP2 = 0; 
-    let b_x_l = false, b_x_d = false;
+    let m_k_a = { a:0, b:'', c:'', d:'', e:0, f:'', g:'', h:'', i:'', j:0, k:0, l:0, m:0, n:false, o:0 };
+    let m_k_b = { a:false, b:false, c:false, d:false, e:false, f:false, g:false, h:false };
+    let diemP2 = 0, b_x_l = false, b_x_d = false;
 
-    console.log("Tính điểm nhân viên, số dòng:", dataRows.length);
-
-    dataRows.forEach((r, idx) => {
-        let c_t_1 = r.ten;
-        let c_g_1 = r.giaTri;
-        let c_s_1 = r.so;
+    dataRows.forEach(r => {
+        let c_t_1 = r.ten, c_g_1 = r.giaTri, c_s_1 = r.so;
         
-        // Điểm từ select
-        if (r.isSelect && !isNaN(r.selectDataP)) {
-            diemP2 += r.selectDataP;
-            console.log(`[${idx}] Select cộng ${r.selectDataP} -> P2=${diemP2}`);
-        }
-        
-        // Điểm từ cột D (quy tắc động)
+        if (r.isSelect && !isNaN(r.selectDataP)) diemP2 += r.selectDataP;
         if (r.q_d && r.q_d.trim() !== "") {
             let qd = r.q_d.replace(/\s/g, '');
             let match = qd.match(/([\+\-]\d+(?:\.\d+)?)/);
-            if (match) {
-                let cong = c_s_1 * parseFloat(match[1]);
-                diemP2 += cong;
-                console.log(`[${idx}] Quy tắc động ${qd} -> +${cong} => P2=${diemP2}`);
-            }
+            if (match) diemP2 += c_s_1 * parseFloat(match[1]);
         }
         
-        // Xử lý dòng "Kết quả xếp loại hàng tháng" (phần 1)
         if (r.isDongBo || c_t_1.includes("tháng")) {
             let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
             let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
-            if (f_x_a_nv(c_g_1, /xuất sắc/i)) { 
-                b_x_l = true; b_x_d = true; 
-                m_k_a.m = 100 + c_d_1; 
-            } else if (f_x_a_nv(c_g_1, /tốt/i)) { 
-                b_x_l = true; b_x_d = true; 
-                m_k_a.m = 80 + c_d_1;
-            } else if (f_x_a_nv(c_g_1, /chưa hoàn thành|không hoàn thành|cht/i)) { 
-                b_x_l = false; b_x_d = false; 
-                m_k_a.m = 0 + c_d_1;
-            } else if (f_x_a_nv(c_g_1, /hoàn thành|ht/i)) { 
-                b_x_l = false; b_x_d = true; 
-                m_k_a.m = 60 + c_d_1;
-            } else {
-                m_k_a.m = c_d_1;
-            }
+            if (f_x_a_nv(c_g_1, /xuất sắc/i)) { b_x_l = true; b_x_d = true; m_k_a.m = 100 + c_d_1; }
+            else if (f_x_a_nv(c_g_1, /tốt/i)) { b_x_l = true; b_x_d = true; m_k_a.m = 80 + c_d_1; }
+            else if (f_x_a_nv(c_g_1, /chưa hoàn thành|không hoàn thành|cht/i)) { b_x_l = false; b_x_d = false; m_k_a.m = 0 + c_d_1; }
+            else if (f_x_a_nv(c_g_1, /hoàn thành|ht/i)) { b_x_l = false; b_x_d = true; m_k_a.m = 60 + c_d_1; }
+            else { m_k_a.m = c_d_1; }
             m_k_a.o = c_d_1;
             m_k_a.n = true;
-            console.log(`[${idx}] Phần 1: ${m_k_a.m} (điểm gốc ${c_d_1})`);
-            return; 
+            return;
         }
         
-        // Các tiêu chí khác
         if (c_t_1.includes("phê bình") || c_t_1.includes("nhắc nhở")) { m_k_a.a = c_s_1; m_k_b.a = true; }
         else if (c_t_1.includes("hiệu quả")) { m_k_a.b = c_g_1; m_k_b.b = true; }
         else if (c_t_1.includes("chuyên môn")) { m_k_a.c = c_g_1; m_k_b.c = true; }
@@ -76,9 +45,7 @@ window.f_x_m_chinh = function(dataRows) {
     });
 
     const h_c_c_n = (c_h) => c_h && c_h.trim() !== "";
-    
-    let c_m_a = (!m_k_b.a || m_k_a.a < 2) && 
-                (b_x_l || (m_k_a.n && m_k_a.o >= 180) || (m_k_a.n && m_k_a.m >= 260)) && 
+    let c_m_a = (!m_k_b.a || m_k_a.a < 2) && (b_x_l || (m_k_a.n && m_k_a.o >= 180) || (m_k_a.n && m_k_a.m >= 260)) && 
                 (!m_k_b.b || f_x_a_nv(m_k_a.b, /tốt|xuất sắc/i)) && 
                 (!m_k_b.c || f_x_a_nv(m_k_a.c, /giỏi|xuất sắc/i)) && 
                 (!m_k_b.d || f_x_a_nv(m_k_a.d, /tốt|xuất sắc/i)) && 
@@ -103,11 +70,12 @@ window.f_x_m_chinh = function(dataRows) {
     let diemP1 = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
     if (m_k_b.a && m_k_a.a > 0) diemP2 -= (m_k_a.a * 2);
     
-    diemP1 = Math.round(diemP1 * 10) / 10;
-    diemP2 = Math.round(diemP2 * 10) / 10;
-    let tongDiem = Math.round((diemP1 + diemP2) * 10) / 10;
-    
-    console.log(`Kết quả NV: P1=${diemP1}, P2=${diemP2}, Tổng=${tongDiem}, Loại=${k_t}`);
-    return { diemP1: diemP1, diemP2: diemP2, tongDiem: tongDiem, k_t: k_t, k_m: k_m };
+    return {
+        diemP1: Math.round(diemP1 * 10) / 10,
+        diemP2: Math.round(diemP2 * 10) / 10,
+        tongDiem: Math.round((diemP1 + diemP2) * 10) / 10,
+        k_t: k_t,
+        k_m: k_m
+    };
 };
 </script>
