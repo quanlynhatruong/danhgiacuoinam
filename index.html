@@ -291,7 +291,7 @@
     let danhSachVienChucAdmin = [];
     let v_bo_nho_dem_admin = {}; 
 
-    // ĐÃ THAY ĐỔI: Hàm mở khóa Google Sign-in
+    // Hàm mở khóa Google Sign-in
     function hienThiNutGoogle() {
         const vungGoogle = document.getElementById("vungXacThucGoogle");
         if (vungGoogle) vungGoogle.style.display = "block";
@@ -331,7 +331,7 @@
         
         if (savedNhom) {
             document.getElementById('oChonNhom').value = savedNhom;
-            hienThiNutGoogle(); // Tự động hiện nút nếu đã từng có session lưu
+            hienThiNutGoogle();
         }
         
         if (loggedUser) showMainUI(loggedUser);
@@ -343,6 +343,13 @@
             });
             tbg.addEventListener('input', function(e) {
                 if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
+            });
+            // *** CẬP NHẬT MỚI: Tự động tính lại điểm khi nhấn nút Thêm/Xóa thành tích ***
+            tbg.addEventListener('click', function(e) {
+                if (e.target && e.target.tagName === 'BUTTON' && (e.target.classList.contains('n-xanh-b') || e.target.classList.contains('n-do'))) {
+                    // Đợi một chút để hàm xử lý thành tích (từ ketnoi.js) cập nhật xong input ẩn
+                    setTimeout(() => { if (typeof f_x_h === 'function') f_x_h(); }, 150);
+                }
             });
         }
         Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
@@ -459,7 +466,6 @@
     async function f_x_vao_khach() {
         v_che_do_khach = true;
         
-        // Kiểm tra xem đã chọn đối tượng chưa
         const objNhom = document.getElementById('oChonNhom');
         if (!objNhom.value) {
             hienThiThongBaoUI("Vui lòng chọn chức danh trước khi vào hệ thống!");
