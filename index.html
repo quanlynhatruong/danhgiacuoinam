@@ -386,14 +386,17 @@ function khoiDongHeThong() {
         });
     }
     
-    // Đã phân luồng nạp thêm tệp danhgiaGV.html để tự động gọi logic Giáo viên
+    // Nạp các tệp logic. Hàm f_x_k giờ đã được bảo vệ khỏi lỗi lồng thẻ script
     Promise.all([f_x_k('danhgiaGV.html'), f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
 }
 
+// HÀM NẠP TỆP ĐÃ NÂNG CẤP BẢO MẬT/CHỐNG LỖI LỒNG THẺ
 function f_x_k(url) {
     return fetch(url).then(r => r.text()).then(txt => {
         let script = document.createElement('script');
-        script.textContent = txt;
+        // Loại bỏ thẻ <script> và </script> từ tệp nguồn (nếu có) để nhúng an toàn
+        let cleanTxt = txt.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '');
+        script.textContent = cleanTxt;
         document.body.appendChild(script);
     }).catch(() => {});
 }
