@@ -490,7 +490,7 @@ async function f_x_vao_khach() {
     let nutLuu = document.getElementById("vungNutBam");
     if (nutLuu) nutLuu.style.display = "none";
     
-    v_hien_thi_menu_admin(true);
+    v_hien_thi_menu_admin(false);
     
     let mKq = document.getElementById("menu-ket-qua");
     if (mKq) {
@@ -532,7 +532,6 @@ async function f_x_d() {
     const p_c = document.getElementById("oNhapChinh").value.trim();
     const objNhom = document.getElementById("oChonNhom");
     const p_n = objNhom.value; 
-    // Trích xuất đúng tên chức vụ từ giao diện để đối chiếu
     const p_chuc_vu = objNhom.options[objNhom.selectedIndex].text; 
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
 
@@ -546,7 +545,6 @@ async function f_x_d() {
     try {
         const p_n_khac = (p_n === 'giaovien') ? 'nhanvien' : 'giaovien';
         
-        // Bổ sung luồng kiểm tra chính xác chức danh (gửi tham số z_p_d)
         const [t_k, t_k_khac] = await Promise.all([
             fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}&z_p_d=${encodeURIComponent(p_chuc_vu)}`),
             fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}&z_p_d=${encodeURIComponent(p_chuc_vu)}`)
@@ -560,10 +558,14 @@ async function f_x_d() {
             v_nam_hoc_hien_tai = t_k.y_namhoc || "";
             if(document.getElementById("hienThiNamHoc")) document.getElementById("hienThiNamHoc").innerText = v_nam_hoc_hien_tai;
 
-            let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
-            sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
+            let roleStr = t_k.y_role ? t_k.y_role.toLowerCase() : "";
+            let quyenAdmin = roleStr.includes('admin');
+            let quyenAdminVip = roleStr.includes('admin vip');
             
-            v_hien_thi_menu_admin(quyenAdmin);
+            sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
+            sessionStorage.setItem("HTDG_IS_ADMIN_VIP", quyenAdminVip ? "true" : "false"); 
+            
+            v_hien_thi_menu_admin(quyenAdminVip);
 
             if (quyenAdmin) {
                 document.getElementById("vungChonAdmin").style.display = "block";
@@ -582,7 +584,6 @@ async function f_x_d() {
             if (typeof f_x_h === "function") f_x_h();
             
         } else if (t_k.status === 'wrong_role' || t_k_khac.status === 'wrong_role') {
-            // Thông báo lỗi nếu chọn sai chức vụ thực tế ở Cột D
             let chucVuDung = t_k.y_role || t_k_khac.y_role || "";
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai chức vụ!<br>Chức vụ của đồng chí là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để chọn đúng chức vụ của mình.", f_x_logout);
             f_x_j(false);
@@ -602,7 +603,7 @@ async function f_x_d() {
             let nutLuu = document.getElementById("vungNutBam");
             if (nutLuu) nutLuu.style.display = "none";
 
-            v_hien_thi_menu_admin(true);
+            v_hien_thi_menu_admin(false);
             
             let mKq = document.getElementById("menu-ket-qua");
             if (mKq) {
