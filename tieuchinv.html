@@ -20,7 +20,6 @@ function f_x_b_nv(chuoiKN, mucDo) {
 }
 
 function f_x_m_chinh(dataRows) {
-    // Biến 'o' lưu Điểm bình quân tháng gốc, 'm' lưu Tổng điểm phần 1 sau quy đổi
     let m_k_a = { a: 0, b: '', c: '', d: '', e: 0, f: '', g: '', h: '', i: '', j: 0, k: 0, l: 0, m: 0, n: false, o: 0 };
     let m_k_b = { a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false, i: false, j: false, k: false, l: false };
     let k_t_c = 0; 
@@ -32,13 +31,12 @@ function f_x_m_chinh(dataRows) {
         let c_g_1 = r.giaTri;
         let c_s_1 = r.so;
         
-        // 1. Nhận diện tính điểm thành phần (Điểm phần 2)
         if (r.isSelect) {
             k_t_c += r.selectDataP;
         }
         
-        // 2. Nhận diện kết quả xếp loại và tính Tổng điểm phần 1 (Quy đổi 100/80/60 + Điểm gốc)
-        if (r.isDiemPhan1 || r.isDongBo || c_t_1.includes("tháng")) {
+        // SỬA: thay r.isDiemPhan1 bằng r.isDongBo
+        if (r.isDongBo || c_t_1.includes("tháng")) {
             let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
             let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
             
@@ -66,12 +64,11 @@ function f_x_m_chinh(dataRows) {
                 m_k_a.m = c_d_1;
             }
             
-            m_k_a.o = c_d_1; // Lưu điểm bình quân gốc
+            m_k_a.o = c_d_1;
             m_k_a.n = true;
             return; 
         }
         
-        // 3. Phân bổ các tiêu chí
         if (c_t_1.includes("phê bình") || c_t_1.includes("nhắc nhở")) { 
             m_k_a.a = c_s_1; 
             m_k_b.a = true; 
@@ -100,8 +97,6 @@ function f_x_m_chinh(dataRows) {
 
     const h_c_c_n = (c_h) => c_h && c_h.trim() !== "";
 
-    // ĐIỀU KIỆN HOÀN THÀNH XUẤT SẮC
-    // Đã cập nhật || (Hoặc) theo yêu cầu mới
     let c_m_a = (!m_k_b.a || m_k_a.a < 2) && 
                 (b_x_l || (m_k_a.n && m_k_a.o >= 180) || (m_k_a.n && m_k_a.m >= 260)) && 
                 (!m_k_b.b || f_x_a_nv(m_k_a.b, /tốt|xuất sắc/i)) && 
@@ -110,7 +105,6 @@ function f_x_m_chinh(dataRows) {
                 (m_k_b.h && m_k_a.h.trim() !== "" && f_x_a_nv(m_k_a.h, /xã|cụm|huyện|tỉnh|quốc/i)) && 
                 f_x_b_nv(m_k_a.g, 'XS');
 
-    // ĐIỀU KIỆN HOÀN THÀNH TỐT
     let c_m_b = (!m_k_b.a || m_k_a.a < 4) && 
                 b_x_l && 
                 (!m_k_b.b || f_x_a_nv(m_k_a.b, /khá|tốt|xuất sắc/i)) && 
@@ -118,7 +112,6 @@ function f_x_m_chinh(dataRows) {
                 (!m_k_b.d || f_x_a_nv(m_k_a.d, /khá|tốt|xuất sắc/i)) && 
                 f_x_b_nv(m_k_a.g, 'Tốt');
 
-    // ĐIỀU KIỆN HOÀN THÀNH
     let c_m_c = (!m_k_b.a || m_k_a.a < 6) && 
                 b_x_d && 
                 (!m_k_b.b || (h_c_c_n(m_k_a.b) && !f_x_a_nv(m_k_a.b, /yếu|kém/i))) && 
@@ -126,7 +119,6 @@ function f_x_m_chinh(dataRows) {
                 (!m_k_b.d || (h_c_c_n(m_k_a.d) && !f_x_a_nv(m_k_a.d, /chưa đạt|kém/i))) && 
                 f_x_b_nv(m_k_a.g, 'HT');
 
-    // KẾT QUẢ ĐÁNH GIÁ CUỐI CÙNG
     let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ"; 
     let k_m = "#dc3545";
     
@@ -141,14 +133,10 @@ function f_x_m_chinh(dataRows) {
         k_m = "#fd7e14"; 
     }
 
-    // TÍNH TOÁN ĐIỂM SỐ
     let k_t_a = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
-    
-    // Trừ 2 điểm cho mỗi lần bị nhắc nhở/phê bình vào Điểm phần 2
     if (m_k_b.a && m_k_a.a > 0) {
         k_t_c -= (m_k_a.a * 2);
     }
-    
     let k_t_t = k_t_a + k_t_c;
 
     return { 
