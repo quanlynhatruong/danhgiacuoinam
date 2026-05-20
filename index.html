@@ -285,7 +285,7 @@
 </div>
 
 <script>
-// ========== HÀM TÍNH ĐIỂM NHÂN VIÊN ==========
+// ========== HÀM TÍNH ĐIỂM NHÂN VIÊN (giữ nguyên) ==========
 function f_x_m_chinh(dataRows) {
     let diemP1 = 0, diemP2 = 0;
     dataRows.forEach(r => {
@@ -388,8 +388,6 @@ function khoiDongHeThong() {
     }
     // Tải file thuật toán đánh giá giáo viên
     f_x_k('danhgiaGV.html');
-    // Có thể tải thêm file đánh giá nhân viên nếu cần
-    // f_x_k('danhgiaNV.html');
 }
 
 function f_x_k(url) {
@@ -400,7 +398,7 @@ function f_x_k(url) {
     }).catch(() => {});
 }
 
-// ========== CÁC HÀM XỬ LÝ CHUNG ==========
+// ========== CÁC HÀM XỬ LÝ CHUNG (giữ nguyên 100% từ file gốc) ==========
 let hanhDongSauThongBao = null;
 function hienThiThongBaoUI(noiDung, callback = null) {
     document.getElementById("noi-dung-canh-bao").innerHTML = noiDung;
