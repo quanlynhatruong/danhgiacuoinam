@@ -1,8 +1,4 @@
 <script>
-// =========================================================
-// KHỐI THUẬT TOÁN ĐÁNH GIÁ DÀNH RIÊNG CHO GIÁO VIÊN
-// Cơ chế: Ánh xạ động, quét điều kiện thời gian thực
-// =========================================================
 function f_x_f_gv(idx) {
     const v_c = document.getElementById(`h_c_${idx}`).value;
     const v_s = parseInt(document.getElementById(`h_g_${idx}`).value);
@@ -26,7 +22,6 @@ function f_x_f_gv(idx) {
     
     c_a.value = (c_a.value.includes("...") ? "" : c_a.value) + c_d;
     document.getElementById(`h_t_${idx}`).innerHTML = c_a.value.replace(/\n/g, '<br>');
-    
     if(typeof f_x_h === 'function') f_x_h();
 }
 
@@ -36,123 +31,170 @@ function f_x_g_gv(idx) {
     if(typeof f_x_h === 'function') f_x_h(); 
 }
 
-function checkConditionDynamic_GV(valThucTe, textDieuKien) {
-    if (!textDieuKien || textDieuKien.trim() === "") return false;
-    
-    let subConditions = textDieuKien.split("||");
-    let inputStr = valThucTe.toString().trim().toLowerCase();
-    
-    let matchNumInput = valThucTe.toString().match(/(\d+([.,]\d+)?)/);
-    let inputNum = matchNumInput ? parseFloat(matchNumInput[1].replace(',', '.')) : 0;
+function f_x_l_chinh(dataRows) {
+    let diemP1 = 0, diemP2 = 0;
+    let diemThangGoc = 0;
+    let isXSThang = false, isTotThang = false, isHTThang = false, isCHTThang = false;
 
-    for (let subCond of subConditions) {
-        let cond = subCond.trim().toLowerCase();
-        if (cond === "") continue;
+    // BƯỚC 1: ĐỘNG CƠ TÍNH ĐIỂM DỰA VÀO CỘT C
+    dataRows.forEach(r => {
+        let v_str = r.giaTri;
+        let v_num = r.so;
 
-        if (cond.startsWith(">=")) {
-            let cleanCond = cond.substring(2).trim();
-            let matchNumCond = cleanCond.match(/(\d+([.,]\d+)?)/);
-            let condNum = matchNumCond ? parseFloat(matchNumCond[1].replace(',', '.')) : NaN;
-            
-            if (!isNaN(condNum)) {
-                if (inputNum >= condNum) return true;
-            } else {
-                let hierarchy = ["trường", "cấp trường", "xã", "cấp xã", "cụm", "nhì cụm", "nhất xã", "tỉnh", "cấp tỉnh", "quốc gia"];
-                let idxInput = hierarchy.findIndex(h => inputStr.includes(h));
-                let idxCond = hierarchy.findIndex(h => cleanCond.includes(h));
-                if (idxInput >= idxCond && idxCond !== -1) return true;
-            }
-        } else {
-            if (inputStr === cond || inputStr.includes(cond)) return true;
-        }
-    }
-    return false;
-}
+        // 1.1 Tính điểm Dropdown
+        if (r.isSelect) diemP2 += r.selectDataP;
 
-function xuLyTinhToanDong_GV(row, valThucTe, inputElement) {
-    let diemCuaDong = 0;
-    let xepLoaiCuaDong = "CHT"; 
-
-    let rawThangGiaTri = row.getAttribute("data-thang-gia-tri") || "";
-    let rawQuyDiem = row.getAttribute("data-quy-diem") || "";
-
-    if (rawThangGiaTri.includes("|")) {
-        if (inputElement.tagName === "SELECT" && inputElement.selectedIndex !== -1) {
-            diemCuaDong = parseFloat(inputElement.options[inputElement.selectedIndex].getAttribute("data-p")) || 0;
-        }
-    } else {
-        let matchHeSo = rawQuyDiem.match(/([\+\-]?\d+)/);
-        if (matchHeSo) {
-            let heSoNhan = parseFloat(matchHeSo[1]) || 0;
-            let giaTriNhap = parseFloat(valThucTe) || 0;
-            diemCuaDong = giaTriNhap * heSoNhan;
-        } else if (rawThangGiaTri === "THANHTICH_HS_DONG") {
-            let m_d_1 = valThucTe.match(/=\s*([\d\.]+)\s*điểm/g);
-            if (m_d_1) {
-                m_d_1.forEach(m => diemCuaDong += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
+        // 1.2 Tính điểm theo phép toán Cột C (+1, -1, +2...)
+        if (r.q_d) {
+            let qd = r.q_d.replace(/\s/g, '');
+            if (qd.startsWith('(+') || qd.startsWith('(-')) {
+                let heSo = parseFloat(qd.match(/[\+\-]\d+(\.\d+)?/)[0]);
+                diemP2 += (v_num * heSo);
             }
         }
-    }
 
-    let condXS = row.getAttribute("data-cond-xs") || "";
-    let condHTT = row.getAttribute("data-cond-htt") || "";
-    let condHT = row.getAttribute("data-cond-ht") || "";
-
-    if (checkConditionDynamic_GV(valThucTe, condXS)) {
-        xepLoaiCuaDong = "XS";
-    } else if (checkConditionDynamic_GV(valThucTe, condHTT)) {
-        xepLoaiCuaDong = "HTT";
-    } else if (checkConditionDynamic_GV(valThucTe, condHT)) {
-        xepLoaiCuaDong = "HT";
-    }
-
-    return { diem: diemCuaDong, xepLoai: xepLoaiCuaDong };
-}
-
-function f_x_l_chinh() {
-    let diemP1 = 0;
-    let diemP2 = 0;
-    let totalCriteriaCount = 0;
-    let xsCount = 0, httCount = 0, htCount = 0, chtCount = 0;
-    
-    let currentSection = "Phần 1";
-    const rows = document.querySelectorAll("#t-b-g tr");
-
-    rows.forEach(row => {
-        if (row.getAttribute("data-loai-dong") === "phan") {
-            let textPhan = row.querySelector(".m-cot-mot").innerText;
-            if (textPhan.toUpperCase().includes("PHẦN 2")) currentSection = "Phần 2";
-            return;
+        // 1.3 Tính điểm Thành tích (Chuyên biệt Module)
+        if (r.quyChe === 'Quy chế T.Tích' || r.quyChe === 'Quy chế' || r.ten.includes("thành tích")) {
+            let m_d_1 = v_str.match(/=\s*([\d\.]+)\s*điểm/g);
+            if (m_d_1) m_d_1.forEach(m => diemP2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
         }
 
-        let inputElement = row.querySelector(".o-n-bang");
-        if (!inputElement) return;
-
-        totalCriteriaCount++;
-        let valThucTe = inputElement.value.trim();
-        let res = xuLyTinhToanDong_GV(row, valThucTe, inputElement);
-
-        if (currentSection === "Phần 1") diemP1 += res.diem;
-        else diemP2 += res.diem;
-
-        if (res.xepLoai === "XS") xsCount++;
-        else if (res.xepLoai === "HTT") httCount++;
-        else if (res.xepLoai === "HT") htCount++;
-        else chtCount++;
+        // 1.4 Xác định Phần 1 và Điểm kết quả hàng tháng
+        if (r.isDongBo || r.ten.includes("tháng")) {
+            diemThangGoc = v_num;
+            if (v_str.includes("xuất sắc")) { isXSThang = true; isHTThang = true; diemP1 = 100 + diemThangGoc; }
+            else if (v_str.includes("tốt")) { isTotThang = true; isHTThang = true; diemP1 = 80 + diemThangGoc; }
+            else if (v_str.includes("chưa hoàn thành") || v_str.includes("cht")) { isCHTThang = true; diemP1 = 0 + diemThangGoc; }
+            else if (v_str.includes("hoàn thành") || v_str.includes("ht")) { isHTThang = true; diemP1 = 60 + diemThangGoc; }
+            else { diemP1 = diemThangGoc; }
+        }
     });
 
-    let tongDiem = diemP1 + diemP2;
+    // BƯỚC 2: ĐỘNG CƠ THẨM ĐỊNH LOGIC (Màng lọc D, E, F, G)
+    let datXS = true, datTot = true, datHT = true;
+
+    const evalCondition = (cond, valNum, valStr, row) => {
+        cond = cond.trim().toLowerCase();
+        if (cond === "" || cond === "any") return true;
+
+        // A. Xử lý Toán học định lượng (Cột D có >=, <=, ==)
+        let isNumericCond = cond.match(/^[><=]+[\d\.]+$/);
+        if (isNumericCond) {
+            if (cond.startsWith(">=")) return valNum >= parseFloat(cond.replace(">=", ""));
+            if (cond.startsWith("<=")) return valNum <= parseFloat(cond.replace("<=", ""));
+            if (cond.startsWith(">")) return valNum > parseFloat(cond.replace(">", ""));
+            if (cond.startsWith("<")) return valNum < parseFloat(cond.replace("<", ""));
+            if (cond.startsWith("==")) return valNum === parseFloat(cond.replace("==", ""));
+        }
+        if (cond.match(/^[\d\.]+$/)) return valNum === parseFloat(cond); // Dò số trực tiếp bằng 0
+
+        // B. Xử lý Hệ thống cấp bậc (Giỏi > Khá, Cấp Tỉnh > Cấp Xã...)
+        if (cond.startsWith(">=") && isNaN(cond.replace(">=", ""))) {
+            let hierarchy = [
+                ["yếu", "kém", "chưa đạt", "không có", "chưa hoàn thành"],
+                ["trung bình", "cấp trường", "hoàn thành"],
+                ["khá", "cấp xã", "cấp cụm", "hoàn thành tốt"],
+                ["tốt", "giỏi", "cấp tỉnh", "cấp huyện", "xuất sắc"],
+                ["cấp quốc gia"]
+            ];
+            let targetText = cond.replace(">=", "").trim();
+            let targetLevel = -1, currentLevel = -1;
+
+            hierarchy.forEach((arr, idx) => { if(arr.some(w => targetText.includes(w))) targetLevel = idx; });
+            hierarchy.forEach((arr, idx) => { if(arr.some(w => valStr.includes(w))) currentLevel = idx; });
+
+            if (targetLevel !== -1 && currentLevel !== -1) return currentLevel >= targetLevel;
+        }
+
+        // C. Xử lý chuyên biệt: Quét đọc dữ liệu Thành Tích
+        if (row.ten.includes("thành tích") || row.quyChe.includes("Quy chế")) {
+            let lines = valStr.split('\n');
+            let bestScore = 0, countTinh = 0;
+
+            lines.forEach(line => {
+                let g = 0, c = 0;
+                if(line.includes("nhất")) g = 4;
+                else if(line.includes("nhì")) g = 3;
+                else if(line.includes("ba")) g = 2;
+                else if(line.includes("kk")) g = 1;
+
+                if(line.includes("quốc gia")) c = 3;
+                else if(line.includes("tỉnh")) { c = 2; countTinh += (parseInt(line.match(/\+\s*(\d+)/)?.[1]) || 1); }
+                else if(line.includes("xã") || line.includes("cụm")) c = 1;
+
+                let score = c * 10 + g; // Công thức chuyển đổi Cấp+Giải thành Điểm xếp loại
+                if(score > bestScore) bestScore = score;
+            });
+
+            cond = cond.replace(/\s+/g, "");
+            
+            // Xử lý đếm giải tỉnh: >= 3 tỉnh
+            if (cond.includes("tỉnh") && cond.match(/>=(\d+)/)) {
+                let req = parseInt(cond.match(/>=(\d+)/)[1]);
+                return countTinh >= req || bestScore >= 30; // 30 là ngưỡng Giải Quốc gia (Miễn điều kiện tỉnh)
+            }
+
+            // Xử lý các điều kiện Nhất xã, Nhì cụm...
+            let targetScore = 0;
+            if (cond.includes("nhấtxã") || cond.includes("nhấtcụm")) targetScore = 14;
+            else if (cond.includes("nhìcụm") || cond.includes("nhìxã")) targetScore = 13;
+            else if (cond.includes("nhấttỉnh")) targetScore = 24;
+
+            if (cond.includes(">=")) return bestScore >= targetScore;
+            return bestScore === targetScore;
+        }
+
+        // D. Mặc định: So khớp chuỗi (Giỏi, Tốt, Khá...)
+        return valStr.includes(cond);
+    };
+
+    // Bộ chẻ nhánh và xử lý logic ||
+    const evalCell = (cellFormula, valNum, valStr, row) => {
+        if (!cellFormula) return true; // Cột trống tức là không yêu cầu giàng buộc -> Tự động Đạt
+        let parts = cellFormula.split("||");
+        for (let i = 0; i < parts.length; i++) {
+            let p = parts[i].trim().toLowerCase();
+
+            // Ngoại lệ chuyên biệt cho Điểm Tháng (Phần 1)
+            if (row.ten.includes("kết quả xếp loại hàng tháng")) {
+                if (p === "xuất sắc" && isXSThang) return true;
+                if (p === "hoàn thành tốt" && isTotThang) return true;
+                if (p === "hoàn thành" && isHTThang) return true;
+                if (p.includes(">") && diemThangGoc > parseFloat(p.replace(">",""))) return true;
+            } else {
+                if (evalCondition(p, valNum, valStr, row)) return true; // Chỉ cần thỏa mãn 1 vế trong cặp ||
+            }
+        }
+        return false;
+    };
+
+    // Vận hành thẩm định toàn bảng
+    dataRows.forEach(r => {
+        if (r.ten === "" || r.ten.includes("phần 1") || r.ten.includes("phần 2")) return; // Bỏ qua nhãn phân loại giao diện
+
+        if (r.g_xs && !evalCell(r.g_xs, r.so, r.giaTri, r)) datXS = false;
+        if (r.g_htt && !evalCell(r.g_htt, r.so, r.giaTri, r)) datTot = false;
+        if (r.g_ht && !evalCell(r.g_ht, r.so, r.giaTri, r)) datHT = false;
+    });
+
+    if (isCHTThang) { datXS = false; datTot = false; datHT = false; }
+
+    // BƯỚC 3: KẾT LUẬN & ĐÓNG GÓI KẾT QUẢ
     let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ";
     let k_m = "#dc3545";
 
-    if (chtCount === 0 && (xsCount >= totalCriteriaCount * 0.5)) {
-        k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745";
-    } else if (chtCount === 0 && ((xsCount + httCount) >= totalCriteriaCount * 0.7)) {
-        k_t = "HOÀN THÀNH TỐT NHIỆM VỤ"; k_m = "#0056b3";
-    } else if (chtCount <= totalCriteriaCount * 0.2) {
-        k_t = "HOÀN THÀNH NHIỆM VỤ"; k_m = "#ffc107";
-    }
+    if (datXS) { k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745"; }
+    else if (datTot) { k_t = "HOÀN THÀNH TỐT NHIỆM VỤ"; k_m = "#007bff"; }
+    else if (datHT) { k_t = "HOÀN THÀNH NHIỆM VỤ"; k_m = "#fd7e14"; }
 
-    return { diemP1, diemP2, tongDiem, k_t, k_m };
+    let k_t_t = diemP1 + diemP2;
+
+    return {
+        diemP1: diemP1 % 1 === 0 ? diemP1 : diemP1.toFixed(1),
+        diemP2: diemP2 % 1 === 0 ? diemP2 : diemP2.toFixed(1),
+        tongDiem: k_t_t % 1 === 0 ? k_t_t : k_t_t.toFixed(1),
+        k_t: k_t,
+        k_m: k_m
+    };
 }
 </script>
