@@ -438,13 +438,12 @@ async function f_x_load_guest_template(p_n) {
 
         if (danhSachVienChucAdmin.length > 0) {
             for (let vc of danhSachVienChucAdmin) {
-                // Fix: Đồng bộ luồng nhận diện khách để khớp với thay đổi
+                // Kiểm duyệt từ khóa tương đương cho cả hai nhóm khi tải form mẫu
                 let roleStr = (vc.role || "").toLowerCase();
-                let role_vp = roleStr.includes('vp') || roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
-                let isGv = !role_vp && (roleStr.includes('giáo viên') || roleStr.includes('giao vien') || roleStr.includes('tổ trưởng') || roleStr.includes('to truong') || roleStr.includes('tổ phó') || roleStr.includes('to pho') || roleStr.includes('tổng phụ trách') || roleStr.includes('tong phu trach'));
-                let isNv = !isGv;
+                let isGv = roleStr.includes('giáo viên') || roleStr.includes('giao vien') || roleStr.includes('tổ trưởng') || roleStr.includes('to truong') || roleStr.includes('tổ phó') || roleStr.includes('to pho') || roleStr.includes('tổng phụ trách') || roleStr.includes('tong phu trach');
+                let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien') || roleStr.includes('vp') || roleStr.includes('kế toán') || roleStr.includes('ke toan') || roleStr.includes('y tế') || roleStr.includes('y te') || roleStr.includes('thư viện') || roleStr.includes('thu vien') || roleStr.includes('thiết bị') || roleStr.includes('thiet bi') || roleStr.includes('bảo vệ') || roleStr.includes('bao ve') || roleStr.includes('văn thư') || roleStr.includes('van thu');
                 
-                if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) {
+                if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && isGv)) {
                     repId = vc.id;
                     break;
                 }
@@ -647,11 +646,12 @@ async function f_x_admin_chon_user() {
     const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
     const selectedName = selectedOption.getAttribute('data-name');
 
-    // Fix: Đồng bộ luồng tra cứu admin để khớp với thay đổi
+    // Kiểm duyệt từ khóa để xác định quyền hạn của tài khoản
     let nhomXacDinh = 'giaovien';
-    let role_vp = selectedRoleStr.includes('vp') || selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien');
-    let is_gv = !role_vp && (selectedRoleStr.includes('giáo viên') || selectedRoleStr.includes('giao vien') || selectedRoleStr.includes('tổ trưởng') || selectedRoleStr.includes('to truong') || selectedRoleStr.includes('tổ phó') || selectedRoleStr.includes('to pho') || selectedRoleStr.includes('tổng phụ trách') || selectedRoleStr.includes('tong phu trach'));
-    if (!is_gv) { nhomXacDinh = 'nhanvien'; }
+    let isGv = selectedRoleStr.includes('giáo viên') || selectedRoleStr.includes('giao vien') || selectedRoleStr.includes('tổ trưởng') || selectedRoleStr.includes('to truong') || selectedRoleStr.includes('tổ phó') || selectedRoleStr.includes('to pho') || selectedRoleStr.includes('tổng phụ trách') || selectedRoleStr.includes('tong phu trach');
+    let isNv = selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien') || selectedRoleStr.includes('vp') || selectedRoleStr.includes('kế toán') || selectedRoleStr.includes('ke toan') || selectedRoleStr.includes('y tế') || selectedRoleStr.includes('y te') || selectedRoleStr.includes('thư viện') || selectedRoleStr.includes('thu vien') || selectedRoleStr.includes('thiết bị') || selectedRoleStr.includes('thiet bi') || selectedRoleStr.includes('bảo vệ') || selectedRoleStr.includes('bao ve') || selectedRoleStr.includes('văn thư') || selectedRoleStr.includes('van thu');
+    
+    if (isNv && !isGv) { nhomXacDinh = 'nhanvien'; }
 
     document.getElementById("theHienChinh").innerText = selectedName;
     document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
