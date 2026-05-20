@@ -31,11 +31,22 @@ function f_x_m_chinh(dataRows) {
         let c_g_1 = r.giaTri;
         let c_s_1 = r.so;
         
+        // 1. Điểm từ select (phần 2)
         if (r.isSelect) {
             k_t_c += r.selectDataP;
         }
         
-        // SỬA: thay r.isDiemPhan1 bằng r.isDongBo
+        // 2. Điểm từ cột D (quy tắc động)
+        if (r.q_d && r.q_d.trim() !== "") {
+            let qd = r.q_d.replace(/\s/g, '');
+            let match = qd.match(/([\+\-]\d+(?:\.\d+)?)/);
+            if (match) {
+                let heSo = parseFloat(match[1]);
+                k_t_c += c_s_1 * heSo;
+            }
+        }
+        
+        // 3. Xử lý dòng "Kết quả xếp loại hàng tháng" (phần 1)
         if (r.isDongBo || c_t_1.includes("tháng")) {
             let c_n_1 = c_g_1.match(/\d+([.,]\d+)?/);
             let c_d_1 = c_n_1 ? parseFloat(c_n_1[0].replace(',', '.')) : 0;
@@ -69,6 +80,7 @@ function f_x_m_chinh(dataRows) {
             return; 
         }
         
+        // 4. Các tiêu chí khác
         if (c_t_1.includes("phê bình") || c_t_1.includes("nhắc nhở")) { 
             m_k_a.a = c_s_1; 
             m_k_b.a = true; 
@@ -97,6 +109,7 @@ function f_x_m_chinh(dataRows) {
 
     const h_c_c_n = (c_h) => c_h && c_h.trim() !== "";
 
+    // Điều kiện xếp loại
     let c_m_a = (!m_k_b.a || m_k_a.a < 2) && 
                 (b_x_l || (m_k_a.n && m_k_a.o >= 180) || (m_k_a.n && m_k_a.m >= 260)) && 
                 (!m_k_b.b || f_x_a_nv(m_k_a.b, /tốt|xuất sắc/i)) && 
@@ -133,16 +146,24 @@ function f_x_m_chinh(dataRows) {
         k_m = "#fd7e14"; 
     }
 
+    // Tính tổng điểm phần 1
     let k_t_a = m_k_a.n ? m_k_a.m : (b_x_l ? 100 : (b_x_d ? 60 : 0));
+    
+    // Trừ điểm phê bình (mỗi lần -2 điểm)
     if (m_k_b.a && m_k_a.a > 0) {
         k_t_c -= (m_k_a.a * 2);
     }
-    let k_t_t = k_t_a + k_t_c;
+    
+    let tongDiem = k_t_a + k_t_c;
+    // Làm tròn
+    k_t_a = Math.round(k_t_a * 10) / 10;
+    k_t_c = Math.round(k_t_c * 10) / 10;
+    tongDiem = Math.round(tongDiem * 10) / 10;
 
     return { 
-        diemP1: k_t_a % 1 === 0 ? k_t_a : k_t_a.toFixed(1), 
-        diemP2: k_t_c % 1 === 0 ? k_t_c : k_t_c.toFixed(1), 
-        tongDiem: k_t_t % 1 === 0 ? k_t_t : k_t_t.toFixed(1), 
+        diemP1: k_t_a, 
+        diemP2: k_t_c, 
+        tongDiem: tongDiem, 
         k_t: k_t, 
         k_m: k_m 
     };
