@@ -363,7 +363,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(ketnoiScript);
 });
 
-function khoiDongHeThong() {
+async function khoiDongHeThong() {
     const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
     const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
     if (savedNhom) {
@@ -386,8 +386,8 @@ function khoiDongHeThong() {
             }
         });
     }
-    // Tải file thuật toán đánh giá giáo viên
-    f_x_k('danhgiaGV.html');
+    // Tải file thuật toán đánh giá giáo viên (CHỜ HOÀN TẤT)
+    await f_x_k('danhgiaGV.html').catch(e => console.log('Lỗi tải danhgiaGV.html:', e));
 }
 
 function f_x_k(url) {
