@@ -281,58 +281,29 @@
 </div>
 
 <script>
+    // ==================== TOÀN BỘ JAVASCRIPT CỦA HỆ THỐNG ====================
     let v_che_do_xem_admin = false;
     let v_che_do_khach = false; 
-
     let danhSachVienChucAdmin = [];
     let v_bo_nho_dem_admin = {}; 
-
-    // BỘ NẠP TUẦN TỰ MỚI - FIX LỖI TREO "ĐANG TẢI..."
-    window.addEventListener('DOMContentLoaded', () => {
-        var ketnoiScript = document.createElement('script');
-        ketnoiScript.src = 'ketnoi.js?v=' + new Date().getTime();
-        
-        ketnoiScript.onload = function() {
-            if (typeof applyDGConfig === 'function') applyDGConfig();
-
-            var gsiScript = document.createElement('script');
-            gsiScript.src = "https://accounts.google.com/gsi/client";
-            gsiScript.async = true;
-            gsiScript.defer = true;
-            document.head.appendChild(gsiScript);
-
-            var html2pdfScript = document.createElement('script');
-            html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-            document.head.appendChild(html2pdfScript);
-
-            const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
-            const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
-            if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
-            if (loggedUser) showMainUI(loggedUser);
-            
-            const tbg = document.getElementById("t-b-g");
-            if (tbg) {
-                tbg.addEventListener('change', function(e) {
-                    if (e.target && e.target.classList.contains('k-hoat-t')) f_x_h();
-                });
-                tbg.addEventListener('input', function(e) {
-                    if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
-                });
-            }
-
-            Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
-        };
-        
-        ketnoiScript.onerror = function() {
-            document.querySelector('.app-title-name-up').innerText = "LỖI KẾT NỐI MÁY CHỦ";
-            alert("Không thể tải tệp cấu hình hệ thống. Vui lòng kiểm tra lại mạng!");
-        };
-        
-        document.head.appendChild(ketnoiScript);
-    });
-
+    let v_timer_h = null;
     let hanhDongSauThongBao = null;
-    
+
+    let v_l_a = "", v_l_b = "", v_l_c = {};
+    let v_l_d = "", v_l_e = "", v_l_f = "";
+    let v_nam_hoc_hien_tai = ""; 
+
+    // Hàm nạp script động
+    function f_x_k(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url + '?v=' + new Date().getTime();
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
     function hienThiThongBaoUI(noiDung, callback = null) {
         document.getElementById("noi-dung-canh-bao").innerHTML = noiDung;
         document.getElementById("ui-canh-bao").style.display = "flex";
@@ -347,14 +318,15 @@
         }
     }
 
-    function f_x_xac_thuc(response) {
-        const payload = decodeJwtResponse(response.credential);
-        const kAttr = "em" + "ail"; 
-        const d_danh = payload[kAttr];
-        const nhomDaChon = document.getElementById('oChonNhom').value;
-        sessionStorage.setItem("HTDG_ACCOUNT_ID", d_danh);
-        sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
-        showMainUI(d_danh);
+    function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
+    function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
+
+    function f_x_logout() {
+        sessionStorage.removeItem("HTDG_ACCOUNT_ID");
+        sessionStorage.removeItem("HTDG_NHOM_ID");
+        sessionStorage.removeItem("HTDG_IS_ADMIN");
+        v_bo_nho_dem_admin = {}; 
+        location.reload();
     }
 
     function decodeJwtResponse(chuoi_ma) {
@@ -364,6 +336,15 @@
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(chuoi_du_lieu);
+    }
+
+    function f_x_xac_thuc(response) {
+        const payload = decodeJwtResponse(response.credential);
+        const d_danh = payload.email;
+        const nhomDaChon = document.getElementById('oChonNhom').value;
+        sessionStorage.setItem("HTDG_ACCOUNT_ID", d_danh);
+        sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
+        showMainUI(d_danh);
     }
 
     function showMainUI(d_danh) {
@@ -411,7 +392,6 @@
                 const tkList = await fetchAPI(`${z_y_a}?z_p_a=l_d_s`);
                 if (tkList.status === 'success' && tkList.data) danhSachVienChucAdmin = tkList.data;
             }
-
             if (danhSachVienChucAdmin.length > 0) {
                 for (let vc of danhSachVienChucAdmin) {
                     let roleStr = (vc.role || "").toLowerCase();
@@ -422,10 +402,8 @@
                     }
                 }
             }
-
             if (repId) {
                 const t_k_admin = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(repId)}&z_p_c=${p_n}`);
-                
                 if (t_k_admin.status === 'success' && t_k_admin.y_d) {
                     let blankData = t_k_admin.y_d.map(item => ({ ...item, x_c: "" }));
                     f_x_e(blankData);
@@ -446,20 +424,15 @@
         document.getElementById('khung-xac-thuc').style.display = 'none';
         document.getElementById('bo-cuc-he-thong').style.display = 'flex';
         document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
-        
         const objNhom = document.getElementById('oChonNhom');
         const p_n = objNhom.value;
         document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
-        
         document.getElementById("vungThongTin").style.display = "flex";
         document.getElementById("vungThuNhat").classList.add("a-di");
         document.getElementById("vungThuHai").classList.remove("a-di");
-        
         let nutLuu = document.getElementById("vungNutBam");
         if (nutLuu) nutLuu.style.display = "none";
-        
         v_hien_thi_menu_admin(true);
-        
         let mKq = document.getElementById("menu-ket-qua");
         if (mKq) {
             mKq.style.display = "flex";
@@ -472,28 +445,10 @@
                 return false; 
             };
         }
-        
         f_x_j(true);
         await f_x_load_guest_template(p_n);
         f_x_j(false);
-        
         hienThiThongBaoUI("Bạn đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị vô hiệu.");
-    }
-
-    function f_x_logout() {
-        sessionStorage.removeItem("HTDG_ACCOUNT_ID");
-        sessionStorage.removeItem("HTDG_NHOM_ID");
-        sessionStorage.removeItem("HTDG_IS_ADMIN");
-        v_bo_nho_dem_admin = {}; 
-        location.reload();
-    }
-
-    let v_l_a = "", v_l_b = "", v_l_c = {};
-    let v_l_d = "", v_l_e = "", v_l_f = "";
-    let v_nam_hoc_hien_tai = ""; 
-
-    function f_x_c() {
-        if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
     }
 
     async function f_x_d() {
@@ -511,7 +466,6 @@
         f_x_j(true);
         try {
             const p_n_khac = (p_n === 'giaovien') ? 'nhanvien' : 'giaovien';
-            
             const [t_k, t_k_khac] = await Promise.all([
                 fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`),
                 fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}`)
@@ -521,13 +475,11 @@
                 v_che_do_khach = false; 
                 v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e; v_l_d = t_k.y_c || ""; 
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
-                
                 v_nam_hoc_hien_tai = t_k.y_namhoc || "";
                 if(document.getElementById("hienThiNamHoc")) document.getElementById("hienThiNamHoc").innerText = v_nam_hoc_hien_tai;
 
                 let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
                 sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
-                
                 v_hien_thi_menu_admin(quyenAdmin);
 
                 if (quyenAdmin) {
@@ -543,7 +495,6 @@
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 document.getElementById("vungThongTin").style.display = "flex";
-                
                 if (typeof f_x_h === "function") f_x_h();
             } else if (t_k_khac.status === 'success') {
                 let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
@@ -558,9 +509,7 @@
                 document.getElementById("vungThuHai").classList.remove("a-di");
                 let nutLuu = document.getElementById("vungNutBam");
                 if (nutLuu) nutLuu.style.display = "none";
-
                 v_hien_thi_menu_admin(true);
-                
                 let mKq = document.getElementById("menu-ket-qua");
                 if (mKq) {
                     mKq.style.display = "flex";
@@ -568,7 +517,6 @@
                     mKq.setAttribute("href", "javascript:void(0)");
                     mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
                 }
-                
                 await f_x_load_guest_template(p_n);
                 hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
             }
@@ -586,7 +534,6 @@
                 danhSachVienChucAdmin = t_k.data;
                 const selectObj = document.getElementById("oChonUserAdmin");
                 selectObj.innerHTML = '<option value="">-- Quản trị viên: Chọn nhân sự để tra cứu/đánh giá --</option>';
-                
                 danhSachVienChucAdmin.forEach(vc => {
                     let opt = document.createElement('option');
                     opt.value = vc.id; 
@@ -605,50 +552,30 @@
         const selectObj = document.getElementById("oChonUserAdmin");
         const selectedId = selectObj.value;
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-
         if (!selectedId) return; 
-
         v_che_do_xem_admin = true; 
-
         const selectedOption = selectObj.options[selectObj.selectedIndex];
         const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
         const selectedName = selectedOption.getAttribute('data-name');
-
         let nhomXacDinh = 'giaovien';
-        if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien')) {
-            nhomXacDinh = 'nhanvien';
-        }
-
+        if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien')) nhomXacDinh = 'nhanvien';
         document.getElementById("theHienChinh").innerText = selectedName;
         document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
         document.getElementById("oChonNhom").value = nhomXacDinh; 
-
         if (v_bo_nho_dem_admin[selectedId]) {
             let t_k = v_bo_nho_dem_admin[selectedId];
-            v_l_b = t_k.y_a; 
-            v_l_a = t_k.y_acc; 
-            v_l_c = t_k.y_e;
-            v_l_d = t_k.y_c || "";
+            v_l_b = t_k.y_a; v_l_a = t_k.y_acc; v_l_c = t_k.y_e; v_l_d = t_k.y_c || "";
             f_x_e(t_k.y_d); 
-            
             if (typeof f_x_h === "function") f_x_h();
             return;
         }
-
         f_x_j(true);
         try {
             const t_k = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(selectedId)}&z_p_c=${nhomXacDinh}`);
-
             if (t_k.status === 'success') {
                 v_bo_nho_dem_admin[selectedId] = t_k; 
-
-                v_l_b = t_k.y_a; 
-                v_l_a = t_k.y_acc; 
-                v_l_c = t_k.y_e;
-                v_l_d = t_k.y_c || "";
-
+                v_l_b = t_k.y_a; v_l_a = t_k.y_acc; v_l_c = t_k.y_e; v_l_d = t_k.y_c || "";
                 f_x_e(t_k.y_d); 
-                
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 hienThiThongBaoUI(t_k.message);
@@ -659,180 +586,19 @@
         f_x_j(false);
     }
 
-    async function f_x_i() {
-        const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
-        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        
-        m_d.forEach(d_k => {
-            const v_c_1 = d_k.querySelector(".m-cot-mot"), v_c_2 = d_k.cells[2], v_c_3 = d_k.querySelector(".o-n-bang");
-            if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
-        });
-        
-        document.getElementById("o-luu-overlay").style.display = "flex";
-        const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
-        
-        try {
-            await fetch(z_y_a, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ w_a: v_l_a, w_b: v_l_b, w_f: ten_tren_web, w_c: m_k, w_d: v_l_e, w_e: v_l_f, w_g: v_nam_hoc_hien_tai }) });
-            
-            v_bo_nho_dem_admin = {}; 
-
-            document.getElementById("o-luu-overlay").style.display = "none"; document.getElementById("o-thong-bao").style.display = "flex";
-        } catch (err) { 
-            document.getElementById("o-luu-overlay").style.display = "none"; 
-            hienThiThongBaoUI("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
-        }
-    }
-    
-    function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
-    function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
-
-    function moKhungChatAI() {
-        document.getElementById('aiChatModal').style.display = 'flex';
-        document.getElementById('aiQueryInput').value = '';
-    }
-
-    function dongKhungChatAI() {
-        document.getElementById('aiChatModal').style.display = 'none';
-    }
-
-    function formatVanBanAI(text) {
-        if (!text) return "";
-        let html = text;
-        
-        html = html.replace(/###\s+(.*)/g, '<h4 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h4>');
-        html = html.replace(/##\s+(.*)/g, '<h3 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h3>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
-        html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
-        html = html.replace(/\n/g, '<br>');
-        
-        html = html.replace(/<\/div><br>/g, '</div>');
-        html = html.replace(/(<br>)+<h3/g, '<h3');
-        html = html.replace(/<\/h3>(<br>)+/g, '</h3>');
-        html = html.replace(/(<br>)+<h4/g, '<h4');
-        html = html.replace(/<\/h4>(<br>)+/g, '</h4>');
-        
-        return html;
-    }
-
-    function copyVanBanAI(elementId, btnElement) {
-        const textElement = document.getElementById(elementId);
-        if (!textElement) return;
-        
-        const textToCopy = textElement.innerText;
-        
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            let originalText = btnElement.innerHTML;
-            btnElement.innerHTML = "✅ Đã copy!";
-            setTimeout(() => {
-                btnElement.innerHTML = originalText;
-            }, 2000);
-        }).catch(err => {
-            console.error('Không thể sao chép văn bản: ', err);
-            btnElement.innerHTML = "❌ Lỗi copy";
-        });
-    }
-
-    async function guiCauHoiAI() {
-        const oNhap = document.getElementById('aiQueryInput');
-        const cauHoi = oNhap.value.trim();
-        const hopPhanHoi = document.getElementById('aiResponseBox');
-        const nutGui = document.getElementById('btnSendAI');
-        const modalBody = document.getElementById('aiModalBody'); 
-
-        if(!cauHoi) {
-            hienThiThongBaoUI("Bạn vui lòng nhập câu hỏi!"); 
-            return;
-        }
-
-        oNhap.value = '';
-        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-
-        const welcomeMsg = document.getElementById('aiWelcomeMsg');
-        if (welcomeMsg) {
-            welcomeMsg.remove();
-        }
-
-        nutGui.disabled = true;
-        nutGui.innerHTML = "⏳ Đang tra cứu...";
-
-        const loadingId = "load_" + new Date().getTime();
-
-        const blockChat = `
-            <div style="border-bottom: 1px dashed #93c5fd; padding-bottom: 15px; margin-bottom: 15px;">
-                <div class="ai-user-query">👤 Bạn: ${cauHoi}</div>
-                <div id="${loadingId}" style="color:#666; font-style:italic; margin-top: 8px;">⏳ AI đang phân tích dữ liệu, xin vui lòng chờ...</div>
-            </div>
-        `;
-        hopPhanHoi.insertAdjacentHTML('beforeend', blockChat);
-        
-        modalBody.scrollTop = modalBody.scrollHeight;
-
-        try {
-            const urlGoiAI = `${z_y_a}?z_p_a=h_o_i_a_i&z_p_b=${encodeURIComponent(cauHoi)}&t=${new Date().getTime()}`;
-            const res = await fetchAPI(urlGoiAI);
-
-            nutGui.disabled = false;
-            nutGui.innerHTML = "Hỏi AI";
-
-            const loadingEl = document.getElementById(loadingId);
-
-            if (res.success) {
-                const phanHoiDep = formatVanBanAI(res.message);
-                
-                if(loadingEl) loadingEl.outerHTML = `
-                    <div style="margin-top: 8px;">
-                        <strong>🤖 AI:</strong><br>
-                        <div id="content-${loadingId}">${phanHoiDep}</div>
-                        <button class="btn-copy-ai" onclick="copyVanBanAI('content-${loadingId}', this)" title="Sao chép nội dung thuần túy">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
-                            </svg>
-                            Copy
-                        </button>
-                    </div>`;
-            } else {
-                if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</div>`;
-            }
-        } catch (err) {
-            nutGui.disabled = false;
-            nutGui.innerHTML = "Hỏi AI";
-            const loadingEl = document.getElementById(loadingId);
-            if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>❌ Lỗi kết nối:</strong> Trình duyệt hoặc mạng chặn yêu cầu.</div>`;
-        }
-
-        modalBody.scrollTop = modalBody.scrollHeight;
-    }
-    
-    document.getElementById('aiQueryInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            guiCauHoiAI();
-        }
-    });
-
-    let v_timer_h = null;
-    function v_f_x_h_debounce() {
-        clearTimeout(v_timer_h);
-        v_timer_h = setTimeout(f_x_h, 250); 
-    }
-
-    // ĐỘNG CƠ QUY TẮC ĐỘNG ĐÃ ĐƯỢC KẾT HỢP VÀO ĐÂY
     function f_x_e(m_n) {
         const k_b = document.getElementById("t-b-g");
         let d_d = 1;
         let p_k = false; 
         let khoiDOM = "";
-
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
             let kq = item.x_c || "";
             let html = "";
             let l_p = !tg && !item.x_a.toLowerCase().includes("phê bình");
             let isFirstDataRow = false;
-            
             if (!l_p && !p_k) { isFirstDataRow = true; p_k = true; kq = v_l_d !== "" ? v_l_d : kq; }
             let l_m = item.x_a.toLowerCase().includes("kết quả xếp loại hàng tháng") || tg.toLowerCase().includes("bình quân cả năm");
-
             if (l_m) {
                 kq = v_l_d !== "" ? v_l_d : kq; 
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
@@ -850,17 +616,12 @@
                 if (isFirstDataRow) html = `<input type="text" class="o-n-bang k-hoat-t k-o-n" value="${kq}" readonly title="Khóa - Dữ liệu tự động">`;
                 else html = `<input type="text" class="o-n-bang k-hoat-t" value="${kq}">`;
             }
-
             let h_s = "";
             if (!l_p && item.x_a.trim() !== "") { h_s = d_d; d_d++; }
-            
             let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
-            
             khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
         });
-        
         k_b.innerHTML = khoiDOM; 
-
         if (v_che_do_xem_admin || v_che_do_khach) {
             document.querySelectorAll("#t-b-g input, #t-b-g select, #t-b-g button").forEach(el => {
                 el.disabled = true;
@@ -875,11 +636,15 @@
         }
     }
 
+    function v_f_x_h_debounce() {
+        clearTimeout(v_timer_h);
+        v_timer_h = setTimeout(f_x_h, 250); 
+    }
+
     function f_x_h() {
         const m_d = document.querySelectorAll("#t-b-g tr");
         const c_n = document.getElementById("oChonNhom").value;
         let mangDuLieuGom = [];
-        
         m_d.forEach(d_k => {
             let c_x_1 = d_k.querySelector(".m-cot-mot");
             let c_x_2 = d_k.querySelector(".o-n-bang");
@@ -901,18 +666,14 @@
                 });
             }
         });
-
         let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
-
         if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
             k_q = f_x_l_chinh(mangDuLieuGom);
         } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
             k_q = f_x_m_chinh(mangDuLieuGom);
         }
-
         v_l_e = k_q.k_t;
         v_l_f = k_q.tongDiem;
-
         document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
         document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
         document.getElementById("vHT3").innerHTML = `
@@ -921,54 +682,201 @@
         `;
     }
 
+    async function f_x_i() {
+        const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        m_d.forEach(d_k => {
+            const v_c_1 = d_k.querySelector(".m-cot-mot"), v_c_2 = d_k.cells[2], v_c_3 = d_k.querySelector(".o-n-bang");
+            if (v_c_1 && v_c_2 && v_c_3) m_k.push({ x_a: v_c_1.innerText, x_b: v_c_2.innerText === 'Quy chế' ? 'THANHTICH_HS_DONG' : v_c_2.innerText, x_c: v_c_3.value });
+        });
+        document.getElementById("o-luu-overlay").style.display = "flex";
+        const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
+        try {
+            await fetch(z_y_a, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ w_a: v_l_a, w_b: v_l_b, w_f: ten_tren_web, w_c: m_k, w_d: v_l_e, w_e: v_l_f, w_g: v_nam_hoc_hien_tai }) });
+            v_bo_nho_dem_admin = {}; 
+            document.getElementById("o-luu-overlay").style.display = "none"; document.getElementById("o-thong-bao").style.display = "flex";
+        } catch (err) { 
+            document.getElementById("o-luu-overlay").style.display = "none"; 
+            hienThiThongBaoUI("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
+        }
+    }
+
     async function f_x_xuat_pdf() {
+        if (v_che_do_khach || v_che_do_xem_admin) {
+            hienThiThongBaoUI("Chế độ xem không cho phép xuất PDF!");
+            return;
+        }
         try {
             const element = document.getElementById("vungThuHai");
-            if (!element) {
-                alert("Không tìm thấy vùng dữ liệu đánh giá.");
-                return;
-            }
-
+            if (!element) throw new Error("Không tìm thấy vùng dữ liệu.");
             let tenNV = "VienChuc";
             const eTen = document.getElementById("theHienChinh");
-            if (eTen) { tenNV = eTen.innerText.trim(); }
-            
-            const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
+            if (eTen) tenNV = eTen.innerText.trim();
+            const namHoc = v_nam_hoc_hien_tai || "2025-2026";
             const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
+            hienThiThongBaoUI("Đang xuất PDF, vui lòng chờ...");
+            const clone = element.cloneNode(true);
+            const header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '20px';
+            header.style.fontFamily = "'Times New Roman', serif";
+            header.innerHTML = `
+                <img src="${DG_LINK_LOGO}" style="width:60px; height:60px;">
+                <h3 style="margin:5px 0 0 0;">${DG_TEN_TRUONG_UP}</h3>
+                <h2 style="margin:0; color:#0056b3;">KẾT QUẢ TỰ ĐÁNH GIÁ VIÊN CHỨC</h2>
+                <p><strong>Họ và tên:</strong> ${tenNV} &nbsp;|&nbsp; <strong>Năm học:</strong> ${namHoc}</p>
+                <hr>
+            `;
+            clone.insertBefore(header, clone.firstChild);
+            const style = document.createElement('style');
+            style.textContent = `
+                table { width:100%; border-collapse:collapse; }
+                th, td { border:1px solid #999; padding:6px; text-align:left; }
+                th { background:#e9ecef; }
+                .v-t-k { margin-top:20px; padding:10px; background:#f1f1f1; }
+                .v-d-g { font-weight:bold; color:#dc3545; }
+            `;
+            clone.prepend(style);
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: tenFile,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            await html2pdf().set(opt).from(clone).save();
+            dongCanhBaoUI();
+        } catch (err) {
+            dongCanhBaoUI();
+            hienThiThongBaoUI("Lỗi xuất PDF: " + err.message);
+        }
+    }
 
-            if (typeof hienThiThongBaoUI === "function") {
-                hienThiThongBaoUI("Hệ thống đang tự động căn chỉnh, chèn Logo và xuất PDF...<br>Vui lòng không cuộn chuột.");
+    function f_x_c() {
+        if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
+    }
+
+    // AI Chat
+    function moKhungChatAI() {
+        document.getElementById('aiChatModal').style.display = 'flex';
+        document.getElementById('aiQueryInput').value = '';
+    }
+    function dongKhungChatAI() {
+        document.getElementById('aiChatModal').style.display = 'none';
+    }
+    function formatVanBanAI(text) {
+        if (!text) return "";
+        let html = text;
+        html = html.replace(/###\s+(.*)/g, '<h4 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h4>');
+        html = html.replace(/##\s+(.*)/g, '<h3 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h3>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
+        html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
+        html = html.replace(/\n/g, '<br>');
+        html = html.replace(/<\/div><br>/g, '</div>');
+        html = html.replace(/(<br>)+<h3/g, '<h3');
+        html = html.replace(/<\/h3>(<br>)+/g, '</h3>');
+        html = html.replace(/(<br>)+<h4/g, '<h4');
+        html = html.replace(/<\/h4>(<br>)+/g, '</h4>');
+        return html;
+    }
+    function copyVanBanAI(elementId, btnElement) {
+        const textElement = document.getElementById(elementId);
+        if (!textElement) return;
+        const textToCopy = textElement.innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            let originalText = btnElement.innerHTML;
+            btnElement.innerHTML = "✅ Đã copy!";
+            setTimeout(() => { btnElement.innerHTML = originalText; }, 2000);
+        }).catch(err => { console.error('Không thể sao chép văn bản: ', err); });
+    }
+    async function guiCauHoiAI() {
+        const oNhap = document.getElementById('aiQueryInput');
+        const cauHoi = oNhap.value.trim();
+        const hopPhanHoi = document.getElementById('aiResponseBox');
+        const nutGui = document.getElementById('btnSendAI');
+        const modalBody = document.getElementById('aiModalBody'); 
+        if(!cauHoi) { hienThiThongBaoUI("Bạn vui lòng nhập câu hỏi!"); return; }
+        oNhap.value = '';
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        const welcomeMsg = document.getElementById('aiWelcomeMsg');
+        if (welcomeMsg) welcomeMsg.remove();
+        nutGui.disabled = true;
+        nutGui.innerHTML = "⏳ Đang tra cứu...";
+        const loadingId = "load_" + new Date().getTime();
+        const blockChat = `
+            <div style="border-bottom: 1px dashed #93c5fd; padding-bottom: 15px; margin-bottom: 15px;">
+                <div class="ai-user-query">👤 Bạn: ${cauHoi}</div>
+                <div id="${loadingId}" style="color:#666; font-style:italic; margin-top: 8px;">⏳ AI đang phân tích dữ liệu, xin vui lòng chờ...</div>
+            </div>
+        `;
+        hopPhanHoi.insertAdjacentHTML('beforeend', blockChat);
+        modalBody.scrollTop = modalBody.scrollHeight;
+        try {
+            const urlGoiAI = `${z_y_a}?z_p_a=h_o_i_a_i&z_p_b=${encodeURIComponent(cauHoi)}&t=${new Date().getTime()}`;
+            const res = await fetchAPI(urlGoiAI);
+            nutGui.disabled = false;
+            nutGui.innerHTML = "Hỏi AI";
+            const loadingEl = document.getElementById(loadingId);
+            if (res.success) {
+                const phanHoiDep = formatVanBanAI(res.message);
+                if(loadingEl) loadingEl.outerHTML = `
+                    <div style="margin-top: 8px;">
+                        <strong>🤖 AI:</strong><br>
+                        <div id="content-${loadingId}">${phanHoiDep}</div>
+                        <button class="btn-copy-ai" onclick="copyVanBanAI('content-${loadingId}', this)" title="Sao chép nội dung thuần túy">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>`;
+            } else {
+                if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</div>`;
             }
+        } catch (err) {
+            nutGui.disabled = false;
+            nutGui.innerHTML = "Hỏi AI";
+            const loadingEl = document.getElementById(loadingId);
+            if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>❌ Lỗi kết nối:</strong> ${err.message}</div>`;
+        }
+        modalBody.scrollTop = modalBody.scrollHeight;
+    }
 
-            const oldWidth = element.style.width;
-            const oldOverflow = element.style.overflow;
-            const oldMaxWidth = element.style.maxWidth;
-            const oldPadding = element.style.padding;
-            const oldBoxSizing = element.style.boxSizing;
-            const vungNut = document.getElementById("vungNutBam");
-
-            const cellStates = [];
-            const tables = element.querySelectorAll("table");
-            tables.forEach(tb => {
-                const cells = tb.querySelectorAll("th, td, tr");
-                cells.forEach(c => {
-                    cellStates.push({
-                        el: c,
-                        padding: c.style.padding,
-                        fontSize: c.style.fontSize,
-                        lineHeight: c.style.lineHeight,
-                        wordBreak: c.style.wordBreak,
-                        whiteSpace: c.style.whiteSpace,
-                        border: c.style.border,
-                        fontWeight: c.style.fontWeight, 
-                        boxSizing: c.style.boxSizing,
-                        pageBreakInside: c.style.pageBreakInside,
-                        breakInside: c.style.breakInside
-                    });
+    // Khởi tạo khi DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+        var ketnoiScript = document.createElement('script');
+        ketnoiScript.src = 'ketnoi.js?v=' + new Date().getTime();
+        ketnoiScript.onload = function() {
+            if (typeof applyDGConfig === 'function') applyDGConfig();
+            var gsiScript = document.createElement('script');
+            gsiScript.src = "https://accounts.google.com/gsi/client";
+            gsiScript.async = true;
+            gsiScript.defer = true;
+            document.head.appendChild(gsiScript);
+            var html2pdfScript = document.createElement('script');
+            html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+            document.head.appendChild(html2pdfScript);
+            const loggedUser = sessionStorage.getItem("HTDG_ACCOUNT_ID");
+            const savedNhom = sessionStorage.getItem("HTDG_NHOM_ID");
+            if (savedNhom) document.getElementById('oChonNhom').value = savedNhom;
+            if (loggedUser) showMainUI(loggedUser);
+            const tbg = document.getElementById("t-b-g");
+            if (tbg) {
+                tbg.addEventListener('change', function(e) {
+                    if (e.target && e.target.classList.contains('k-hoat-t')) f_x_h();
                 });
-            });
-
-            const tieuDePDF = document.createElement("div");
-            tieuDePDF.id = "tieu-de-pdf-tam";
-            tieuDePDF.style.marginBottom = "15px"; 
-            tieuDePDF.style.fontFamily = "'Times New Roman',
+                tbg.addEventListener('input', function(e) {
+                    if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
+                });
+            }
+            Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
+        };
+        ketnoiScript.onerror = function() {
+            document.querySelector('.app-title-name-up').innerText = "LỖI KẾT NỐI MÁY CHỦ";
+            alert("Không thể tải tệp cấu hình hệ thống. Vui lòng kiểm tra lại mạng!");
+        };
+        document.head.appendChild(ketnoiScript);
+    });
+</script>
+</body>
+</html>
