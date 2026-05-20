@@ -1,5 +1,5 @@
 <script>
-// Hàm thêm thành tích (giữ nguyên)
+// ==================== XỬ LÝ THÀNH TÍCH HỌC SINH ====================
 function f_x_f_gv(idx) {
     const v_c = document.getElementById(`h_c_${idx}`).value;
     const v_s = parseInt(document.getElementById(`h_g_${idx}`).value);
@@ -32,7 +32,7 @@ function f_x_g_gv(idx) {
     if(typeof f_x_h === 'function') f_x_h(); 
 }
 
-// Hàm tính điểm cho giáo viên (đã sửa lỗi cộng điểm)
+// ==================== TÍNH ĐIỂM CHO GIÁO VIÊN ====================
 function f_x_l_chinh(dataRows) {
     let diemP1 = 0, diemP2 = 0;
     let diemThangGoc = 0;
@@ -42,7 +42,7 @@ function f_x_l_chinh(dataRows) {
         let v_str = r.giaTri;
         let v_num = r.so;
 
-        // 1. Điểm từ các select (có data-p)
+        // 1. Điểm từ select (có data-p)
         if (r.isSelect) {
             diemP2 += r.selectDataP;
         }
@@ -94,12 +94,11 @@ function f_x_l_chinh(dataRows) {
         }
     });
 
-    // Hàm đánh giá điều kiện
+    // Hàm đánh giá điều kiện (giữ nguyên logic cũ)
     const evalCondition = (cond, valNum, valStr, row) => {
         if (!cond || cond.trim() === "" || cond.toLowerCase() === "any") return true;
         cond = cond.trim().toLowerCase();
         
-        // So sánh số học
         let numericMatch = cond.match(/^([><=]+)([\d\.]+)$/);
         if (numericMatch) {
             let op = numericMatch[1];
@@ -112,7 +111,6 @@ function f_x_l_chinh(dataRows) {
         }
         if (cond.match(/^[\d\.]+$/)) return valNum === parseFloat(cond);
         
-        // Xử lý thứ bậc (>= Tốt, >= Cấp tỉnh...)
         if (cond.startsWith(">=")) {
             let hierarchy = [
                 ["yếu", "kém", "chưa đạt", "không có", "chưa hoàn thành"],
@@ -128,7 +126,6 @@ function f_x_l_chinh(dataRows) {
             if (targetLevel !== -1 && currentLevel !== -1) return currentLevel >= targetLevel;
         }
         
-        // Xử lý thành tích đặc biệt
         if (row.ten.includes("thành tích") || row.quyChe.includes("Quy chế")) {
             let lines = valStr.split('\n');
             let bestScore = 0, countTinh = 0;
@@ -158,7 +155,6 @@ function f_x_l_chinh(dataRows) {
                 else return bestScore === targetScore;
             }
         }
-        
         return valStr.includes(cond);
     };
     
@@ -196,7 +192,6 @@ function f_x_l_chinh(dataRows) {
     else if (datHT) { k_t = "HOÀN THÀNH NHIỆM VỤ"; k_m = "#fd7e14"; }
     
     let tongDiem = diemP1 + diemP2;
-    // Làm tròn 1 chữ số thập phân
     diemP1 = Math.round(diemP1 * 10) / 10;
     diemP2 = Math.round(diemP2 * 10) / 10;
     tongDiem = Math.round(tongDiem * 10) / 10;
