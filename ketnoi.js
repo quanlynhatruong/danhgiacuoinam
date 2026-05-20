@@ -3,34 +3,44 @@
    CHỨC NĂNG: LƯU TRỮ VÀ ĐỒNG BỘ TOÀN BỘ CÁC THÔNG SỐ ĐỊNH DANH HỆ THỐNG
    ========================================================================== */
 
+// 🔁 SAU KHI TRIỂN KHAI GOOGLE APPS SCRIPT, HÃY CẬP NHẬT URL NÀY
 var DG_CONFIG_GAS_URL = "https://script.google.com/macros/s/AKfycbyfW0HDpryuXX9HqqEAS7Ggec1iXbSdcUGjMxcZMvnREjhD5CkJuVZFvII899dKwrcV/exec";
-var DG_LINK_LOGO = "https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png"; 
 
+// Logo trường (có thể đổi sang ảnh khác)
+var DG_LINK_LOGO = "https://i.ibb.co/6R8Y9DNq/logo-l-a-ch-n6.png";
+
+// Thông tin trường
 var DG_TEN_TRUONG = "Trường TH&THCS Hợp Thành";
 var DG_TEN_TRUONG_UP = "TRƯỜNG TH&THCS HỢP THÀNH";
 
+// Tên phần mềm
 var DG_TEN_PM = "Hệ Thống Đánh Giá Xếp Loại Cuối năm";
 var DG_TEN_PM_UP = "HỆ THỐNG ĐÁNH GIÁ XẾP LOẠI CUỐI NĂM";
+
+// Tác giả
 var DG_TAC_GIA = "Hoàng Ngọc Lâm";
 var DG_TAC_GIA_UP = "HOÀNG NGỌC LÂM";
 
+// Google Client ID (để đăng nhập)
 var DG_GOOGLE_CLIENT_ID = "407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com";
+
+// Mô tả trang
 var DG_MO_TA = "Hệ thống đánh giá xếp loại viên chức cuối năm - " + DG_TEN_TRUONG;
 
 /* ========================================================================= */
-/* KHỞI TẠO CẤU TRÚC HEADER VÀ ĐỒNG BỘ GIAO DIỆN TỰ ĐỘNG                     */
+/* TỰ ĐỘNG CẬP NHẬT CÁC THẺ META, TITLE, FAVICON, LOGO, TÊN TRƯỜNG...      */
 /* ========================================================================= */
 (function() {
-    // 1. Tạo thẻ Meta Description
+    // Thẻ meta description
     var metaDesc = document.createElement('meta');
     metaDesc.name = "description";
     metaDesc.content = DG_MO_TA;
     document.head.appendChild(metaDesc);
     
-    // 2. Cập nhật thẻ Title
+    // Title
     document.title = DG_TEN_PM + " - " + DG_TEN_TRUONG;
     
-    // 3. Khởi tạo thẻ Favicon
+    // Favicon
     var linkIcon = document.createElement('link');
     linkIcon.rel = 'icon';
     linkIcon.id = 'page_favicon';
@@ -38,7 +48,7 @@ var DG_MO_TA = "Hệ thống đánh giá xếp loại viên chức cuối năm -
     document.head.appendChild(linkIcon);
 })();
 
-// Hàm đồng bộ tên, logo vào tất cả các thẻ của phần mềm
+// Hàm đồng bộ logo, tên trường, tên phần mềm vào tất cả các thẻ có class tương ứng
 function applyDGConfig() {
     if(typeof DG_LINK_LOGO !== 'undefined') {
         document.querySelectorAll('.app-logo').forEach(img => { img.src = DG_LINK_LOGO; img.style.display = 'inline-block'; });
