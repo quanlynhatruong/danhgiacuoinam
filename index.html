@@ -293,7 +293,6 @@
     let v_l_d = "", v_l_e = "", v_l_f = "";
     let v_nam_hoc_hien_tai = ""; 
 
-    // Hàm nạp script động
     function f_x_k(url) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -309,18 +308,12 @@
         document.getElementById("ui-canh-bao").style.display = "flex";
         hanhDongSauThongBao = callback; 
     }
-
     function dongCanhBaoUI() {
         document.getElementById("ui-canh-bao").style.display = "none";
-        if (typeof hanhDongSauThongBao === 'function') {
-            hanhDongSauThongBao(); 
-            hanhDongSauThongBao = null;
-        }
+        if (typeof hanhDongSauThongBao === 'function') { hanhDongSauThongBao(); hanhDongSauThongBao = null; }
     }
-
     function dongThongBao() { document.getElementById("o-thong-bao").style.display = "none"; }
     function f_x_j(l) { document.getElementById("h-dang-tai").style.display = l ? "block" : "none"; }
-
     function f_x_logout() {
         sessionStorage.removeItem("HTDG_ACCOUNT_ID");
         sessionStorage.removeItem("HTDG_NHOM_ID");
@@ -328,7 +321,6 @@
         v_bo_nho_dem_admin = {}; 
         location.reload();
     }
-
     function decodeJwtResponse(chuoi_ma) {
         let base64Url = chuoi_ma.split('.')[1];
         let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -337,7 +329,6 @@
         }).join(''));
         return JSON.parse(chuoi_du_lieu);
     }
-
     function f_x_xac_thuc(response) {
         const payload = decodeJwtResponse(response.credential);
         const d_danh = payload.email;
@@ -346,44 +337,31 @@
         sessionStorage.setItem("HTDG_NHOM_ID", nhomDaChon);
         showMainUI(d_danh);
     }
-
     function showMainUI(d_danh) {
         document.getElementById('khung-xac-thuc').style.display = 'none';
         document.getElementById('bo-cuc-he-thong').style.display = 'flex'; 
-        
         let mKq = document.getElementById("menu-ket-qua");
         if (mKq) {
             mKq.style.display = "flex";
-            if (mKq.hasAttribute("data-href-goc")) {
-                mKq.setAttribute("href", mKq.getAttribute("data-href-goc"));
-            }
+            if (mKq.hasAttribute("data-href-goc")) mKq.setAttribute("href", mKq.getAttribute("data-href-goc"));
             mKq.onclick = null;
         }
-
         const objNhom = document.getElementById('oChonNhom');
         if(document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text;
         const oNhap = document.getElementById('oNhapChinh');
         if (oNhap) { oNhap.value = d_danh; f_x_d(); }
     }
-
     function v_hien_thi_menu_admin(hienThi) {
         let kieu = hienThi ? "flex" : "none";
         if (document.getElementById("menu-quan-ly-quyen")) document.getElementById("menu-quan-ly-quyen").style.display = kieu;
         if (document.getElementById("menu-tieu-chi-gv")) document.getElementById("menu-tieu-chi-gv").style.display = kieu;
         if (document.getElementById("menu-tieu-chi-nv")) document.getElementById("menu-tieu-chi-nv").style.display = kieu;
     }
-
     const fetchAPI = async (url) => {
         const response = await fetch(url);
         const text = await response.text();
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            console.error("LỖI MÁY CHỦ TRẢ VỀ:", text);
-            throw new Error("LỖI 500: URL Máy chủ Google Apps Script bị sai, HOẶC đồng chí chưa Triển khai phiên bản mới (New Version) đúng chuẩn.");
-        }
+        try { return JSON.parse(text); } catch (e) { throw new Error("Lỗi kết nối máy chủ."); }
     };
-
     async function f_x_load_guest_template(p_n) {
         try {
             const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
@@ -396,10 +374,7 @@
                 for (let vc of danhSachVienChucAdmin) {
                     let roleStr = (vc.role || "").toLowerCase();
                     let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
-                    if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) {
-                        repId = vc.id;
-                        break;
-                    }
+                    if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) { repId = vc.id; break; }
                 }
             }
             if (repId) {
@@ -408,17 +383,10 @@
                     let blankData = t_k_admin.y_d.map(item => ({ ...item, x_c: "" }));
                     f_x_e(blankData);
                     if (typeof f_x_h === "function") f_x_h();
-                } else {
-                    document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
-                }
-            } else {
-                document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu.</td></tr>";
-            }
-        } catch (e) {
-            document.getElementById("t-b-g").innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
-        }
+                } else { document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4'>Lỗi tải mẫu</td></tr>"; }
+            } else { document.getElementById("t-b-g").innerHTML = "<tr><td colspan='4'>Không có cấu trúc mẫu</td></tr>"; }
+        } catch (e) { document.getElementById("t-b-g").innerHTML = `<tr><td colspan='4'>${e.message}</td></tr>`; }
     }
-
     async function f_x_vao_khach() {
         v_che_do_khach = true;
         document.getElementById('khung-xac-thuc').style.display = 'none';
@@ -436,33 +404,21 @@
         let mKq = document.getElementById("menu-ket-qua");
         if (mKq) {
             mKq.style.display = "flex";
-            if (!mKq.hasAttribute("data-href-goc")) {
-                mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
-            }
+            if (!mKq.hasAttribute("data-href-goc")) mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
             mKq.setAttribute("href", "javascript:void(0)");
-            mKq.onclick = function() { 
-                hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); 
-                return false; 
-            };
+            mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH: Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
         }
         f_x_j(true);
         await f_x_load_guest_template(p_n);
         f_x_j(false);
-        hienThiThongBaoUI("Bạn đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>, các chức năng tương tác đã bị vô hiệu.");
+        hienThiThongBaoUI("Bạn đang truy cập với tư cách Khách.<br>Hệ thống hiển thị khung tiêu chí mẫu ở chế độ <b>Chỉ xem</b>.");
     }
-
     async function f_x_d() {
         v_che_do_xem_admin = false; 
         const p_c = document.getElementById("oNhapChinh").value.trim();
         const p_n = document.getElementById("oChonNhom").value; 
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-
-        if (!p_c) {
-            if (v_che_do_khach) return; 
-            hienThiThongBaoUI("Hệ thống chưa xác định được định danh!");
-            return;
-        }
-        
+        if (!p_c) { if (!v_che_do_khach) hienThiThongBaoUI("Hệ thống chưa xác định được định danh!"); return; }
         f_x_j(true);
         try {
             const p_n_khac = (p_n === 'giaovien') ? 'nhanvien' : 'giaovien';
@@ -470,18 +426,15 @@
                 fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}`),
                 fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}`)
             ]);
-            
             if (t_k.status === 'success') {
                 v_che_do_khach = false; 
                 v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e; v_l_d = t_k.y_c || ""; 
                 document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
                 v_nam_hoc_hien_tai = t_k.y_namhoc || "";
                 if(document.getElementById("hienThiNamHoc")) document.getElementById("hienThiNamHoc").innerText = v_nam_hoc_hien_tai;
-
                 let quyenAdmin = (t_k.y_role && t_k.y_role.toLowerCase().includes('admin'));
                 sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
                 v_hien_thi_menu_admin(quyenAdmin);
-
                 if (quyenAdmin) {
                     document.getElementById("vungChonAdmin").style.display = "block";
                     document.getElementById("vungHienThiNamHoc").style.display = "none";
@@ -490,7 +443,6 @@
                     document.getElementById("vungChonAdmin").style.display = "none";
                     document.getElementById("vungHienThiNamHoc").style.display = "block";
                 }
-
                 f_x_e(t_k.y_d);
                 document.getElementById("vungThuNhat").classList.add("a-di");
                 document.getElementById("vungThuHai").classList.remove("a-di");
@@ -498,7 +450,7 @@
                 if (typeof f_x_h === "function") f_x_h();
             } else if (t_k_khac.status === 'success') {
                 let tenNhomDung = (p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN";
-                hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Tài khoản của bạn được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
+                hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Tài khoản của bạn được phân loại là <b>" + tenNhomDung + "</b>.<br>Vui lòng ấn Đóng để quay lại.", f_x_logout);
                 f_x_j(false);
                 return;
             } else { 
@@ -515,17 +467,16 @@
                     mKq.style.display = "flex";
                     if (!mKq.hasAttribute("data-href-goc")) mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
                     mKq.setAttribute("href", "javascript:void(0)");
-                    mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
+                    mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH: Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
                 }
                 await f_x_load_guest_template(p_n);
-                hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
+                hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem).</b>");
             }
         } catch (err) { 
-            hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">${err.message}</span>`, f_x_logout); 
+            hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi!</b><br><br>${err.message}`, f_x_logout); 
         }
         f_x_j(false);
     }
-
     async function f_x_load_users() {
         try {
             const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
@@ -533,21 +484,16 @@
             if (t_k.status === 'success') {
                 danhSachVienChucAdmin = t_k.data;
                 const selectObj = document.getElementById("oChonUserAdmin");
-                selectObj.innerHTML = '<option value="">-- Quản trị viên: Chọn nhân sự để tra cứu/đánh giá --</option>';
+                selectObj.innerHTML = '<option value="">-- Quản trị viên: Chọn nhân sự --</option>';
                 danhSachVienChucAdmin.forEach(vc => {
                     let opt = document.createElement('option');
-                    opt.value = vc.id; 
-                    opt.text = vc.name + (vc.role ? ` - ${vc.role}` : "");
-                    opt.setAttribute('data-role', vc.role);
-                    opt.setAttribute('data-name', vc.name);
+                    opt.value = vc.id; opt.text = vc.name + (vc.role ? ` - ${vc.role}` : "");
+                    opt.setAttribute('data-role', vc.role); opt.setAttribute('data-name', vc.name);
                     selectObj.appendChild(opt);
                 });
             }
-        } catch (err) {
-            console.error("Lỗi tải danh sách bộ máy nhân sự.");
-        }
+        } catch (err) { console.error("Lỗi tải danh sách nhân sự."); }
     }
-
     async function f_x_admin_chon_user() {
         const selectObj = document.getElementById("oChonUserAdmin");
         const selectedId = selectObj.value;
@@ -565,8 +511,7 @@
         if (v_bo_nho_dem_admin[selectedId]) {
             let t_k = v_bo_nho_dem_admin[selectedId];
             v_l_b = t_k.y_a; v_l_a = t_k.y_acc; v_l_c = t_k.y_e; v_l_d = t_k.y_c || "";
-            f_x_e(t_k.y_d); 
-            if (typeof f_x_h === "function") f_x_h();
+            f_x_e(t_k.y_d); if (typeof f_x_h === "function") f_x_h();
             return;
         }
         f_x_j(true);
@@ -575,22 +520,14 @@
             if (t_k.status === 'success') {
                 v_bo_nho_dem_admin[selectedId] = t_k; 
                 v_l_b = t_k.y_a; v_l_a = t_k.y_acc; v_l_c = t_k.y_e; v_l_d = t_k.y_c || "";
-                f_x_e(t_k.y_d); 
-                if (typeof f_x_h === "function") f_x_h();
-            } else {
-                hienThiThongBaoUI(t_k.message);
-            }
-        } catch (err) {
-            hienThiThongBaoUI("Lỗi gián đoạn khi tải dữ liệu viên chức.");
-        }
+                f_x_e(t_k.y_d); if (typeof f_x_h === "function") f_x_h();
+            } else { hienThiThongBaoUI(t_k.message); }
+        } catch (err) { hienThiThongBaoUI("Lỗi gián đoạn khi tải dữ liệu viên chức."); }
         f_x_j(false);
     }
-
     function f_x_e(m_n) {
         const k_b = document.getElementById("t-b-g");
-        let d_d = 1;
-        let p_k = false; 
-        let khoiDOM = "";
+        let d_d = 1, p_k = false, khoiDOM = "";
         m_n.forEach((item, index) => {
             let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
             let kq = item.x_c || "";
@@ -603,8 +540,7 @@
                 kq = v_l_d !== "" ? v_l_d : kq; 
                 if (kq) kq = kq.toString().replace(/([^\s\d.,:])\s*(\d)/, '$1:$2');
                 html = `<input type="text" class="o-n-bang k-o-n h-dong-bo k-hoat-t" value="${kq}" readonly title="Khóa - Dữ liệu tự động đồng bộ">`;
-            } 
-            else if (tg === "THANHTICH_HS_DONG") {
+            } else if (tg === "THANHTICH_HS_DONG") {
                 html = `<div class="k-phu"><div class="k-d-k"><select id="h_c_${index}"><option value="QUOCGIA">Quốc gia</option><option value="TINH">Cấp Tỉnh</option><option value="XA">Xã/Cụm</option></select><select id="h_g_${index}"><option value="0">Giải Nhất</option><option value="1">Giải Nhì</option><option value="2">Giải Ba</option><option value="3">KK</option></select><select id="h_l_${index}"><option value="1">Cá nhân</option><option value="1.5">Tập thể (x1.5)</option></select><input type="number" id="h_s_${index}" value="1" min="1" style="width: 50px;"><button class="n-bam n-xanh-b n-nho" onclick="f_x_f_gv(${index})">Thêm</button><button class="n-bam n-do n-nho" onclick="f_x_g_gv(${index})">Xóa</button></div><div id="h_t_${index}" class="k-k-q" style="font-weight: normal; font-size: 14px;">${kq ? kq.replace(/\\n/g, '<br>') : '...'}</div><input type="hidden" class="o-n-bang k-hoat-t" id="h_a_${index}" value="${kq}"></div>`;
             } else if (tg.includes("|")) {
                 let t_c = kq ? "" : `<option value="" data-p="0" disabled selected>-- Chọn mức --</option>`;
@@ -635,54 +571,51 @@
             if (nutLuu) nutLuu.style.display = "flex";
         }
     }
-
-    function v_f_x_h_debounce() {
-        clearTimeout(v_timer_h);
-        v_timer_h = setTimeout(f_x_h, 250); 
-    }
-
+    function v_f_x_h_debounce() { clearTimeout(v_timer_h); v_timer_h = setTimeout(f_x_h, 250); }
     function f_x_h() {
-    const m_d = document.querySelectorAll("#t-b-g tr");
-    const c_n = document.getElementById("oChonNhom").value;
-    let mangDuLieuGom = [];
-    m_d.forEach(d_k => {
-        let c_x_1 = d_k.querySelector(".m-cot-mot");
-        let c_x_2 = d_k.querySelector(".o-n-bang");
-        if (c_x_1 && c_x_2) {
-            let e_s = d_k.querySelector("select.o-n-bang");
-            mangDuLieuGom.push({
-                ten: c_x_1.innerText.trim().toLowerCase(),
-                giaTri: c_x_2.value.toLowerCase(),
-                so: parseFloat(c_x_2.value.replace(/[^\d\.\-]/g, '')) || 0,
-                isSelect: e_s !== null,
-                selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
-                isDongBo: d_k.querySelector(".h-dong-bo") !== null,
-                quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
-                q_d: c_x_1.getAttribute("data-qd"),
-                g_xs: c_x_1.getAttribute("data-xs"),
-                g_htt: c_x_1.getAttribute("data-htt"),
-                g_ht: c_x_1.getAttribute("data-ht"),
-                g_cht: c_x_1.getAttribute("data-cht")
-            });
+        const m_d = document.querySelectorAll("#t-b-g tr");
+        const c_n = document.getElementById("oChonNhom").value;
+        let mangDuLieuGom = [];
+        m_d.forEach(d_k => {
+            let c_x_1 = d_k.querySelector(".m-cot-mot");
+            let c_x_2 = d_k.querySelector(".o-n-bang");
+            if (c_x_1 && c_x_2) {
+                let e_s = d_k.querySelector("select.o-n-bang");
+                mangDuLieuGom.push({
+                    ten: c_x_1.innerText.trim().toLowerCase(),
+                    giaTri: c_x_2.value.toLowerCase(),
+                    so: parseFloat(c_x_2.value.replace(/[^\d\.\-]/g, '')) || 0,
+                    isSelect: e_s !== null,
+                    selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
+                    isDongBo: d_k.querySelector(".h-dong-bo") !== null,
+                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
+                    q_d: c_x_1.getAttribute("data-qd"),
+                    g_xs: c_x_1.getAttribute("data-xs"),
+                    g_htt: c_x_1.getAttribute("data-htt"),
+                    g_ht: c_x_1.getAttribute("data-ht"),
+                    g_cht: c_x_1.getAttribute("data-cht")
+                });
+            }
+        });
+        let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
+        if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
+            k_q = f_x_l_chinh(mangDuLieuGom);
+        } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
+            k_q = f_x_m_chinh(mangDuLieuGom);
+        } else {
+            console.warn("Hàm tính điểm chưa được tải!");
         }
-    });
-    let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
-    if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
-        k_q = f_x_l_chinh(mangDuLieuGom);
-    } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
-        k_q = f_x_m_chinh(mangDuLieuGom);
+        v_l_e = k_q.k_t;
+        v_l_f = k_q.tongDiem;
+        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
+        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
+        document.getElementById("vHT3").innerHTML = `
+            <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
+            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
+        `;
     }
-    v_l_e = k_q.k_t;
-    v_l_f = k_q.tongDiem;
-    document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
-    document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
-    document.getElementById("vHT3").innerHTML = `
-        <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
-        <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
-    `;
-}
-
     async function f_x_i() {
+        if (v_che_do_khach || v_che_do_xem_admin) { hienThiThongBaoUI("Chế độ xem không cho phép lưu!"); return; }
         const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
         m_d.forEach(d_k => {
@@ -697,97 +630,52 @@
             document.getElementById("o-luu-overlay").style.display = "none"; document.getElementById("o-thong-bao").style.display = "flex";
         } catch (err) { 
             document.getElementById("o-luu-overlay").style.display = "none"; 
-            hienThiThongBaoUI("Lỗi mạng khi lưu dữ liệu. Vui lòng kiểm tra kết nối và thử lại."); 
+            hienThiThongBaoUI("Lỗi mạng khi lưu dữ liệu."); 
         }
     }
-
     async function f_x_xuat_pdf() {
-        if (v_che_do_khach || v_che_do_xem_admin) {
-            hienThiThongBaoUI("Chế độ xem không cho phép xuất PDF!");
-            return;
-        }
+        if (v_che_do_khach || v_che_do_xem_admin) { hienThiThongBaoUI("Chế độ xem không cho phép xuất PDF!"); return; }
         try {
             const element = document.getElementById("vungThuHai");
             if (!element) throw new Error("Không tìm thấy vùng dữ liệu.");
-            let tenNV = "VienChuc";
-            const eTen = document.getElementById("theHienChinh");
-            if (eTen) tenNV = eTen.innerText.trim();
+            let tenNV = document.getElementById("theHienChinh").innerText.trim() || "VienChuc";
             const namHoc = v_nam_hoc_hien_tai || "2025-2026";
             const tenFile = `KetQuaDanhGia_${tenNV.replace(/\s+/g, "_")}_${namHoc}.pdf`;
             hienThiThongBaoUI("Đang xuất PDF, vui lòng chờ...");
             const clone = element.cloneNode(true);
             const header = document.createElement('div');
-            header.style.textAlign = 'center';
-            header.style.marginBottom = '20px';
-            header.style.fontFamily = "'Times New Roman', serif";
-            header.innerHTML = `
-                <img src="${DG_LINK_LOGO}" style="width:60px; height:60px;">
-                <h3 style="margin:5px 0 0 0;">${DG_TEN_TRUONG_UP}</h3>
-                <h2 style="margin:0; color:#0056b3;">KẾT QUẢ TỰ ĐÁNH GIÁ VIÊN CHỨC</h2>
-                <p><strong>Họ và tên:</strong> ${tenNV} &nbsp;|&nbsp; <strong>Năm học:</strong> ${namHoc}</p>
-                <hr>
-            `;
+            header.style.textAlign = 'center'; header.style.marginBottom = '20px'; header.style.fontFamily = "'Times New Roman', serif";
+            header.innerHTML = `<img src="${DG_LINK_LOGO}" style="width:60px;"><h3>${DG_TEN_TRUONG_UP}</h3><h2>KẾT QUẢ TỰ ĐÁNH GIÁ</h2><p><strong>Họ tên:</strong> ${tenNV} | <strong>Năm học:</strong> ${namHoc}</p><hr>`;
             clone.insertBefore(header, clone.firstChild);
             const style = document.createElement('style');
-            style.textContent = `
-                table { width:100%; border-collapse:collapse; }
-                th, td { border:1px solid #999; padding:6px; text-align:left; }
-                th { background:#e9ecef; }
-                .v-t-k { margin-top:20px; padding:10px; background:#f1f1f1; }
-                .v-d-g { font-weight:bold; color:#dc3545; }
-            `;
+            style.textContent = `table { width:100%; border-collapse:collapse; } th, td { border:1px solid #999; padding:6px; } th { background:#e9ecef; } .v-t-k { margin-top:20px; }`;
             clone.prepend(style);
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: tenFile,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, letterRendering: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
+            const opt = { margin: [0.5,0.5,0.5,0.5], filename: tenFile, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
             await html2pdf().set(opt).from(clone).save();
             dongCanhBaoUI();
-        } catch (err) {
-            dongCanhBaoUI();
-            hienThiThongBaoUI("Lỗi xuất PDF: " + err.message);
-        }
+        } catch (err) { dongCanhBaoUI(); hienThiThongBaoUI("Lỗi xuất PDF: " + err.message); }
     }
-
-    function f_x_c() {
-        if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
-    }
-
-    // AI Chat
-    function moKhungChatAI() {
-        document.getElementById('aiChatModal').style.display = 'flex';
-        document.getElementById('aiQueryInput').value = '';
-    }
-    function dongKhungChatAI() {
-        document.getElementById('aiChatModal').style.display = 'none';
-    }
+    function f_x_c() { if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h(); }
+    function moKhungChatAI() { document.getElementById('aiChatModal').style.display = 'flex'; document.getElementById('aiQueryInput').value = ''; }
+    function dongKhungChatAI() { document.getElementById('aiChatModal').style.display = 'none'; }
     function formatVanBanAI(text) {
         if (!text) return "";
         let html = text;
-        html = html.replace(/###\s+(.*)/g, '<h4 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h4>');
-        html = html.replace(/##\s+(.*)/g, '<h3 style="color: #b91c1c; margin-top: 10px; margin-bottom: 5px;">$1</h3>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
-        html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
+        html = html.replace(/###\s+(.*)/g, '<h4 style="color: #b91c1c;">$1</h4>');
+        html = html.replace(/##\s+(.*)/g, '<h3 style="color: #b91c1c;">$1</h3>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left:15px;">&bull; $2</div>');
         html = html.replace(/\n/g, '<br>');
-        html = html.replace(/<\/div><br>/g, '</div>');
-        html = html.replace(/(<br>)+<h3/g, '<h3');
-        html = html.replace(/<\/h3>(<br>)+/g, '</h3>');
-        html = html.replace(/(<br>)+<h4/g, '<h4');
-        html = html.replace(/<\/h4>(<br>)+/g, '</h4>');
         return html;
     }
     function copyVanBanAI(elementId, btnElement) {
         const textElement = document.getElementById(elementId);
         if (!textElement) return;
-        const textToCopy = textElement.innerText;
-        navigator.clipboard.writeText(textToCopy).then(() => {
+        navigator.clipboard.writeText(textElement.innerText).then(() => {
             let originalText = btnElement.innerHTML;
             btnElement.innerHTML = "✅ Đã copy!";
-            setTimeout(() => { btnElement.innerHTML = originalText; }, 2000);
-        }).catch(err => { console.error('Không thể sao chép văn bản: ', err); });
+            setTimeout(() => btnElement.innerHTML = originalText, 2000);
+        }).catch(err => console.error(err));
     }
     async function guiCauHoiAI() {
         const oNhap = document.getElementById('aiQueryInput');
@@ -795,54 +683,29 @@
         const hopPhanHoi = document.getElementById('aiResponseBox');
         const nutGui = document.getElementById('btnSendAI');
         const modalBody = document.getElementById('aiModalBody'); 
-        if(!cauHoi) { hienThiThongBaoUI("Bạn vui lòng nhập câu hỏi!"); return; }
+        if(!cauHoi) { hienThiThongBaoUI("Vui lòng nhập câu hỏi!"); return; }
         oNhap.value = '';
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
         const welcomeMsg = document.getElementById('aiWelcomeMsg');
         if (welcomeMsg) welcomeMsg.remove();
-        nutGui.disabled = true;
-        nutGui.innerHTML = "⏳ Đang tra cứu...";
+        nutGui.disabled = true; nutGui.innerHTML = "⏳ Đang tra cứu...";
         const loadingId = "load_" + new Date().getTime();
-        const blockChat = `
-            <div style="border-bottom: 1px dashed #93c5fd; padding-bottom: 15px; margin-bottom: 15px;">
-                <div class="ai-user-query">👤 Bạn: ${cauHoi}</div>
-                <div id="${loadingId}" style="color:#666; font-style:italic; margin-top: 8px;">⏳ AI đang phân tích dữ liệu, xin vui lòng chờ...</div>
-            </div>
-        `;
+        const blockChat = `<div style="border-bottom:1px dashed #93c5fd; padding-bottom:15px; margin-bottom:15px;"><div class="ai-user-query">👤 Bạn: ${cauHoi}</div><div id="${loadingId}" style="color:#666; font-style:italic;">⏳ AI đang phân tích...</div></div>`;
         hopPhanHoi.insertAdjacentHTML('beforeend', blockChat);
         modalBody.scrollTop = modalBody.scrollHeight;
         try {
             const urlGoiAI = `${z_y_a}?z_p_a=h_o_i_a_i&z_p_b=${encodeURIComponent(cauHoi)}&t=${new Date().getTime()}`;
             const res = await fetchAPI(urlGoiAI);
-            nutGui.disabled = false;
-            nutGui.innerHTML = "Hỏi AI";
+            nutGui.disabled = false; nutGui.innerHTML = "Hỏi AI";
             const loadingEl = document.getElementById(loadingId);
             if (res.success) {
                 const phanHoiDep = formatVanBanAI(res.message);
-                if(loadingEl) loadingEl.outerHTML = `
-                    <div style="margin-top: 8px;">
-                        <strong>🤖 AI:</strong><br>
-                        <div id="content-${loadingId}">${phanHoiDep}</div>
-                        <button class="btn-copy-ai" onclick="copyVanBanAI('content-${loadingId}', this)" title="Sao chép nội dung thuần túy">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
-                            </svg>
-                            Copy
-                        </button>
-                    </div>`;
-            } else {
-                if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</div>`;
-            }
-        } catch (err) {
-            nutGui.disabled = false;
-            nutGui.innerHTML = "Hỏi AI";
-            const loadingEl = document.getElementById(loadingId);
-            if(loadingEl) loadingEl.outerHTML = `<div style="margin-top: 8px; color:red;"><strong>❌ Lỗi kết nối:</strong> ${err.message}</div>`;
-        }
+                if(loadingEl) loadingEl.outerHTML = `<div><strong>🤖 AI:</strong><br><div id="content-${loadingId}">${phanHoiDep}</div><button class="btn-copy-ai" onclick="copyVanBanAI('content-${loadingId}', this)">📋 Copy</button></div>`;
+            } else { if(loadingEl) loadingEl.outerHTML = `<div style="color:red;">⚠️ Lỗi: ${res.message}</div>`; }
+        } catch (err) { nutGui.disabled = false; nutGui.innerHTML = "Hỏi AI"; const loadingEl = document.getElementById(loadingId); if(loadingEl) loadingEl.outerHTML = `<div style="color:red;">❌ Lỗi kết nối: ${err.message}</div>`; }
         modalBody.scrollTop = modalBody.scrollHeight;
     }
-
-    // Khởi tạo khi DOM load
+    document.getElementById('aiQueryInput').addEventListener('keypress', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); guiCauHoiAI(); } });
     window.addEventListener('DOMContentLoaded', () => {
         var ketnoiScript = document.createElement('script');
         ketnoiScript.src = 'ketnoi.js?v=' + new Date().getTime();
@@ -850,8 +713,7 @@
             if (typeof applyDGConfig === 'function') applyDGConfig();
             var gsiScript = document.createElement('script');
             gsiScript.src = "https://accounts.google.com/gsi/client";
-            gsiScript.async = true;
-            gsiScript.defer = true;
+            gsiScript.async = true; gsiScript.defer = true;
             document.head.appendChild(gsiScript);
             var html2pdfScript = document.createElement('script');
             html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
@@ -862,19 +724,12 @@
             if (loggedUser) showMainUI(loggedUser);
             const tbg = document.getElementById("t-b-g");
             if (tbg) {
-                tbg.addEventListener('change', function(e) {
-                    if (e.target && e.target.classList.contains('k-hoat-t')) f_x_h();
-                });
-                tbg.addEventListener('input', function(e) {
-                    if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce();
-                });
+                tbg.addEventListener('change', function(e) { if (e.target && e.target.classList.contains('k-hoat-t')) f_x_h(); });
+                tbg.addEventListener('input', function(e) { if (e.target && e.target.classList.contains('k-hoat-t')) v_f_x_h_debounce(); });
             }
             Promise.all([f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
         };
-        ketnoiScript.onerror = function() {
-            document.querySelector('.app-title-name-up').innerText = "LỖI KẾT NỐI MÁY CHỦ";
-            alert("Không thể tải tệp cấu hình hệ thống. Vui lòng kiểm tra lại mạng!");
-        };
+        ketnoiScript.onerror = function() { alert("Không thể tải tệp cấu hình hệ thống."); };
         document.head.appendChild(ketnoiScript);
     });
 </script>
