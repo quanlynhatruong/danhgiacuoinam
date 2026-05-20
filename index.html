@@ -78,7 +78,7 @@
         .n-dong-tb { margin-top: 20px; padding: 10px 30px; background: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .n-dong-tb:hover { background: #146c43; }
 
-        #ui-canh-bao { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #842029; padding: 30px 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid #f5c2c7; display: none; flex-direction: column; align-items: center; z-index: 10010; text-align: center; border-top: 8px solid #dc3545; min-width: 350px; }
+        #ui-canh-bao { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; color: #842029; padding: 30px 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); border: 1px solid #f5c2c7; display: none; flex-direction: column; align-items: center; z-index: 10100; text-align: center; border-top: 8px solid #dc3545; min-width: 350px; }
         .n-dong-cb { margin-top: 20px; padding: 10px 30px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .n-dong-cb:hover { background: #b02a37; }
 
@@ -226,7 +226,7 @@
                     <h3 style="margin: 0 0 5px 0;">DỰ KIẾN KẾT QUẢ ĐÁNH GIÁ:</h3>
                 </div>
                 
-                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #d9534f; font-size: 18px; line-height: 1.6;">
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #0056b3; font-size: 18px; line-height: 1.6;">
                     <div id="vHT1" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 1: 0</div>
                     <div id="vHT2" style="font-size: 18px; font-weight: bold; color: #0056b3;">Tổng điểm phần 2: 0</div>
                 </div>
@@ -284,52 +284,6 @@
 </div>
 
 <script>
-// ========== HÀM TÍNH ĐIỂM NHÂN VIÊN (Giữ nguyên) ==========
-function f_x_m_chinh(dataRows) {
-    let diemP1 = 0, diemP2 = 0;
-    dataRows.forEach(r => {
-        let v_str = r.giaTri || "";
-        let v_num = r.so || 0;
-        if (r.isSelect) diemP2 += r.selectDataP;
-        if (r.quyChe) {
-            let tgClean = r.quyChe.replace(/\s/g, '');
-            let heSoMatch = tgClean.match(/^\(([\+\-]?\d+(\.\d+)?)\)$/);
-            if (heSoMatch) {
-                let heSo = parseFloat(heSoMatch[1]);
-                if (!isNaN(heSo)) diemP2 += v_num * heSo;
-            }
-        }
-        if (r.q_d && !(r.quyChe && r.quyChe.match(/^\([\+\-]?\d+(\.\d+)?\)$/))) {
-            let qd = r.q_d.replace(/\s/g, '');
-            if (qd.startsWith('(+') || qd.startsWith('(-')) {
-                let heSo = parseFloat(qd.match(/[\+\-]\d+(\.\d+)?/)[0]);
-                if (!isNaN(heSo)) diemP2 += (v_num * heSo);
-            }
-        }
-        if (r.ten.includes("thành tích") || r.quyChe.includes("Quy chế")) {
-            let m_d_1 = v_str.match(/=\s*([\d\.]+)\s*điểm/g);
-            if (m_d_1) m_d_1.forEach(m => diemP2 += parseFloat(m.replace(/[^\d\.]/g, '')) || 0);
-        }
-        if (r.isDongBo || r.ten.includes("tháng")) {
-            if (v_str.includes("xuất sắc")) diemP1 = 100 + v_num;
-            else if (v_str.includes("tốt")) diemP1 = 80 + v_num;
-            else if (v_str.includes("hoàn thành")) diemP1 = 60 + v_num;
-            else diemP1 = v_num;
-        }
-    });
-    let tong = diemP1 + diemP2;
-    let k_t = "CHƯA HOÀN THÀNH NHIỆM VỤ";
-    let k_m = "#dc3545";
-    if (tong >= 90) { k_t = "HOÀN THÀNH XUẤT SẮC NHIỆM VỤ"; k_m = "#28a745"; }
-    else if (tong >= 70) { k_t = "HOÀN THÀNH TỐT NHIỆM VỤ"; k_m = "#007bff"; }
-    else if (tong >= 50) { k_t = "HOÀN THÀNH NHIỆM VỤ"; k_m = "#fd7e14"; }
-    return {
-        diemP1: diemP1, diemP2: diemP2,
-        tongDiem: tong,
-        k_t: k_t, k_m: k_m
-    };
-}
-
 // ========== CÁC BIẾN & HÀM KHỞI TẠO ==========
 let v_che_do_xem_admin = false;
 let v_che_do_khach = false; 
@@ -386,7 +340,12 @@ function khoiDongHeThong() {
         });
     }
     
-    Promise.all([f_x_k('danhgiaGV.html'), f_x_k('tieuchigv.html'), f_x_k('tieuchinv.html')]).catch(e => console.log(e));
+    Promise.all([
+        f_x_k('danhgiaGV.html'), 
+        f_x_k('danhgiaNV.html'), 
+        f_x_k('tieuchigv.html'), 
+        f_x_k('tieuchinv.html')
+    ]).catch(e => console.log(e));
 }
 
 function f_x_k(url) {
@@ -616,7 +575,6 @@ async function f_x_d() {
             
             if (typeof f_x_h === "function") f_x_h();
         } else if (t_k_khac.status === 'success') {
-            // Đã cập nhật logic lấy chức vụ thực tế từ cột D (y_role)
             let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN");
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Bạn đã chọn sai đối tượng đánh giá!<br>Chức vụ của bạn trên hệ thống là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
             f_x_j(false);
