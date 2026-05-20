@@ -642,45 +642,45 @@
     }
 
     function f_x_h() {
-        const m_d = document.querySelectorAll("#t-b-g tr");
-        const c_n = document.getElementById("oChonNhom").value;
-        let mangDuLieuGom = [];
-        m_d.forEach(d_k => {
-            let c_x_1 = d_k.querySelector(".m-cot-mot");
-            let c_x_2 = d_k.querySelector(".o-n-bang");
-            if (c_x_1 && c_x_2) {
-                let e_s = d_k.querySelector("select.o-n-bang");
-                mangDuLieuGom.push({
-                    ten: c_x_1.innerText.trim().toLowerCase(),
-                    giaTri: c_x_2.value.toLowerCase(),
-                    so: parseFloat(c_x_2.value.replace(/[^\d\.\-]/g, '')) || 0,
-                    isSelect: e_s !== null,
-                    selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
-                    isDongBo: d_k.querySelector(".h-dong-bo") !== null,
-                    quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
-                    q_d: c_x_1.getAttribute("data-qd"),
-                    g_xs: c_x_1.getAttribute("data-xs"),
-                    g_htt: c_x_1.getAttribute("data-htt"),
-                    g_ht: c_x_1.getAttribute("data-ht"),
-                    g_cht: c_x_1.getAttribute("data-cht")
-                });
-            }
-        });
-        let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
-        if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
-            k_q = f_x_l_chinh(mangDuLieuGom);
-        } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
-            k_q = f_x_m_chinh(mangDuLieuGom);
+    const m_d = document.querySelectorAll("#t-b-g tr");
+    const c_n = document.getElementById("oChonNhom").value;
+    let mangDuLieuGom = [];
+    m_d.forEach(d_k => {
+        let c_x_1 = d_k.querySelector(".m-cot-mot");
+        let c_x_2 = d_k.querySelector(".o-n-bang");
+        if (c_x_1 && c_x_2) {
+            let e_s = d_k.querySelector("select.o-n-bang");
+            mangDuLieuGom.push({
+                ten: c_x_1.innerText.trim().toLowerCase(),
+                giaTri: c_x_2.value.toLowerCase(),
+                so: parseFloat(c_x_2.value.replace(/[^\d\.\-]/g, '')) || 0,
+                isSelect: e_s !== null,
+                selectDataP: e_s ? parseFloat(e_s.options[e_s.selectedIndex].getAttribute("data-p")) || 0 : 0,
+                isDongBo: d_k.querySelector(".h-dong-bo") !== null,
+                quyChe: d_k.cells[2] ? d_k.cells[2].innerText.trim() : '',
+                q_d: c_x_1.getAttribute("data-qd"),
+                g_xs: c_x_1.getAttribute("data-xs"),
+                g_htt: c_x_1.getAttribute("data-htt"),
+                g_ht: c_x_1.getAttribute("data-ht"),
+                g_cht: c_x_1.getAttribute("data-cht")
+            });
         }
-        v_l_e = k_q.k_t;
-        v_l_f = k_q.tongDiem;
-        document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
-        document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
-        document.getElementById("vHT3").innerHTML = `
-            <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
-            <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
-        `;
+    });
+    let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
+    if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
+        k_q = f_x_l_chinh(mangDuLieuGom);
+    } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
+        k_q = f_x_m_chinh(mangDuLieuGom);
     }
+    v_l_e = k_q.k_t;
+    v_l_f = k_q.tongDiem;
+    document.getElementById("vHT1").innerText = `Tổng điểm phần 1: ${k_q.diemP1}`;
+    document.getElementById("vHT2").innerText = `Tổng điểm phần 2: ${k_q.diemP2}`;
+    document.getElementById("vHT3").innerHTML = `
+        <div style="font-size: 20px; font-weight: bold; color: ${k_q.k_m}; text-transform: uppercase; white-space: nowrap;">${k_q.k_t}</div>
+        <div style="font-size: 18px; color: #b30000; font-weight: bold; margin-top: 5px;">Tổng điểm năm học: ${k_q.tongDiem}</div>
+    `;
+}
 
     async function f_x_i() {
         const m_d = document.querySelectorAll("#t-b-g tr"), m_k = [];
