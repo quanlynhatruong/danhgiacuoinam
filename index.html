@@ -438,8 +438,12 @@ async function f_x_load_guest_template(p_n) {
 
         if (danhSachVienChucAdmin.length > 0) {
             for (let vc of danhSachVienChucAdmin) {
+                // Fix: Đồng bộ luồng nhận diện khách để khớp với thay đổi
                 let roleStr = (vc.role || "").toLowerCase();
-                let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
+                let role_vp = roleStr.includes('vp') || roleStr.includes('nhân viên') || roleStr.includes('nhan vien');
+                let isGv = !role_vp && (roleStr.includes('giáo viên') || roleStr.includes('giao vien') || roleStr.includes('tổ trưởng') || roleStr.includes('to truong') || roleStr.includes('tổ phó') || roleStr.includes('to pho') || roleStr.includes('tổng phụ trách') || roleStr.includes('tong phu trach'));
+                let isNv = !isGv;
+                
                 if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && !isNv)) {
                     repId = vc.id;
                     break;
@@ -643,10 +647,11 @@ async function f_x_admin_chon_user() {
     const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
     const selectedName = selectedOption.getAttribute('data-name');
 
+    // Fix: Đồng bộ luồng tra cứu admin để khớp với thay đổi
     let nhomXacDinh = 'giaovien';
-    if (selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien')) {
-        nhomXacDinh = 'nhanvien';
-    }
+    let role_vp = selectedRoleStr.includes('vp') || selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien');
+    let is_gv = !role_vp && (selectedRoleStr.includes('giáo viên') || selectedRoleStr.includes('giao vien') || selectedRoleStr.includes('tổ trưởng') || selectedRoleStr.includes('to truong') || selectedRoleStr.includes('tổ phó') || selectedRoleStr.includes('to pho') || selectedRoleStr.includes('tổng phụ trách') || selectedRoleStr.includes('tong phu trach'));
+    if (!is_gv) { nhomXacDinh = 'nhanvien'; }
 
     document.getElementById("theHienChinh").innerText = selectedName;
     document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
