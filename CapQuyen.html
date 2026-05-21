@@ -7,25 +7,26 @@
     // 1. Khởi tạo và nhúng CSS riêng biệt cho module
     const style = document.createElement('style');
     style.textContent = `
-        #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 15px 20px; border-radius: 5px; box-sizing: border-box; }
+        /* Bỏ padding top để thu hẹp tối đa khoảng cách với tiêu đề hệ thống */
+        #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
         
-        /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) ĐÃ ĐƯỢC TỐI ƯU KHOẢNG CÁCH */
+        /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) */
         .cq-header-sticky { 
             position: sticky; 
-            top: 74px; /* Neo khít vào mép tiêu đề hệ thống mẹ */
+            top: 77px; /* Sẽ được JS tự động tính toán chính xác để chống rung/giật (jitter) */
             background: #fff; 
             z-index: 990; 
             padding-top: 5px;
-            padding-bottom: 10px; /* Khoảng cách từ nút đến dòng kẻ */
-            margin-bottom: 10px;  /* Khoảng cách từ dòng kẻ đến bảng */
-            border-bottom: 2px solid var(--mau-c); /* Chuyển dòng kẻ xuống vị trí này */
+            padding-bottom: 10px; 
+            margin-bottom: 10px;  
+            border-bottom: 2px solid red; /* Thêm dòng kẻ đỏ theo nét vẽ */
         }
         
         .cq-tieu-de { 
             color: var(--mau-c); 
             text-transform: uppercase; 
             text-align: center; 
-            margin: 0 0 10px 0; /* Thu hẹp tối đa khoảng cách với cụm nút */
+            margin: 0 0 10px 0; 
             padding: 0; 
             font-size: 20px; 
             font-weight: bold;
@@ -85,6 +86,31 @@
         </div>
     `;
     document.getElementById('main-ui').insertAdjacentHTML('beforeend', capQuyenHTML);
+
+    // THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN XUYÊN TỆP (Lõi xử lý chống rung giật và xóa kẻ xanh)
+    setInterval(() => {
+        const ui = document.getElementById('cap-quyen-ui');
+        const kDau = document.querySelector('.k-dau');
+        
+        if (ui && ui.style.display === 'block') {
+            if(kDau) {
+                kDau.style.borderBottom = 'none'; // Xóa dòng kẻ xanh của hệ thống mẹ
+                kDau.style.paddingBottom = '0px'; // Thu hẹp tối đa vùng đệm
+            }
+            const sysHeader = document.querySelector('.k-header-sticky');
+            const cqHeader = document.querySelector('.cq-header-sticky');
+            if (sysHeader && cqHeader) {
+                // Tự động neo cụm chức năng dính chặt vào đáy của thanh hệ thống
+                cqHeader.style.top = sysHeader.offsetHeight + 'px'; 
+            }
+        } else {
+            if(kDau) {
+                // Trả lại nguyên trạng cho hệ thống đánh giá khi đóng Quản lý quyền
+                kDau.style.borderBottom = ''; 
+                kDau.style.paddingBottom = '';
+            }
+        }
+    }, 100); // Tần số quyét cực thấp không ảnh hưởng hiệu suất
 })();
 
 // 3. Hàm logic xử lý dữ liệu và giao tiếp máy chủ
