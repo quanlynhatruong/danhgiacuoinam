@@ -85,13 +85,17 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
     let opts = ["Giáo viên cấp 1","Giáo viên cấp 2", "Tổ phó cấp 1", "Tổ phó cấp 2","Tổ trưởng cấp 1", "Tổ trưởng cấp 2", "Tổ trưởng VP", "Tổ phó VP", "Nhân viên", "Tổng phụ trách cấp 1", "Tổng phụ trách cấp 2", "Admin", "Admin VIP"];
     let selHTML = `<select class="cq-quyen">`;
     let found = false;
+    
+    // BẢN VÁ: Chuẩn hóa biến quyen để tránh lỗi TypeError ngoại lệ
+    let quyenChuan = quyen ? quyen.toString().trim() : ""; 
+    
     opts.forEach(opt => {
-        let sel = (opt.toLowerCase() === quyen.toLowerCase()) ? "selected" : "";
+        let sel = (opt.toLowerCase() === quyenChuan.toLowerCase()) ? "selected" : "";
         if (sel) found = true;
         selHTML += `<option value="${opt}" ${sel}>${opt}</option>`;
     });
-    if (!found && quyen !== "") {
-        selHTML += `<option value="${quyen}" selected>${quyen}</option>`;
+    if (!found && quyenChuan !== "") {
+        selHTML += `<option value="${quyenChuan}" selected>${quyenChuan}</option>`;
     }
     selHTML += `</select>`;
 
@@ -110,7 +114,7 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
 function cq_ThemDongMoi() {
     const tbody = document.getElementById('tbody-quyen');
     // Chèn dòng mới lên trên cùng của tbody (vị trí đầu bảng HTML)
-    tbody.insertAdjacentHTML('afterbegin', cq_TaoDHTMLDong(0, "", "", "", "Giáo viên"));
+    tbody.insertAdjacentHTML('afterbegin', cq_TaoDHTMLDong(0, "", "", "", "Giáo viên cấp 1"));
     cq_CapNhatSTT();
 }
 
