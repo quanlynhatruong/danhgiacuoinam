@@ -86,7 +86,6 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
     let selHTML = `<select class="cq-quyen">`;
     let found = false;
     
-    // Chuẩn hóa biến quyen để tránh lỗi TypeError
     let quyenChuan = quyen ? quyen.toString().trim() : ""; 
     
     opts.forEach(opt => {
@@ -113,7 +112,6 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
 
 function cq_ThemDongMoi() {
     const tbody = document.getElementById('tbody-quyen');
-    // Chèn dòng mới lên trên cùng của tbody (vị trí đầu bảng HTML)
     tbody.insertAdjacentHTML('afterbegin', cq_TaoDHTMLDong(0, "", "", "", "Giáo viên cấp 1"));
     cq_CapNhatSTT();
 }
@@ -132,32 +130,31 @@ function cq_CapNhatSTT() {
     });
 }
 
-// Hàm hỗ trợ: Gọi popup xanh thành công của hệ thống để thay thế popup đỏ
+// Hàm điều hướng thông báo thành công sang hộp thoại màu xanh chuẩn của hệ thống
 function cq_ThongBaoThanhCong(noiDung) {
-    let hopThongBao = document.getElementById("o-thong-bao");
+    const hopThongBao = document.getElementById("o-thong-bao");
     if (hopThongBao) {
-        let divs = hopThongBao.querySelectorAll("div");
-        let nutXacNhan = hopThongBao.querySelector("button");
+        const divs = hopThongBao.getElementsByTagName("div");
+        const nutXacNhan = hopThongBao.getElementsByTagName("button")[0];
         
-        // Lưu lại nội dung gốc của hệ thống
-        let tieuDeGoc = divs[0].innerHTML;
-        let noiDungGoc = divs[1].innerHTML;
-        let hamDongGoc = nutXacNhan.onclick;
-        
-        // Đổi nội dung thành công cho chức năng Cấp quyền
-        divs[0].innerHTML = "CẬP NHẬT THÀNH CÔNG";
-        divs[1].innerHTML = noiDung;
-        hopThongBao.style.display = "flex";
-        
-        // Trả lại nguyên trạng khi đóng
-        nutXacNhan.onclick = function() {
-            hopThongBao.style.display = "none";
-            divs[0].innerHTML = tieuDeGoc;
-            divs[1].innerHTML = noiDungGoc;
-            nutXacNhan.onclick = hamDongGoc;
-        };
+        if (divs.length >= 2 && nutXacNhan) {
+            const tieuDeGoc = divs[0].innerHTML;
+            const noiDungGoc = divs[1].innerHTML;
+            const hamDongGoc = nutXacNhan.onclick;
+            
+            divs[0].innerHTML = "CẬP NHẬT THÀNH CÔNG";
+            divs[1].innerHTML = noiDung;
+            hopThongBao.style.display = "flex";
+            
+            nutXacNhan.onclick = function() {
+                hopThongBao.style.display = "none";
+                divs[0].innerHTML = tieuDeGoc;
+                divs[1].innerHTML = noiDungGoc;
+                nutXacNhan.onclick = hamDongGoc;
+            };
+        }
     } else {
-        alert(noiDung); // Thông báo dự phòng nếu giao diện chưa tải
+        alert(noiDung);
     }
 }
 
@@ -171,7 +168,6 @@ async function cq_LuuCapNhat() {
         let hoten = tr.querySelector('.cq-hoten').value.trim();
         let quyen = tr.querySelector('.cq-quyen').value.trim();
         
-        // Bỏ qua dòng trắng hoàn toàn
         if (id !== "" || email !== "") {
             m_d.push({ id_sheet: id, email: email, ho_ten: hoten, quyen: quyen });
         }
@@ -186,12 +182,10 @@ async function cq_LuuCapNhat() {
             body: JSON.stringify({ action: 'luu_quyen', data: m_d })
         });
         
-        // Timeout chờ tiến trình GAS ghi đè do tính chất no-cors
         setTimeout(() => {
             document.getElementById("o-luu-overlay").style.display = "none";
-            // Sử dụng hàm thông báo thành công thay vì hàm thông báo lỗi mặc định
             cq_ThongBaoThanhCong("Hệ thống đã cập nhật danh sách Quyền Truy Cập thành công!");
-            cq_TaiDuLieu(); // Load lại từ máy chủ cho đồng bộ
+            cq_TaiDuLieu(); 
         }, 1500);
         
     } catch (err) {
