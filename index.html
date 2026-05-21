@@ -161,7 +161,7 @@
 
     <div class="k-ngoai" id="main-ui">
         
-        <?!= include('ketqua'); ?>
+        <?!= include('KetQua'); ?>
 
         <div id="vung-danh-gia-ui" style="display: block; width: 100%;">
             <div class="k-header-sticky">
@@ -258,7 +258,17 @@
     <button class="n-dong-cb" onclick="dongCanhBaoUI()">Đóng</button>
 </div>
 
-<script src="ketnoi.js"></script>
+<script>
+    /* LƯU Ý CHO P. HIỆU TRƯỞNG: Do GAS không cho phép dùng đuôi .js cục bộ trên giao diện, 
+       đồng chí vui lòng đảm bảo file "ketnoi.js" trên App Script thực chất được tạo
+       dưới dạng file HTML (tên là ketnoi.html) và bọc mã bên trong thẻ <script>...</script> */
+    <?!= include('ketnoi'); ?>
+    <?!= include('danhgiaGV'); ?>
+    <?!= include('danhgiaNV'); ?>
+</script>
+
+<?!= include('CapQuyen'); ?>
+
 <script>
 let v_che_do_xem_admin = false;
 let v_che_do_khach = false; 
@@ -272,25 +282,19 @@ function hienThiNutGoogle() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    var ketnoiScript = document.createElement('script');
-    ketnoiScript.src = 'ketnoi.js?v=' + new Date().getTime(); 
-    ketnoiScript.onload = function() {
-        if (typeof applyDGConfig === 'function') applyDGConfig();
-        var gsiScript = document.createElement('script');
-        gsiScript.src = "https://accounts.google.com/gsi/client";
-        gsiScript.async = true; gsiScript.defer = true;
-        document.head.appendChild(gsiScript);
-        var html2pdfScript = document.createElement('script');
-        html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-        document.head.appendChild(html2pdfScript);
-        khoiDongHeThong();
-    };
-    ketnoiScript.onerror = function() {
-        let textUp = document.querySelector('.app-title-name-up');
-        if(textUp) textUp.innerText = "LỖI KẾT NỐI MÁY CHỦ";
-        alert("Hệ thống bảo mật từ chối nạp cấu hình. Vui lòng kiểm tra lại đường dẫn tệp ketnoi.js!");
-    };
-    document.head.appendChild(ketnoiScript);
+    // Đã thay thế logic tạo thẻ DOM ảo nguy hiểm bằng lệnh chạy khởi tạo trực tiếp
+    if (typeof applyDGConfig === 'function') applyDGConfig();
+    
+    var gsiScript = document.createElement('script');
+    gsiScript.src = "https://accounts.google.com/gsi/client";
+    gsiScript.async = true; gsiScript.defer = true;
+    document.head.appendChild(gsiScript);
+    
+    var html2pdfScript = document.createElement('script');
+    html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    document.head.appendChild(html2pdfScript);
+    
+    khoiDongHeThong();
 });
 
 function khoiDongHeThong() {
@@ -319,23 +323,7 @@ function khoiDongHeThong() {
             }
         });
     }
-    
-   Promise.all([
-        f_x_k('danhgiaGVC1.html'),
-        f_x_k('danhgiaGVC2.html'),
-        f_x_k('danhgiaNV.html'), 
-        f_x_k('tieuchinv.html'),
-        f_x_k('CapQuyen.html') 
-    ]).catch(e => console.log(e));
-}
-
-function f_x_k(url) {
-    return fetch(url).then(r => r.text()).then(txt => {
-        let script = document.createElement('script');
-        let cleanTxt = txt.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '');
-        script.textContent = cleanTxt;
-        document.body.appendChild(script);
-    }).catch(() => {});
+    // (Đã loại bỏ cơ chế fetch() các module HTML do không tương thích với máy chủ GAS)
 }
 
 let hanhDongSauThongBao = null;
@@ -682,7 +670,7 @@ async function f_x_d() {
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
     } catch (err) { 
-        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Cấu hình module menudoc.html chưa tải. Vui lòng kiểm tra file Mã.gs. Lỗi gốc: ${err.message}</span>`, f_x_logout); 
+        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Hệ thống đang tải dữ liệu. Vui lòng làm mới trang. Lỗi gốc: ${err.message}</span>`, f_x_logout); 
     }
     f_x_j(false);
 }
