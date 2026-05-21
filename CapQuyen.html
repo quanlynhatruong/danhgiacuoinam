@@ -7,26 +7,50 @@
     // 1. Khởi tạo và nhúng CSS riêng biệt cho module
     const style = document.createElement('style');
     style.textContent = `
-        #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 20px; border-radius: 5px; box-sizing: border-box; }
+        #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 15px 20px; border-radius: 5px; box-sizing: border-box; }
         
-        /* Cụm đầu trang bám dính (Sticky Header) */
-        .cq-header-sticky { position: sticky; top: 77px; background: white; z-index: 990; padding-bottom: 10px; margin-bottom: 5px; }
-        .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin-top: 0; margin-bottom: 10px; padding-bottom: 0; font-size: 20px; }
-        .cq-hanh-dong { display: flex; justify-content: space-between; align-items: center; }
+        /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) ĐÃ ĐƯỢC TỐI ƯU KHOẢNG CÁCH */
+        .cq-header-sticky { 
+            position: sticky; 
+            top: 74px; /* Neo khít vào mép tiêu đề hệ thống mẹ */
+            background: #fff; 
+            z-index: 990; 
+            padding-top: 5px;
+            padding-bottom: 10px; /* Khoảng cách từ nút đến dòng kẻ */
+            margin-bottom: 10px;  /* Khoảng cách từ dòng kẻ đến bảng */
+            border-bottom: 2px solid var(--mau-c); /* Chuyển dòng kẻ xuống vị trí này */
+        }
         
-        .table-quyen { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .table-quyen th, .table-quyen td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
+        .cq-tieu-de { 
+            color: var(--mau-c); 
+            text-transform: uppercase; 
+            text-align: center; 
+            margin: 0 0 10px 0; /* Thu hẹp tối đa khoảng cách với cụm nút */
+            padding: 0; 
+            font-size: 20px; 
+            font-weight: bold;
+        }
+        
+        .cq-hanh-dong { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        /* CẤU TRÚC BẢNG VÀ NÚT BẤM */
+        .table-quyen { width: 100%; border-collapse: collapse; margin-top: 0; }
+        .table-quyen th, .table-quyen td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: center; vertical-align: middle; }
         .table-quyen th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; }
-        .table-quyen input, .table-quyen select { width: 100%; border: 1px solid #ddd; padding: 8px; box-sizing: border-box; font-family: inherit; font-size: 15px; border-radius: 4px; transition: border-color 0.3s; }
+        .table-quyen input, .table-quyen select { width: 100%; border: 1px solid #ddd; padding: 7px; box-sizing: border-box; font-family: inherit; font-size: 15px; border-radius: 4px; transition: border-color 0.3s; }
         .table-quyen input:focus, .table-quyen select:focus { border-color: var(--mau-c); outline: none; }
         
         .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .btn-xoa-dong:hover { background: #c82333; }
         
-        .btn-them-moi { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
+        .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
         .btn-them-moi:hover { background: #218838; }
         
-        .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0; }
+        .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
         .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
     `;
     document.head.appendChild(style);
@@ -224,7 +248,6 @@ async function cq_LuuCapNhat() {
         }
     }
 
-    // Chặn lưu nếu không có sự khác biệt
     if (!isChanged) {
         hienThiThongBaoUI("Dữ liệu không có sự thay đổi nào để lưu!");
         return;
