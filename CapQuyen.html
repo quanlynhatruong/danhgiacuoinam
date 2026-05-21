@@ -1,0 +1,168 @@
+<script>
+/**
+ * MODULE: QUẢN LÝ QUYỀN TRUY CẬP
+ * Thiết kế và phát triển: Hoàng Ngọc Lâm
+ */
+(function() {
+    // 1. Khởi tạo và nhúng CSS riêng biệt cho module
+    const style = document.createElement('style');
+    style.textContent = `
+        #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 20px; border-radius: 5px; box-sizing: border-box; }
+        .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; border-bottom: 2px solid var(--mau-c); padding-bottom: 10px; margin-top: 0; font-size: 20px; }
+        .table-quyen { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table-quyen th, .table-quyen td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
+        .table-quyen th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; }
+        .table-quyen input, .table-quyen select { width: 100%; border: 1px solid #ddd; padding: 8px; box-sizing: border-box; font-family: inherit; font-size: 15px; border-radius: 4px; }
+        .table-quyen input:focus, .table-quyen select:focus { border-color: var(--mau-c); outline: none; }
+        .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .btn-xoa-dong:hover { background: #c82333; }
+        .btn-them-moi { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; font-size: 15px; transition: 0.2s; }
+        .btn-them-moi:hover { background: #218838; }
+        .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
+        .vung-nut-quyen { display: flex; justify-content: center; margin-top: 25px; }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Nhúng bộ khung HTML vào vùng nội dung chính (main-ui)
+    const capQuyenHTML = `
+        <div id="cap-quyen-ui">
+            <h3 class="cq-tieu-de">QUẢN LÝ QUYỀN TRUY CẬP</h3>
+            <button class="btn-them-moi" onclick="cq_ThemDongMoi()">+ Thêm mới</button>
+            <div style="overflow-x: auto;">
+                <table class="table-quyen">
+                    <thead>
+                        <tr>
+                            <th width="8%">Sửa</th>
+                            <th width="7%">STT</th>
+                            <th width="20%">Tên sheet (ID)</th>
+                            <th width="30%">Địa chỉ hộp thư (Email)</th>
+                            <th width="20%">Họ và tên</th>
+                            <th width="15%">Quyền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-quyen">
+                        </tbody>
+                </table>
+            </div>
+            <div class="vung-nut-quyen">
+                <button class="btn-cap-nhat" onclick="cq_LuuCapNhat()">CẬP NHẬT (LƯU THAY ĐỔI)</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('main-ui').insertAdjacentHTML('beforeend', capQuyenHTML);
+})();
+
+// 3. Hàm logic xử lý dữ liệu và giao tiếp máy chủ
+let cq_DuLieuGoc = [];
+
+async function cq_TaiDuLieu() {
+    f_x_j(true); 
+    try {
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        const response = await fetchAPI(z_y_a + "?z_p_a=get_quyen");
+        if (response.status === 'success') {
+            cq_DuLieuGoc = response.data;
+            cq_HienThiBang();
+        } else {
+            hienThiThongBaoUI("Lỗi truy xuất hệ thống phân quyền: " + response.message);
+        }
+    } catch (err) {
+        hienThiThongBaoUI("Gián đoạn kết nối khi lấy dữ liệu danh sách quyền.");
+    }
+    f_x_j(false);
+}
+
+function cq_HienThiBang() {
+    const tbody = document.getElementById('tbody-quyen');
+    tbody.innerHTML = '';
+    cq_DuLieuGoc.forEach((item, index) => {
+        tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
+    });
+}
+
+function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
+    let opts = ["Giáo viên", "Tổ phó", "Tổ trưởng", "Tổ trưởng VP", "Tổ phó VP", "Nhân viên", "Tổng phụ trách", "Admin", "Admin VIP"];
+    let selHTML = `<select class="cq-quyen">`;
+    let found = false;
+    opts.forEach(opt => {
+        let sel = (opt.toLowerCase() === quyen.toLowerCase()) ? "selected" : "";
+        if (sel) found = true;
+        selHTML += `<option value="${opt}" ${sel}>${opt}</option>`;
+    });
+    if (!found && quyen !== "") {
+        selHTML += `<option value="${quyen}" selected>${quyen}</option>`;
+    }
+    selHTML += `</select>`;
+
+    return `
+        <tr>
+            <td><button class="btn-xoa-dong" onclick="cq_XoaDong(this)">Xóa</button></td>
+            <td class="cq-stt">${index + 1}</td>
+            <td><input type="text" class="cq-id" value="${id_sheet}"></td>
+            <td><input type="text" class="cq-email" value="${email}"></td>
+            <td><input type="text" class="cq-hoten" value="${ho_ten}"></td>
+            <td>${selHTML}</td>
+        </tr>
+    `;
+}
+
+function cq_ThemDongMoi() {
+    const tbody = document.getElementById('tbody-quyen');
+    const stt = tbody.children.length + 1;
+    tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(stt - 1, "", "", "", "Giáo viên"));
+    cq_CapNhatSTT();
+}
+
+function cq_XoaDong(btn) {
+    if (confirm("Đồng chí có chắc chắn muốn xóa quyền truy cập của nhân sự này khỏi CSDL?")) {
+        btn.closest('tr').remove();
+        cq_CapNhatSTT();
+    }
+}
+
+function cq_CapNhatSTT() {
+    const tbody = document.getElementById('tbody-quyen');
+    Array.from(tbody.children).forEach((tr, index) => {
+        tr.querySelector('.cq-stt').innerText = index + 1;
+    });
+}
+
+async function cq_LuuCapNhat() {
+    const tbody = document.getElementById('tbody-quyen');
+    let m_d = [];
+    
+    Array.from(tbody.children).forEach(tr => {
+        let id = tr.querySelector('.cq-id').value.trim();
+        let email = tr.querySelector('.cq-email').value.trim();
+        let hoten = tr.querySelector('.cq-hoten').value.trim();
+        let quyen = tr.querySelector('.cq-quyen').value.trim();
+        
+        // Bỏ qua dòng trắng hoàn toàn
+        if (id !== "" || email !== "") {
+            m_d.push({ id_sheet: id, email: email, ho_ten: hoten, quyen: quyen });
+        }
+    });
+
+    document.getElementById("o-luu-overlay").style.display = "flex";
+    try {
+        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        const response = await fetch(z_y_a, {
+            method: 'POST',
+            mode: 'no-cors', 
+            body: JSON.stringify({ action: 'luu_quyen', data: m_d })
+        });
+        
+        // Timeout chờ tiến trình GAS ghi đè do tính chất no-cors
+        setTimeout(() => {
+            document.getElementById("o-luu-overlay").style.display = "none";
+            hienThiThongBaoUI("Hệ thống đã cập nhật danh sách Quyền Truy Cập thành công!");
+            cq_TaiDuLieu(); // Load lại từ máy chủ cho đồng bộ
+        }, 1500);
+        
+    } catch (err) {
+        document.getElementById("o-luu-overlay").style.display = "none";
+        hienThiThongBaoUI("Đứt cáp kết nối khi ghi dữ liệu. Vui lòng thử lại.");
+    }
+}
+</script>
