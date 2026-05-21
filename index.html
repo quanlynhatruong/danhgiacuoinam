@@ -407,9 +407,12 @@ function showMainUI(d_danh) {
 
 function v_hien_thi_menu_admin(hienThi) {
     let kieu = hienThi ? "flex" : "none";
-    if (document.getElementById("menu-quan-ly-quyen")) document.getElementById("menu-quan-ly-quyen").style.display = kieu;
-    if (document.getElementById("menu-tieu-chi-gv")) document.getElementById("menu-tieu-chi-gv").style.display = kieu;
-    if (document.getElementById("menu-tieu-chi-nv")) document.getElementById("menu-tieu-chi-nv").style.display = kieu;
+    let mn1 = document.getElementById("menu-quan-ly-quyen");
+    let mn2 = document.getElementById("menu-tieu-chi-gv");
+    let mn3 = document.getElementById("menu-tieu-chi-nv");
+    if (mn1) mn1.style.display = kieu;
+    if (mn2) mn2.style.display = kieu;
+    if (mn3) mn3.style.display = kieu;
 }
 
 const fetchAPI = async (url) => {
@@ -476,10 +479,13 @@ async function f_x_vao_khach() {
 
     if (document.getElementById('khung-xac-thuc')) document.getElementById('khung-xac-thuc').style.display = 'none';
     if (document.getElementById('bo-cuc-he-thong')) document.getElementById('bo-cuc-he-thong').style.display = 'flex';
-    if (document.getElementById('theHienChinh')) document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
+    
+    let theHien = document.getElementById('theHienChinh');
+    if (theHien) theHien.innerText = "KHÁCH THAM QUAN";
     
     const p_n = objNhom.value;
-    if (document.getElementById('hienThiNhom')) document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
+    let hienNhom = document.getElementById('hienThiNhom');
+    if (hienNhom) hienNhom.innerText = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
     
     if (document.getElementById("vungThongTin")) document.getElementById("vungThongTin").style.display = "flex";
     if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
@@ -676,7 +682,7 @@ async function f_x_d() {
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
     } catch (err) { 
-        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Cấu hình module menudoc.html chưa tải. Vui lòng nạp đúng vào trang. Lỗi gốc: ${err.message}</span>`, f_x_logout); 
+        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Cấu hình module menudoc.html chưa tải. Vui lòng kiểm tra file Mã.gs. Lỗi gốc: ${err.message}</span>`, f_x_logout); 
     }
     f_x_j(false);
 }
