@@ -121,10 +121,10 @@
             
             <select id="oChonNhom" onchange="hienThiNutGoogle()" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
                 <option value="" disabled selected>-- Chọn chức vụ của bạn --</option>
-                <option value="giaovien">TỔ TRƯỞNG</option>
-                <option value="giaovien">TỔ PHÓ</option>
-                <option value="giaovien">TỔNG PHỤ TRÁCH</option>
-                <option value="giaovien">GIÁO VIÊN</option>
+                <option value="giaovienc1">TỔ TRƯỞNG</option>
+                <option value="giaovienc1">TỔ PHÓ</option>
+                <option value="giaovienc1">TỔNG PHỤ TRÁCH</option>
+                <option value="giaovienc1">GIÁO VIÊN</option>
                 <option value="nhanvien">TỔ TRƯỞNG VP</option>
                 <option value="nhanvien">TỔ PHÓ VP</option>
                 <option value="nhanvien">NHÂN VIÊN</option>
@@ -442,7 +442,7 @@ async function f_x_load_guest_template(p_n) {
                 let isGv = roleStr.includes('giáo viên') || roleStr.includes('giao vien') || roleStr.includes('tổ trưởng') || roleStr.includes('to truong') || roleStr.includes('tổ phó') || roleStr.includes('to pho') || roleStr.includes('tổng phụ trách') || roleStr.includes('tong phu trach');
                 let isNv = roleStr.includes('nhân viên') || roleStr.includes('nhan vien') || roleStr.includes('vp') || roleStr.includes('kế toán') || roleStr.includes('ke toan') || roleStr.includes('y tế') || roleStr.includes('y te') || roleStr.includes('thư viện') || roleStr.includes('thu vien') || roleStr.includes('thiết bị') || roleStr.includes('thiet bi') || roleStr.includes('bảo vệ') || roleStr.includes('bao ve') || roleStr.includes('văn thư') || roleStr.includes('van thu');
                 
-                if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovien' && isGv)) {
+                if ((p_n === 'nhanvien' && isNv) || (p_n === 'giaovienc1' && isGv)) {
                     repId = vc.id;
                     break;
                 }
@@ -543,7 +543,7 @@ async function f_x_d() {
     
     f_x_j(true);
     try {
-        const p_n_khac = (p_n === 'giaovien') ? 'nhanvien' : 'giaovien';
+        const p_n_khac = (p_n === 'giaovienc1') ? 'nhanvien' : 'giaovienc1';
         
         const [t_k, t_k_khac] = await Promise.all([
             fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}&z_p_d=${encodeURIComponent(p_chuc_vu)}`),
@@ -590,7 +590,7 @@ async function f_x_d() {
             return;
             
         } else if (t_k_khac.status === 'success') {
-            let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac === 'giaovien') ? "GIÁO VIÊN" : "NHÂN VIÊN");
+            let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac === 'giaovienc1') ? "GIÁO VIÊN" : "NHÂN VIÊN");
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai đối tượng đánh giá!<br>Chức vụ của đồng chí trên hệ thống là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
             f_x_j(false);
             return;
@@ -658,7 +658,7 @@ async function f_x_admin_chon_user() {
     const selectedRoleStr = selectedOption.getAttribute('data-role').toLowerCase();
     const selectedName = selectedOption.getAttribute('data-name');
 
-    let nhomXacDinh = 'giaovien';
+    let nhomXacDinh = 'giaovienc1';
     let isGv = selectedRoleStr.includes('giáo viên') || selectedRoleStr.includes('giao vien') || selectedRoleStr.includes('tổ trưởng') || selectedRoleStr.includes('to truong') || selectedRoleStr.includes('tổ phó') || selectedRoleStr.includes('to pho') || selectedRoleStr.includes('tổng phụ trách') || selectedRoleStr.includes('tong phu trach');
     let isNv = selectedRoleStr.includes('nhân viên') || selectedRoleStr.includes('nhan vien') || selectedRoleStr.includes('vp') || selectedRoleStr.includes('kế toán') || selectedRoleStr.includes('ke toan') || selectedRoleStr.includes('y tế') || selectedRoleStr.includes('y te') || selectedRoleStr.includes('thư viện') || selectedRoleStr.includes('thu vien') || selectedRoleStr.includes('thiết bị') || selectedRoleStr.includes('thiet bi') || selectedRoleStr.includes('bảo vệ') || selectedRoleStr.includes('bao ve') || selectedRoleStr.includes('văn thư') || selectedRoleStr.includes('van thu');
     
@@ -933,7 +933,7 @@ function f_x_h() {
 
     let k_q = { diemP1: 0, diemP2: 0, tongDiem: 0, k_t: "CHƯA HOÀN THÀNH NHIỆM VỤ", k_m: "#dc3545" };
 
-    if (c_n === "giaovien" && typeof f_x_l_chinh === "function") {
+    if (c_n === "giaovienc1" && typeof f_x_l_chinh === "function") {
         k_q = f_x_l_chinh(mangDuLieuGom);
     } else if (c_n === "nhanvien" && typeof f_x_m_chinh === "function") {
         k_q = f_x_m_chinh(mangDuLieuGom);
