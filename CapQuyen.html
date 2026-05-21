@@ -4,39 +4,29 @@
  * Thiết kế và phát triển: Hoàng Ngọc Lâm
  */
 (function() {
+    // 0. CHỐT CHẶN AN TOÀN: Ngăn chặn nạp đúp module gây lỗi tê liệt menu
+    if (document.getElementById('cap-quyen-ui')) return;
+
     // 1. Khởi tạo và nhúng CSS riêng biệt cho module
     const style = document.createElement('style');
     style.textContent = `
-        /* Bỏ padding top để thu hẹp tối đa khoảng cách với tiêu đề hệ thống */
+        /* Đã thu hẹp tối đa khoảng đệm (padding) */
         #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
         
         /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) */
         .cq-header-sticky { 
             position: sticky; 
-            top: 77px; /* Sẽ được JS tự động tính toán chính xác để chống rung/giật (jitter) */
+            top: 77px; /* Sẽ được thuật toán bên dưới tính toán lại chính xác tuyệt đối */
             background: #fff; 
             z-index: 990; 
             padding-top: 5px;
             padding-bottom: 10px; 
             margin-bottom: 10px;  
-            border-bottom: 2px solid red; /* Thêm dòng kẻ đỏ theo nét vẽ */
+            border-bottom: 2px solid red; /* Dòng kẻ đỏ theo đúng yêu cầu */
         }
         
-        .cq-tieu-de { 
-            color: var(--mau-c); 
-            text-transform: uppercase; 
-            text-align: center; 
-            margin: 0 0 10px 0; 
-            padding: 0; 
-            font-size: 20px; 
-            font-weight: bold;
-        }
-        
-        .cq-hanh-dong { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
+        .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
+        .cq-hanh-dong { display: flex; justify-content: space-between; align-items: center; }
         
         /* CẤU TRÚC BẢNG VÀ NÚT BẤM */
         .table-quyen { width: 100%; border-collapse: collapse; margin-top: 0; }
@@ -47,16 +37,14 @@
         
         .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .btn-xoa-dong:hover { background: #c82333; }
-        
         .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
         .btn-them-moi:hover { background: #218838; }
-        
         .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
         .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
     `;
     document.head.appendChild(style);
 
-    // 2. Nhúng bộ khung HTML vào vùng nội dung chính (main-ui)
+    // 2. Nhúng bộ khung HTML vào vùng nội dung chính
     const capQuyenHTML = `
         <div id="cap-quyen-ui">
             <div class="cq-header-sticky">
@@ -85,36 +73,49 @@
             </div>
         </div>
     `;
-    document.getElementById('main-ui').insertAdjacentHTML('beforeend', capQuyenHTML);
+    
+    // Đảm bảo chèn an toàn vào DOM
+    const mainUi = document.getElementById('main-ui');
+    if (mainUi) mainUi.insertAdjacentHTML('beforeend', capQuyenHTML);
 
-    // THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN XUYÊN TỆP (Lõi xử lý chống rung giật và xóa kẻ xanh)
-    setInterval(() => {
-        const ui = document.getElementById('cap-quyen-ui');
-        const kDau = document.querySelector('.k-dau');
-        
-        if (ui && ui.style.display === 'block') {
-            if(kDau) {
-                kDau.style.borderBottom = 'none'; // Xóa dòng kẻ xanh của hệ thống mẹ
-                kDau.style.paddingBottom = '0px'; // Thu hẹp tối đa vùng đệm
-            }
-            const sysHeader = document.querySelector('.k-header-sticky');
-            const cqHeader = document.querySelector('.cq-header-sticky');
-            if (sysHeader && cqHeader) {
-                // Tự động neo cụm chức năng dính chặt vào đáy của thanh hệ thống
-                cqHeader.style.top = sysHeader.offsetHeight + 'px'; 
-            }
-        } else {
-            if(kDau) {
-                // Trả lại nguyên trạng cho hệ thống đánh giá khi đóng Quản lý quyền
-                kDau.style.borderBottom = ''; 
-                kDau.style.paddingBottom = '';
-            }
-        }
-    }, 100); // Tần số quyét cực thấp không ảnh hưởng hiệu suất
+    // 3. THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN (Bản vá chống lỗi triệt để bằng Observer)
+    const uiNode = document.getElementById('cap-quyen-ui');
+    if (uiNode) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'style') {
+                    const isVisible = uiNode.style.display === 'block';
+                    const kDau = document.querySelector('.k-dau');
+                    const sysHeader = document.querySelector('.k-header-sticky');
+                    const cqHeader = document.querySelector('.cq-header-sticky');
+
+                    if (isVisible) {
+                        if (kDau) {
+                            kDau.style.borderBottom = 'none'; // Giấu kẻ xanh
+                            kDau.style.paddingBottom = '0px'; // Bỏ đệm dưới
+                            kDau.style.marginBottom = '0px'; 
+                        }
+                        if (sysHeader && cqHeader) {
+                            // Neo chặt tọa độ chống rung
+                            cqHeader.style.top = sysHeader.offsetHeight + 'px';
+                        }
+                    } else {
+                        if (kDau) {
+                            // Trả lại nguyên trạng cho hệ thống mẹ khi đóng menu
+                            kDau.style.borderBottom = '';
+                            kDau.style.paddingBottom = '';
+                            kDau.style.marginBottom = '';
+                        }
+                    }
+                }
+            });
+        });
+        observer.observe(uiNode, { attributes: true });
+    }
 })();
 
-// 3. Hàm logic xử lý dữ liệu và giao tiếp máy chủ
-let cq_DuLieuGoc = [];
+// 4. Hàm logic xử lý dữ liệu (Sử dụng var để tránh lỗi Crash bộ nhớ đệm GAS)
+var cq_DuLieuGoc = [];
 
 async function cq_TaiDuLieu() {
     f_x_j(true); 
@@ -256,7 +257,6 @@ async function cq_LuuCapNhat() {
         return; 
     }
 
-    // KIỂM TRA DỮ LIỆU CÓ THAY ĐỔI SO VỚI MÁY CHỦ KHÔNG
     let isChanged = false;
     if (m_d.length !== cq_DuLieuGoc.length) {
         isChanged = true;
