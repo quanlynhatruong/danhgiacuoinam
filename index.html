@@ -540,7 +540,7 @@ function f_x_mo_quan_ly_quyen() {
     document.getElementById("vungChonAdmin").style.display = "none";
     document.getElementById("h-dang-tai").style.display = "none";
     
-    // --- XỬ LÝ ĐỔI MÀU SÁNG MENU ---
+    // Bật sáng menu Quản lý quyền, tắt sáng menu Đánh giá
     let mDanhGia = document.getElementById("menu-danh-gia");
     if (mDanhGia) {
         mDanhGia.style.backgroundColor = ""; 
@@ -551,23 +551,21 @@ function f_x_mo_quan_ly_quyen() {
         mQuyen.style.backgroundColor = "rgba(255, 255, 255, 0.15)"; 
         mQuyen.style.fontWeight = "bold";
     }
-    // -------------------------------
     
     let vungQuyen = document.getElementById("cap-quyen-ui");
     if (vungQuyen) {
         vungQuyen.style.display = "block";
         if (typeof cq_TaiDuLieu === "function") cq_TaiDuLieu();
     } else {
-        hienThiThongBaoUI("Hệ thống chưa tải xong module Quản lý quyền!");
+        if (typeof hienThiThongBaoUI === "function") hienThiThongBaoUI("Hệ thống chưa tải xong module Quản lý quyền!");
     }
 }
 
 function f_x_c() {
-    // BỔ SUNG: Tắt trang cấp quyền khi bấm Đánh giá
     let vungQuyen = document.getElementById("cap-quyen-ui");
     if (vungQuyen) vungQuyen.style.display = "none";
 
-    // --- XỬ LÝ ĐỔI MÀU SÁNG MENU ---
+    // Bật sáng menu Đánh giá, tắt sáng menu Quản lý quyền
     let mQuyen = document.getElementById("menu-quan-ly-quyen");
     if (mQuyen) {
         mQuyen.style.backgroundColor = ""; 
@@ -578,19 +576,18 @@ function f_x_c() {
         mDanhGia.style.backgroundColor = "rgba(255, 255, 255, 0.15)"; 
         mDanhGia.style.fontWeight = "bold";
     }
-    // -------------------------------
 
-    // PHỤC HỒI LOGIC GỐC TRÁNH LỖI TRẮNG TRANG
+    // Phục hồi lại không gian làm việc gốc
     let vungThuHai = document.getElementById("vungThuHai");
     if (vungThuHai && !vungThuHai.classList.contains("a-di") && document.getElementById("oNhapChinh").value.trim() !== "") {
-        f_x_h();
+        if (typeof f_x_h === "function") f_x_h();
         if (sessionStorage.getItem("HTDG_IS_ADMIN") === "true" || sessionStorage.getItem("HTDG_IS_ADMIN_VIP") === "true") {
             document.getElementById("vungChonAdmin").style.display = "block";
         } else {
             document.getElementById("vungHienThiNamHoc").style.display = "block";
         }
     } else {
-        f_x_d(); 
+        if (typeof f_x_d === "function") f_x_d(); 
     }
 }
 
