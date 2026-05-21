@@ -121,10 +121,13 @@
             
             <select id="oChonNhom" onchange="hienThiNutGoogle()" class="o-c-kieu" style="width: 100%; margin-bottom: 20px; box-sizing: border-box; text-align: center;">
                 <option value="" disabled selected>-- Chọn chức vụ của bạn --</option>
-                <option value="giaovienc1">TỔ TRƯỞNG</option>
-                <option value="giaovienc1">TỔ PHÓ</option>
+                <option value="giaovienc1">TỔ TRƯỞNG C1</option>
+                <option value="giaovienc1">TỔ PHÓ C1</option>
+                <option value="giaovienc1">GIÁO VIÊN C1</option>
+                <option value="giaovienc2">TỔ TRƯỞNG C2</option>
+                <option value="giaovienc2">TỔ PHÓ C2</option>
+                <option value="giaovienc1">GIÁO VIÊN C2</option>
                 <option value="giaovienc1">TỔNG PHỤ TRÁCH</option>
-                <option value="giaovienc1">GIÁO VIÊN</option>
                 <option value="nhanvien">TỔ TRƯỞNG VP</option>
                 <option value="nhanvien">TỔ PHÓ VP</option>
                 <option value="nhanvien">NHÂN VIÊN</option>
@@ -343,7 +346,7 @@ function khoiDongHeThong() {
     Promise.all([
         f_x_k('danhgiaGV.html'), 
         f_x_k('danhgiaNV.html'), 
-        f_x_k('tieuchigv.html'), 
+        f_x_k('tieuchigvC1.html'), 
         f_x_k('tieuchinv.html')
     ]).catch(e => console.log(e));
 }
