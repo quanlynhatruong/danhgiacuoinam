@@ -131,7 +131,34 @@ function cq_CapNhatSTT() {
         tr.querySelector('.cq-stt').innerText = index + 1;
     });
 }
-
+// Hàm hỗ trợ: Gọi popup xanh thành công của hệ thống để thay thế popup đỏ
+function cq_ThongBaoThanhCong(noiDung) {
+    let hopThongBao = document.getElementById("o-thong-bao");
+    if (hopThongBao) {
+        let divs = hopThongBao.querySelectorAll("div");
+        let nutXacNhan = hopThongBao.querySelector("button");
+        
+        // Lưu lại nội dung gốc của hệ thống
+        let tieuDeGoc = divs[0].innerHTML;
+        let noiDungGoc = divs[1].innerHTML;
+        let hamDongGoc = nutXacNhan.onclick;
+        
+        // Đổi nội dung thành công cho chức năng Cấp quyền
+        divs[0].innerHTML = "CẬP NHẬT THÀNH CÔNG";
+        divs[1].innerHTML = noiDung;
+        hopThongBao.style.display = "flex";
+        
+        // Trả lại nguyên trạng khi đóng
+        nutXacNhan.onclick = function() {
+            hopThongBao.style.display = "none";
+            divs[0].innerHTML = tieuDeGoc;
+            divs[1].innerHTML = noiDungGoc;
+            nutXacNhan.onclick = hamDongGoc;
+        };
+    } else {
+        alert(noiDung); // Thông báo dự phòng nếu giao diện chưa tải
+    }
+}
 async function cq_LuuCapNhat() {
     const tbody = document.getElementById('tbody-quyen');
     let m_d = [];
