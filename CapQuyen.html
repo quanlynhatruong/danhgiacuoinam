@@ -86,7 +86,7 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
     let selHTML = `<select class="cq-quyen">`;
     let found = false;
     
-    // BẢN VÁ: Chuẩn hóa biến quyen để tránh lỗi TypeError ngoại lệ
+    // Chuẩn hóa biến quyen để tránh lỗi TypeError
     let quyenChuan = quyen ? quyen.toString().trim() : ""; 
     
     opts.forEach(opt => {
@@ -131,6 +131,7 @@ function cq_CapNhatSTT() {
         tr.querySelector('.cq-stt').innerText = index + 1;
     });
 }
+
 // Hàm hỗ trợ: Gọi popup xanh thành công của hệ thống để thay thế popup đỏ
 function cq_ThongBaoThanhCong(noiDung) {
     let hopThongBao = document.getElementById("o-thong-bao");
@@ -159,6 +160,7 @@ function cq_ThongBaoThanhCong(noiDung) {
         alert(noiDung); // Thông báo dự phòng nếu giao diện chưa tải
     }
 }
+
 async function cq_LuuCapNhat() {
     const tbody = document.getElementById('tbody-quyen');
     let m_d = [];
@@ -187,7 +189,8 @@ async function cq_LuuCapNhat() {
         // Timeout chờ tiến trình GAS ghi đè do tính chất no-cors
         setTimeout(() => {
             document.getElementById("o-luu-overlay").style.display = "none";
-            hienThiThongBaoUI("Hệ thống đã cập nhật danh sách Quyền Truy Cập thành công!");
+            // Sử dụng hàm thông báo thành công thay vì hàm thông báo lỗi mặc định
+            cq_ThongBaoThanhCong("Hệ thống đã cập nhật danh sách Quyền Truy Cập thành công!");
             cq_TaiDuLieu(); // Load lại từ máy chủ cho đồng bộ
         }, 1500);
         
