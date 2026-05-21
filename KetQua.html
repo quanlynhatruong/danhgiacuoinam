@@ -57,15 +57,17 @@
                 <a href="javascript:void(0)" class="the-chuyen active" id="menu-ket-qua">
                     <span class="b-tuong">📈</span> Kết quả
                 </a>
-                <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;">
+                
+                <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;" onclick="chuyenVeTrangChinh('QUYEN')">
                     <span class="b-tuong">👥</span> Quản lý quyền
                 </span>
-                <span class="the-chuyen" id="menu-tieu-chi-gv" style="display: none;">
+                <span class="the-chuyen" id="menu-tieu-chi-gv" style="display: none;" onclick="chuyenVeTrangChinh('TC_GV')">
                     <span class="b-tuong">🏫</span> Tiêu chí GV
                 </span>
-                <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
+                <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;" onclick="chuyenVeTrangChinh('TC_NV')">
                     <span class="b-tuong">💼</span> Tiêu chí NV
                 </span>
+                
                 <span class="the-chuyen" id="menu-tro-giup">
                     <span class="b-tuong">💡</span> Trợ giúp
                 </span>
@@ -113,6 +115,12 @@
 
     <script>
         let v_dl_toan_bo = [];
+
+        // HÀM ĐIỀU HƯỚNG TỪ KẾT QUẢ VỀ TRANG CHỦ MỞ TAB
+        function chuyenVeTrangChinh(tabName) {
+            sessionStorage.setItem('HTDG_CHUYEN_TAB', tabName);
+            window.location.href = 'index.html';
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof applyDGConfig === 'function') {
