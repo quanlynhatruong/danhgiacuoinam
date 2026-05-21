@@ -580,7 +580,18 @@ function f_x_c() {
     }
     // -------------------------------
 
-    if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
+    // PHỤC HỒI LOGIC GỐC TRÁNH LỖI TRẮNG TRANG
+    let vungThuHai = document.getElementById("vungThuHai");
+    if (vungThuHai && !vungThuHai.classList.contains("a-di") && document.getElementById("oNhapChinh").value.trim() !== "") {
+        f_x_h();
+        if (sessionStorage.getItem("HTDG_IS_ADMIN") === "true" || sessionStorage.getItem("HTDG_IS_ADMIN_VIP") === "true") {
+            document.getElementById("vungChonAdmin").style.display = "block";
+        } else {
+            document.getElementById("vungHienThiNamHoc").style.display = "block";
+        }
+    } else {
+        f_x_d(); 
+    }
 }
 
 async function f_x_d() {
