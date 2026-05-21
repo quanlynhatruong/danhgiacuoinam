@@ -258,16 +258,18 @@
     <button class="n-dong-cb" onclick="dongCanhBaoUI()">Đóng</button>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<?!= include('CapQuyen'); ?>
+
 <script>
-    /* LƯU Ý CHO P. HIỆU TRƯỞNG: Do GAS không cho phép dùng đuôi .js cục bộ trên giao diện, 
-       đồng chí vui lòng đảm bảo file "ketnoi.js" trên App Script thực chất được tạo
-       dưới dạng file HTML (tên là ketnoi.html) và bọc mã bên trong thẻ <script>...</script> */
     <?!= include('ketnoi'); ?>
     <?!= include('danhgiaGV'); ?>
     <?!= include('danhgiaNV'); ?>
+    // Bỏ chú thích dòng dưới nếu đồng chí có thêm file mã cho Cấp 2
+    // <?!= include('danhgiaGVC2'); ?>
 </script>
-
-<?!= include('CapQuyen'); ?>
 
 <script>
 let v_che_do_xem_admin = false;
@@ -282,18 +284,8 @@ function hienThiNutGoogle() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Đã thay thế logic tạo thẻ DOM ảo nguy hiểm bằng lệnh chạy khởi tạo trực tiếp
+    // Gọi cấu hình đồng bộ (được nạp từ include('ketnoi'))
     if (typeof applyDGConfig === 'function') applyDGConfig();
-    
-    var gsiScript = document.createElement('script');
-    gsiScript.src = "https://accounts.google.com/gsi/client";
-    gsiScript.async = true; gsiScript.defer = true;
-    document.head.appendChild(gsiScript);
-    
-    var html2pdfScript = document.createElement('script');
-    html2pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-    document.head.appendChild(html2pdfScript);
-    
     khoiDongHeThong();
 });
 
@@ -323,7 +315,6 @@ function khoiDongHeThong() {
             }
         });
     }
-    // (Đã loại bỏ cơ chế fetch() các module HTML do không tương thích với máy chủ GAS)
 }
 
 let hanhDongSauThongBao = null;
