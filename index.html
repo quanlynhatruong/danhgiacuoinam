@@ -178,7 +178,7 @@
             <a href="KetQua.html" class="the-chuyen" id="menu-ket-qua" style="text-decoration: none;">
                 <span class="b-tuong">📈</span> Kết quả
             </a>
-            <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;">
+            <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;" onclick="f_x_mo_quan_ly_quyen()">
                 <span class="b-tuong">👥</span> Quản lý quyền
             </span>
             <span class="the-chuyen" id="menu-tieu-chi-gv" style="display: none;">
@@ -344,11 +344,13 @@ function khoiDongHeThong() {
         });
     }
     
+   // BỔ SUNG: Nạp module CapQuyen.html tuân thủ chuẩn HtmlService
    Promise.all([
         f_x_k('danhgiaGVC1.html'),
         f_x_k('danhgiaGVC2.html'),
         f_x_k('danhgiaNV.html'), 
-        f_x_k('tieuchinv.html')
+        f_x_k('tieuchinv.html'),
+        f_x_k('CapQuyen.html') 
     ]).catch(e => console.log(e));
 }
 
@@ -530,7 +532,28 @@ function f_x_logout() {
 let v_l_a = "", v_l_b = "", v_l_d = "", v_l_e = "", v_l_f = "";
 let v_nam_hoc_hien_tai = ""; 
 
+// BỔ SUNG: Xử lý bật/tắt module Quản lý quyền
+function f_x_mo_quan_ly_quyen() {
+    document.getElementById("vungThuNhat").classList.add("a-di");
+    document.getElementById("vungThuHai").classList.add("a-di");
+    document.getElementById("vungHienThiNamHoc").style.display = "none";
+    document.getElementById("vungChonAdmin").style.display = "none";
+    document.getElementById("h-dang-tai").style.display = "none";
+    
+    let vungQuyen = document.getElementById("cap-quyen-ui");
+    if (vungQuyen) {
+        vungQuyen.style.display = "block";
+        if (typeof cq_TaiDuLieu === "function") cq_TaiDuLieu();
+    } else {
+        hienThiThongBaoUI("Hệ thống chưa tải xong module Quản lý quyền!");
+    }
+}
+
 function f_x_c() {
+    // BỔ SUNG: Tắt trang cấp quyền khi bấm Đánh giá
+    let vungQuyen = document.getElementById("cap-quyen-ui");
+    if (vungQuyen) vungQuyen.style.display = "none";
+
     if (!document.getElementById("vungThuHai").classList.contains("a-di")) f_x_d(); else f_x_h();
 }
 
