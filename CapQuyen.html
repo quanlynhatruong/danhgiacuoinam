@@ -109,8 +109,8 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
 
 function cq_ThemDongMoi() {
     const tbody = document.getElementById('tbody-quyen');
-    const stt = tbody.children.length + 1;
-    tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(stt - 1, "", "", "", "Giáo viên"));
+    // Chèn dòng mới lên trên cùng của tbody
+    tbody.insertAdjacentHTML('afterbegin', cq_TaoDHTMLDong(0, "", "", "", "Giáo viên"));
     cq_CapNhatSTT();
 }
 
