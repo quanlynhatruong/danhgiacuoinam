@@ -1,14 +1,14 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Cập nhật: Căn giữa dọc, ẩn icon resize textarea, ô vừa khít nội dung.
+ * Cập nhật: Bỏ thanh trượt dọc, load năm học từ A1.
  */
 (function() {
     if (document.getElementById('tieuchi-gvc1-ui')) return;
 
     const style = document.createElement('style');
     style.textContent = `
-        #tieuchi-gvc1-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
+        #tieuchi-gvc1-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; overflow-y: visible; }
         
         .tc-header-sticky { 
             position: sticky; 
@@ -28,11 +28,11 @@
         .tc-nam-hoc input { border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; font-family: inherit; width: 130px; text-align: center; }
         
         .table-tieuchi { width: 100%; border-collapse: collapse; margin-top: 0; }
-        .table-tieuchi th, .table-tieuchi td { border: 1px solid #dee2e6; padding: 8px 10px; vertical-align: middle; }  /* Căn giữa dọc */
+        .table-tieuchi th, .table-tieuchi td { border: 1px solid #dee2e6; padding: 8px 10px; vertical-align: middle; }
         .table-tieuchi th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; text-align: center; }
         .table-tieuchi td { text-align: left; }
         
-        /* Textarea không có icon resize, không khung */
+        /* Textarea không icon resize, không khung */
         .table-tieuchi textarea {
             width: 100%;
             border: none;
@@ -43,11 +43,11 @@
             line-height: 1.4;
             padding: 4px 0;
             margin: 0;
-            resize: none;          /* Ẩn icon resize */
+            resize: none;
             overflow: auto;
             box-sizing: border-box;
-            height: auto;          /* Tự động theo nội dung (JS sẽ cập nhật) */
-            min-height: 38px;      /* Đủ cao cho một dòng */
+            height: auto;
+            min-height: 38px;
         }
         .table-tieuchi textarea:focus {
             background: #fef9e6;
@@ -77,7 +77,7 @@
                     </div>
                 </div>
             </div>
-            <div style="overflow-x: auto;">
+            <div style="overflow-x: auto; overflow-y: visible;"> <!-- Bỏ thanh trượt dọc -->
                 <table class="table-tieuchi">
                     <thead>
                         <tr><th width="6%">Sửa</th><th width="5%">TT</th><th width="30%">Tiêu chí</th><th width="12%">Thang giá trị</th><th width="10%">Quy điểm</th><th width="10%">Xuất sắc</th><th width="10%">HTT</th><th width="10%">Hoàn thành</th><th width="7%">CHT</th></tr>
@@ -122,11 +122,13 @@ async function tcgvc1_TaiDuLieu() {
         const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
         if (response.status === 'success') {
             tcgvc1_DuLieuGoc = response.data || [];
+            // Load năm học từ response (nếu có)
             if (response.nam_hoc) {
                 tcgvc1_NamHocGoc = response.nam_hoc;
                 const inpNam = document.getElementById('tcgvc1-namhoc');
                 if (inpNam) inpNam.value = response.nam_hoc;
             } else {
+                // Nếu API chưa trả về, gọi riêng
                 await tcgvc1_TaiNamHoc();
             }
             tcgvc1_HienThiBang();
@@ -148,7 +150,7 @@ async function tcgvc1_TaiNamHoc() {
             const inpNam = document.getElementById('tcgvc1-namhoc');
             if (inpNam) inpNam.value = res.nam_hoc;
         }
-    } catch (e) { }
+    } catch (e) { /* bỏ qua */ }
 }
 
 function tcgvc1_HienThiBang() {
