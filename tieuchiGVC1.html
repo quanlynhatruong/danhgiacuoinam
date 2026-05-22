@@ -1,7 +1,7 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Bổ sung: Di chuyển dòng lên/xuống. Giữ nguyên mọi chức năng khác.
+ * Bổ sung: Di chuyển dòng lên/xuống (dọc), giữ nguyên mọi chức năng khác.
  */
 (function() {
     if (document.getElementById('tieuchi-gvc1-ui')) return;
@@ -59,16 +59,34 @@
             background: #fef9e6;
         }
         
-        .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin-right: 5px; }
-        .btn-xoa-dong:hover { background: #c82333; }
-        .btn-di-chuyen { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; margin: 0 2px; }
+        /* Nút bấm theo cột dọc */
+        .td-buttons {
+            text-align: center;
+            white-space: nowrap;
+            width: 50px;
+        }
+        .btn-di-chuyen, .btn-xoa-dong {
+            display: block;
+            width: 100%;
+            margin: 4px 0;
+            padding: 6px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .btn-di-chuyen { background: #6c757d; color: white; }
         .btn-di-chuyen:hover { background: #5a6268; }
+        .btn-xoa-dong { background: #dc3545; color: white; }
+        .btn-xoa-dong:hover { background: #c82333; }
+        
         .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
         .btn-them-moi:hover { background: #218838; }
         .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
         .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
-        
-        .td-buttons { white-space: nowrap; text-align: center; }
     `;
     document.head.appendChild(style);
 
@@ -90,7 +108,7 @@
             <div style="overflow-x: auto; overflow-y: visible;">
                 <table class="table-tieuchi">
                     <thead>
-                        <tr><th width="10%">Sửa</th><th width="5%">TT</th><th width="28%">Tiêu chí</th><th width="10%">Thang giá trị</th><th width="8%">Quy điểm</th><th width="8%">Xuất sắc</th><th width="8%">HTT</th><th width="8%">Hoàn thành</th><th width="7%">CHT</th></tr>
+                        <tr><th width="7%">Sửa</th><th width="5%">TT</th><th width="28%">Tiêu chí</th><th width="10%">Thang giá trị</th><th width="8%">Quy điểm</th><th width="8%">Xuất sắc</th><th width="8%">HTT</th><th width="8%">Hoàn thành</th><th width="7%">CHT</th></tr>
                     </thead>
                     <tbody id="tcgvc1-tbody"></tbody>
                 </table>
@@ -172,9 +190,9 @@ function tcgvc1_TaoDong(index, item) {
     
     return `<tr>
         <td class="td-buttons">
-            <button class="btn-di-chuyen" onclick="tcgvc1_DiChuyen(this, 'up')" title="Di chuyển lên">⬆️</button>
-            <button class="btn-di-chuyen" onclick="tcgvc1_DiChuyen(this, 'down')" title="Di chuyển xuống">⬇️</button>
+            <button class="btn-di-chuyen" onclick="tcgvc1_DiChuyen(this, 'up')" title="Di chuyển lên">▲</button>
             <button class="btn-xoa-dong" onclick="tcgvc1_XoaDong(this)">Xóa</button>
+            <button class="btn-di-chuyen" onclick="tcgvc1_DiChuyen(this, 'down')" title="Di chuyển xuống">▼</button>
         </td>
         <td class="tcgvc1-stt" style="text-align:center">${index+1}</td>
         <td><textarea class="tcgvc1-tieuchi" rows="1" placeholder="Nhập tiêu chí">${tieu_chi}</textarea></td>
