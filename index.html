@@ -203,6 +203,10 @@
             <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
                 <span class="b-tuong">💼</span> Tiêu chí xếp loại nhân viên
             </span>
+            <!-- BỔ SUNG: Menu Tiêu chí xếp loại Giáo viên C2 -->
+            <span class="the-chuyen" id="menu-tieu-chi-gvc2" style="display: none;">
+                <span class="b-tuong">📚</span> Tiêu chí xếp loại Giáo viên C2
+            </span>
             <span class="the-chuyen" id="menu-tro-giup" onclick="moKhungChatAI()">
                 <span class="b-tuong">💡</span> Trợ giúp
             </span>
@@ -376,10 +380,11 @@ function khoiDongHeThong() {
         f_x_k('danhgiaNV.html'), 
         f_x_k('CapQuyen.html'),
         f_x_k('KetQua.html'),
-        f_x_k('tieuchiGVC1.html')   // BỔ SUNG: tải module tiêu chí
+        f_x_k('tieuchiGVC1.html'),
+        f_x_k('tieuchiGVC2.html')   // BỔ SUNG: tải module tiêu chí GVC2
     ]).catch(e => console.log(e));
     
-    // Gán sự kiện cho menu tiêu chí sau khi đã tải DOM
+    // Gán sự kiện cho các menu tiêu chí sau khi đã tải DOM
     setTimeout(function() {
         const menuTieuChiGv = document.getElementById("menu-tieu-chi-gv");
         if (menuTieuChiGv) {
@@ -393,6 +398,14 @@ function khoiDongHeThong() {
             menuTieuChiNv.onclick = function(e) {
                 e.preventDefault();
                 f_x_mo_tieu_chi_nv();
+            };
+        }
+        // BỔ SUNG: gán sự kiện cho menu GVC2
+        const menuTieuChiGvc2 = document.getElementById("menu-tieu-chi-gvc2");
+        if (menuTieuChiGvc2) {
+            menuTieuChiGvc2.onclick = function(e) {
+                e.preventDefault();
+                f_x_mo_tieu_chi_gvc2();
             };
         }
     }, 500);
@@ -470,9 +483,11 @@ function v_hien_thi_menu_admin(hienThi) {
     let mn1 = document.getElementById("menu-quan-ly-quyen");
     let mn2 = document.getElementById("menu-tieu-chi-gv");
     let mn3 = document.getElementById("menu-tieu-chi-nv");
+    let mn4 = document.getElementById("menu-tieu-chi-gvc2"); // BỔ SUNG
     if (mn1) mn1.style.display = kieu;
     if (mn2) mn2.style.display = kieu;
     if (mn3) mn3.style.display = kieu;
+    if (mn4) mn4.style.display = kieu;
 }
 
 async function fetchAPI(url) {
@@ -516,7 +531,7 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
@@ -591,6 +606,7 @@ function f_x_mo_ket_qua() {
     if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
     if(document.getElementById("cap-quyen-ui")) document.getElementById("cap-quyen-ui").style.display = "none";
     if(document.getElementById("tieuchi-gvc1-ui")) document.getElementById("tieuchi-gvc1-ui").style.display = "none";
+    if(document.getElementById("tieuchi-gvc2-ui")) document.getElementById("tieuchi-gvc2-ui").style.display = "none";
     if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "none";
     if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
     if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
@@ -627,6 +643,7 @@ function f_x_mo_quan_ly_quyen() {
     if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
     if(document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
     if(document.getElementById("tieuchi-gvc1-ui")) document.getElementById("tieuchi-gvc1-ui").style.display = "none";
+    if(document.getElementById("tieuchi-gvc2-ui")) document.getElementById("tieuchi-gvc2-ui").style.display = "none";
     if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "none";
     if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
     if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
@@ -645,13 +662,14 @@ function f_x_mo_quan_ly_quyen() {
     }
 }
 
-// ================= BỔ SUNG: MỞ MODULE TIÊU CHÍ =================
+// Hàm mở module tiêu chí GVC1
 function f_x_mo_tieu_chi_gv() {
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
     if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
     if(document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
     if(document.getElementById("cap-quyen-ui")) document.getElementById("cap-quyen-ui").style.display = "none";
+    if(document.getElementById("tieuchi-gvc2-ui")) document.getElementById("tieuchi-gvc2-ui").style.display = "none";
     if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "none";
     if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
     if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
@@ -669,16 +687,42 @@ function f_x_mo_tieu_chi_gv() {
     }
 }
 
+// Hàm mở module tiêu chí GVC2 (BỔ SUNG)
+function f_x_mo_tieu_chi_gvc2() {
+    if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
+    if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
+    if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
+    if(document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
+    if(document.getElementById("cap-quyen-ui")) document.getElementById("cap-quyen-ui").style.display = "none";
+    if(document.getElementById("tieuchi-gvc1-ui")) document.getElementById("tieuchi-gvc1-ui").style.display = "none";
+    if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "none";
+    if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
+    if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
+    
+    document.querySelectorAll('.the-chuyen').forEach(el => el.classList.remove('active'));
+    let menuTc = document.getElementById("menu-tieu-chi-gvc2");
+    if (menuTc) menuTc.classList.add("active");
+    
+    let vungTc = document.getElementById("tieuchi-gvc2-ui");
+    if (vungTc) {
+        vungTc.style.display = "block";
+        if (typeof tcgvc2_TaiDuLieu === "function") tcgvc2_TaiDuLieu();
+    } else {
+        hienThiThongBaoUI("Module quản lý tiêu chí Giáo viên C2 chưa được tải xong.");
+    }
+}
+
 function f_x_mo_tieu_chi_nv() {
     hienThiThongBaoUI("Module quản lý tiêu chí nhân viên đang được phát triển.");
 }
-// ================= KẾT THÚC BỔ SUNG =================
 
 function f_x_c() {
     let vungQuyen = document.getElementById("cap-quyen-ui");
     if (vungQuyen) vungQuyen.style.display = "none";
-    let vungTc = document.getElementById("tieuchi-gvc1-ui");
-    if (vungTc) vungTc.style.display = "none";
+    let vungTc1 = document.getElementById("tieuchi-gvc1-ui");
+    if (vungTc1) vungTc1.style.display = "none";
+    let vungTc2 = document.getElementById("tieuchi-gvc2-ui");
+    if (vungTc2) vungTc2.style.display = "none";
     if (document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
     
     if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
