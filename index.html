@@ -25,7 +25,23 @@
         .the-chuyen:first-child { border-top: 1px solid rgba(255, 255, 255, 0.15); }
         .the-chuyen:hover { background-color: rgba(255, 255, 255, 0.1); font-weight: 500;}
         .the-chuyen.active { background-color: rgba(255, 255, 255, 0.2); font-weight: bold; color: #ffc107; }
-        .b-tuong { margin-right: 12px; font-size: 18px; display: inline-block; width: 24px; text-align: center;}
+        .b-tuong { margin-right: 12px; font-size: 18px; display: inline-block; width: 24px; text-align: center; }
+        
+        /* Submenu styling */
+        .submenu-tieu-chi {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .submenu-tieu-chi .the-chuyen {
+            padding-left: 48px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .submenu-tieu-chi .the-chuyen .b-tuong {
+            font-size: 16px;
+            width: 28px;
+        }
         
         .k-ngoai { flex: 1; background: white; padding: 0 30px 25px 30px; border-radius: 0 5px 5px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; width: 100%; box-sizing: border-box; margin: 0;}
         
@@ -197,15 +213,24 @@
             <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;" onclick="f_x_mo_quan_ly_quyen()">
                 <span class="b-tuong">👥</span> Quản lý quyền
             </span>
-            <span class="the-chuyen" id="menu-tieu-chi-gv-c1" style="display: none;">
-                <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên C1
+            
+            <!-- Tab mẹ Tiêu chí đánh giá -->
+            <span class="the-chuyen" id="menu-tieu-chi-cha" style="display: none;" onclick="toggleSubmenuTieuChi(event)">
+                <span class="b-tuong">📋</span> Tiêu chí đánh giá
+                <span style="margin-left: auto; font-size: 14px;">▼</span>
             </span>
-            <span class="the-chuyen" id="menu-tieu-chi-gv-c2" style="display: none;">
-                <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên C2
-            </span>
-            <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
-                <span class="b-tuong">💼</span> Tiêu chí xếp loại nhân viên
-            </span>
+            <div class="submenu-tieu-chi" id="submenu-tieu-chi" style="display: none;">
+                <span class="the-chuyen" id="menu-tieu-chi-gv-c1" style="display: none;">
+                    <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên C1
+                </span>
+                <span class="the-chuyen" id="menu-tieu-chi-gv-c2" style="display: none;">
+                    <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên C2
+                </span>
+                <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
+                    <span class="b-tuong">💼</span> Tiêu chí xếp loại nhân viên
+                </span>
+            </div>
+            
             <span class="the-chuyen" id="menu-tro-giup" onclick="moKhungChatAI()">
                 <span class="b-tuong">💡</span> Trợ giúp
             </span>
@@ -476,13 +501,39 @@ function showMainUI(d_danh) {
     if (oNhap) { oNhap.value = d_danh; f_x_d(); }
 }
 
+function toggleSubmenuTieuChi(event) {
+    event.stopPropagation();
+    const submenu = document.getElementById('submenu-tieu-chi');
+    const arrowSpan = event.currentTarget.querySelector('span:last-child');
+    if (submenu.style.display === 'none') {
+        submenu.style.display = 'flex';
+        if (arrowSpan) arrowSpan.innerHTML = '▲';
+    } else {
+        submenu.style.display = 'none';
+        if (arrowSpan) arrowSpan.innerHTML = '▼';
+    }
+}
+
 function v_hien_thi_menu_admin(hienThi) {
     let kieu = hienThi ? "flex" : "none";
     let mn1 = document.getElementById("menu-quan-ly-quyen");
+    let mnCha = document.getElementById("menu-tieu-chi-cha");
+    let submenu = document.getElementById("submenu-tieu-chi");
+    if (mn1) mn1.style.display = kieu;
+    if (mnCha) {
+        mnCha.style.display = kieu;
+        if (hienThi && submenu) {
+            submenu.style.display = "flex";
+            const arrowSpan = mnCha.querySelector('span:last-child');
+            if (arrowSpan) arrowSpan.innerHTML = '▲';
+        } else if (submenu) {
+            submenu.style.display = "none";
+        }
+    }
+    // Các mục con vẫn giữ style của riêng chúng, nhưng đã nằm trong submenu nên không cần set lại
     let mn2 = document.getElementById("menu-tieu-chi-gv-c1");
     let mn3 = document.getElementById("menu-tieu-chi-gv-c2");
     let mn4 = document.getElementById("menu-tieu-chi-nv");
-    if (mn1) mn1.style.display = kieu;
     if (mn2) mn2.style.display = kieu;
     if (mn3) mn3.style.display = kieu;
     if (mn4) mn4.style.display = kieu;
