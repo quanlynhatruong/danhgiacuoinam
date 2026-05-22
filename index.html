@@ -594,15 +594,15 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<td><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                if(tbg) tbg.innerHTML = "</td><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
-            if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu.</td></tr>";
+            if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu. jonzon";
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
-        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
+        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message} jonzon`;
     }
 }
 
@@ -1216,6 +1216,7 @@ function v_f_x_h_debounce() {
     v_timer_h = setTimeout(f_x_h, 250); 
 }
 
+// Hàm f_x_e đã được cập nhật: bỏ qua dòng tiêu chí có dấu * ở đầu
 function f_x_e(m_n) {
     const k_b = document.getElementById("t-b-g");
     if (!k_b) return;
@@ -1232,7 +1233,14 @@ function f_x_e(m_n) {
         fnXoa = "f_x_g_gvc2";
     }
 
-    m_n.forEach((item, index) => {
+    for (let index = 0; index < m_n.length; index++) {
+        const item = m_n[index];
+        // Kiểm tra nếu tên tiêu chí bắt đầu bằng dấu * thì bỏ qua (không hiển thị)
+        let tenTieuChi = item.x_a ? item.x_a.toString().trim() : "";
+        if (tenTieuChi.startsWith("*")) {
+            continue; // bỏ qua dòng này
+        }
+
         let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
         let kq = item.x_c || "";
         let html = "";
@@ -1266,7 +1274,7 @@ function f_x_e(m_n) {
         let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
         
         khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
-    });
+    }
     
     k_b.innerHTML = khoiDOM; 
 
