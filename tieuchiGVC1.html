@@ -1,0 +1,263 @@
+<script>
+/**
+ * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
+ * Dựa trên cấu trúc CapQuyen, chuyên biệt cho sheet "CHITIEUGVC1"
+ */
+(function() {
+    // 0. CHỐT CHẶN NẠP ĐÚP
+    if (document.getElementById('tieuchi-gvc1-ui')) return;
+
+    // 1. NHÚNG CSS RIÊNG
+    const style = document.createElement('style');
+    style.textContent = `
+        #tieuchi-gvc1-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
+        
+        .tc-header-sticky { 
+            position: sticky; 
+            top: 77px;
+            background: #fff; 
+            z-index: 990; 
+            padding-top: 5px;
+            padding-bottom: 10px; 
+            margin-bottom: 10px;  
+            border-bottom: 2px solid red;
+        }
+        
+        .tc-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
+        .tc-hanh-dong { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        
+        .table-tieuchi { width: 100%; border-collapse: collapse; margin-top: 0; }
+        .table-tieuchi th, .table-tieuchi td { border: 1px solid #dee2e6; padding: 8px 10px; vertical-align: middle; }
+        .table-tieuchi th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; text-align: center; }
+        .table-tieuchi td { text-align: left; }
+        .table-tieuchi input, .table-tieuchi select { width: 100%; border: 1px solid #ddd; padding: 7px; box-sizing: border-box; font-family: inherit; font-size: 14px; border-radius: 4px; transition: border-color 0.3s; }
+        .table-tieuchi input:focus, .table-tieuchi select:focus { border-color: var(--mau-c); outline: none; }
+        
+        .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .btn-xoa-dong:hover { background: #c82333; }
+        .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
+        .btn-them-moi:hover { background: #218838; }
+        .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
+        .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
+        
+        /* Giãn dòng tự động */
+        .table-tieuchi textarea, 
+        .table-tieuchi input[type="text"] { min-height: 40px; line-height: 1.4; }
+    `;
+    document.head.appendChild(style);
+
+    // 2. KHUNG HTML
+    const tieuchiHTML = `
+        <div id="tieuchi-gvc1-ui">
+            <div class="tc-header-sticky">
+                <h3 class="tc-tieu-de">TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN TIỂU HỌC</h3>
+                <div class="tc-hanh-dong">
+                    <button class="btn-them-moi" onclick="tcgvc1_ThemDong()">+ Thêm mới</button>
+                    <button class="btn-cap-nhat" onclick="tcgvc1_LuuCapNhat()">CẬP NHẬT (LƯU THAY ĐỔI)</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table-tieuchi">
+                    <thead>
+                        <tr><th width="6%">Sửa</th><th width="5%">TT</th><th width="30%">Tiêu chí</th><th width="12%">Thang giá trị</th><th width="10%">Quy điểm</th><th width="10%">Xuất sắc</th><th width="10%">HTT</th><th width="10%">Hoàn thành</th><th width="7%">CHT</th></tr>
+                    </thead>
+                    <tbody id="tcgvc1-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    const mainUi = document.getElementById('main-ui');
+    if (mainUi) mainUi.insertAdjacentHTML('beforeend', tieuchiHTML);
+
+    // 3. OBSERVER ĐỒNG BỘ STICKY HEADER
+    const uiNode = document.getElementById('tieuchi-gvc1-ui');
+    if (uiNode) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'style') {
+                    const isVisible = uiNode.style.display === 'block';
+                    const kDau = document.querySelector('.k-dau');
+                    const sysHeader = document.querySelector('.k-header-sticky');
+                    const tcHeader = document.querySelector('.tc-header-sticky');
+                    if (isVisible) {
+                        if (kDau) { kDau.style.borderBottom = 'none'; kDau.style.paddingBottom = '0px'; kDau.style.marginBottom = '0px'; }
+                        if (sysHeader && tcHeader) tcHeader.style.top = sysHeader.offsetHeight + 'px';
+                    } else {
+                        if (kDau) { kDau.style.borderBottom = ''; kDau.style.paddingBottom = ''; kDau.style.marginBottom = ''; }
+                    }
+                }
+            });
+        });
+        observer.observe(uiNode, { attributes: true });
+    }
+})();
+
+// 4. BIẾN TOÀN CỤC VÀ HÀM XỬ LÝ
+var tcgvc1_DuLieuGoc = [];
+
+async function tcgvc1_TaiDuLieu() {
+    if (typeof f_x_j === 'function') f_x_j(true);
+    try {
+        const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
+        if (response.status === 'success') {
+            tcgvc1_DuLieuGoc = response.data || [];
+            tcgvc1_HienThiBang();
+        } else {
+            hienThiThongBaoUI("Lỗi tải tiêu chí: " + (response.message || "Không xác định"));
+        }
+    } catch (err) {
+        hienThiThongBaoUI("Mất kết nối khi tải danh sách tiêu chí.");
+    }
+    if (typeof f_x_j === 'function') f_x_j(false);
+}
+
+function tcgvc1_HienThiBang() {
+    const tbody = document.getElementById('tcgvc1-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    tcgvc1_DuLieuGoc.forEach((item, idx) => {
+        tbody.insertAdjacentHTML('beforeend', tcgvc1_TaoDong(idx, item));
+    });
+}
+
+function tcgvc1_TaoDong(index, item) {
+    // Hỗ trợ cấu trúc dữ liệu: { tieu_chi, thang_gia_tri, quy_diem, xuat_sac, htt, hoan_thanh, cht }
+    const tieu_chi = escapeHtml(item.tieu_chi || '');
+    const thang_gia_tri = escapeHtml(item.thang_gia_tri || '');
+    const quy_diem = escapeHtml(item.quy_diem || '');
+    const xuat_sac = escapeHtml(item.xuat_sac || '');
+    const htt = escapeHtml(item.htt || '');
+    const hoan_thanh = escapeHtml(item.hoan_thanh || '');
+    const cht = escapeHtml(item.cht || '');
+    
+    return `<tr>
+        <td style="text-align:center"><button class="btn-xoa-dong" onclick="tcgvc1_XoaDong(this)">Xóa</button></td>
+        <td class="tcgvc1-stt" style="text-align:center">${index+1}</td>
+        <td><input type="text" class="tcgvc1-tieuchi" value="${tieu_chi}" placeholder="Nhập tiêu chí"></td>
+        <td><input type="text" class="tcgvc1-thang" value="${thang_gia_tri}" placeholder="VD: 0-10"></td>
+        <td><input type="text" class="tcgvc1-quydiem" value="${quy_diem}" placeholder="Điểm tối đa"></td>
+        <td><input type="text" class="tcgvc1-xuatsac" value="${xuat_sac}" placeholder="Mức xuất sắc"></td>
+        <td><input type="text" class="tcgvc1-htt" value="${htt}" placeholder="HTT"></td>
+        <td><input type="text" class="tcgvc1-hoanthanh" value="${hoan_thanh}" placeholder="Hoàn thành"></td>
+        <td><input type="text" class="tcgvc1-cht" value="${cht}" placeholder="CHT"></td>
+    </tr>`;
+}
+
+function tcgvc1_ThemDong() {
+    const tbody = document.getElementById('tcgvc1-tbody');
+    const emptyItem = { tieu_chi: '', thang_gia_tri: '', quy_diem: '', xuat_sac: '', htt: '', hoan_thanh: '', cht: '' };
+    tbody.insertAdjacentHTML('afterbegin', tcgvc1_TaoDong(0, emptyItem));
+    tcgvc1_CapNhatSTT();
+}
+
+function tcgvc1_XoaDong(btn) {
+    if (confirm("Xóa tiêu chí này khỏi danh sách?")) {
+        btn.closest('tr').remove();
+        tcgvc1_CapNhatSTT();
+    }
+}
+
+function tcgvc1_CapNhatSTT() {
+    const tbody = document.getElementById('tcgvc1-tbody');
+    if (!tbody) return;
+    Array.from(tbody.children).forEach((tr, idx) => {
+        const sttCell = tr.querySelector('.tcgvc1-stt');
+        if (sttCell) sttCell.innerText = idx + 1;
+    });
+}
+
+async function tcgvc1_LuuCapNhat() {
+    const tbody = document.getElementById('tcgvc1-tbody');
+    const newData = [];
+    let hasError = false;
+    
+    Array.from(tbody.children).forEach(tr => {
+        const tieu_chi = tr.querySelector('.tcgvc1-tieuchi')?.value.trim() || '';
+        const thang_gia_tri = tr.querySelector('.tcgvc1-thang')?.value.trim() || '';
+        const quy_diem = tr.querySelector('.tcgvc1-quydiem')?.value.trim() || '';
+        const xuat_sac = tr.querySelector('.tcgvc1-xuatsac')?.value.trim() || '';
+        const htt = tr.querySelector('.tcgvc1-htt')?.value.trim() || '';
+        const hoan_thanh = tr.querySelector('.tcgvc1-hoanthanh')?.value.trim() || '';
+        const cht = tr.querySelector('.tcgvc1-cht')?.value.trim() || '';
+        
+        // Chỉ thêm dòng có ít nhất tiêu chí không rỗng (hoặc tất cả đều trống thì bỏ qua)
+        if (tieu_chi !== '') {
+            newData.push({ tieu_chi, thang_gia_tri, quy_diem, xuat_sac, htt, hoan_thanh, cht });
+        }
+    });
+    
+    // So sánh với dữ liệu gốc (bỏ qua thứ tự, so sánh nội dung)
+    if (JSON.stringify(tcgvc1_DuLieuGoc) === JSON.stringify(newData)) {
+        hienThiThongBaoUI("Không có thay đổi nào để lưu.");
+        return;
+    }
+    
+    const overlay = document.getElementById("o-luu-overlay");
+    if (overlay) overlay.style.display = "flex";
+    try {
+        const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        // Gửi dữ liệu dạng POST (chú ý mode no-cors như trong CapQuyen gốc)
+        await fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'luu_tieuchi_gvc1', data: newData })
+        });
+        // Giả lập thành công (do no-cors không đọc response)
+        setTimeout(() => {
+            if (overlay) overlay.style.display = "none";
+            tcgvc1_ThongBaoThanhCong("Đã cập nhật bảng tiêu chí đánh giá thành công!");
+            tcgvc1_TaiDuLieu();
+        }, 1500);
+    } catch (err) {
+        if (overlay) overlay.style.display = "none";
+        hienThiThongBaoUI("Lỗi kết nối khi lưu dữ liệu. Vui lòng thử lại.");
+    }
+}
+
+function tcgvc1_ThongBaoThanhCong(noiDung) {
+    const hopThongBao = document.getElementById("o-thong-bao");
+    if (hopThongBao) {
+        const divs = hopThongBao.getElementsByTagName("div");
+        const nutXacNhan = hopThongBao.getElementsByTagName("button")[0];
+        if (divs.length >= 2 && nutXacNhan) {
+            const tieuDeGoc = divs[0].innerHTML;
+            const noiDungGoc = divs[1].innerHTML;
+            const hamDongGoc = nutXacNhan.onclick;
+            divs[0].innerHTML = "CẬP NHẬT THÀNH CÔNG";
+            divs[1].innerHTML = noiDung;
+            hopThongBao.style.display = "flex";
+            nutXacNhan.onclick = function() {
+                hopThongBao.style.display = "none";
+                divs[0].innerHTML = tieuDeGoc;
+                divs[1].innerHTML = noiDungGoc;
+                nutXacNhan.onclick = hamDongGoc;
+            };
+        }
+    } else {
+        alert(noiDung);
+    }
+}
+
+// Hàm bảo vệ XSS nhẹ
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
+    });
+}
+
+// Tự động tải dữ liệu khi module được mở (bạn sẽ gọi từ menu chính)
+// Để tương thích, có thể thêm lệnh khởi tạo:
+if (typeof window.tcgvc1_TaiDuLieu === 'undefined') {
+    window.tcgvc1_TaiDuLieu = tcgvc1_TaiDuLieu;
+    window.tcgvc1_ThemDong = tcgvc1_ThemDong;
+    window.tcgvc1_XoaDong = tcgvc1_XoaDong;
+    window.tcgvc1_LuuCapNhat = tcgvc1_LuuCapNhat;
+}
+</script>
