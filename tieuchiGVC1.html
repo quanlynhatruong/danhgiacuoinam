@@ -1,7 +1,7 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Cập nhật: Bỏ thanh trượt dọc, load năm học từ A1.
+ * Cập nhật: Bỏ thanh trượt dọc, load năm học từ A1 sheet.
  */
 (function() {
     if (document.getElementById('tieuchi-gvc1-ui')) return;
@@ -122,13 +122,13 @@ async function tcgvc1_TaiDuLieu() {
         const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
         if (response.status === 'success') {
             tcgvc1_DuLieuGoc = response.data || [];
-            // Load năm học từ response (nếu có)
+            // Load năm học từ response (bắt buộc backend trả về)
             if (response.nam_hoc) {
                 tcgvc1_NamHocGoc = response.nam_hoc;
                 const inpNam = document.getElementById('tcgvc1-namhoc');
                 if (inpNam) inpNam.value = response.nam_hoc;
             } else {
-                // Nếu API chưa trả về, gọi riêng
+                // Fallback: thử gọi API riêng nếu backend chưa tích hợp
                 await tcgvc1_TaiNamHoc();
             }
             tcgvc1_HienThiBang();
@@ -141,6 +141,7 @@ async function tcgvc1_TaiDuLieu() {
     if (typeof f_x_j === 'function') f_x_j(false);
 }
 
+// Hàm riêng đọc năm học (nếu cần)
 async function tcgvc1_TaiNamHoc() {
     try {
         const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
@@ -150,7 +151,7 @@ async function tcgvc1_TaiNamHoc() {
             const inpNam = document.getElementById('tcgvc1-namhoc');
             if (inpNam) inpNam.value = res.nam_hoc;
         }
-    } catch (e) { /* bỏ qua */ }
+    } catch (e) { /* không báo lỗi */ }
 }
 
 function tcgvc1_HienThiBang() {
@@ -182,7 +183,7 @@ function tcgvc1_TaoDong(index, item) {
         <td><textarea class="tcgvc1-htt" rows="1" placeholder="HTT">${htt}</textarea></td>
         <td><textarea class="tcgvc1-hoanthanh" rows="1" placeholder="Hoàn thành">${hoan_thanh}</textarea></td>
         <td><textarea class="tcgvc1-cht" rows="1" placeholder="CHT">${cht}</textarea></td>
-    </tr>`;
+    </table>`;
 }
 
 function tcgvc1_AutoResizeTextarea() {
