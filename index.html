@@ -91,7 +91,7 @@
         .k-k-q { font-weight: bold; color: #d9534f; background: #fff; padding: 8px; border: 1px dashed #dc3545; white-space: pre-line; min-height: 20px; line-height: 1.5;}
         
         .v-t-k { background: #e9ecef; border-left: 5px solid var(--mau-c); padding: 12px 20px; margin-top: 20px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;}
-        .v-d-g { font-size: 22px; font-weight: bold; color: #dc3545; text-align: right;}
+        .v-d-g { font-size: 22px; font-weight: bold; color: #dc3545; text-align: center;}
         #h-dang-tai { display: none; color: var(--mau-c); font-style: italic; text-align: center; margin: 15px; font-size: 15px;}
         .a-di { display: none; }
         .k-o-n { background-color: #e9ecef !important; cursor: not-allowed; color: #d9534f; font-weight: bold; border: 1px solid #ccc; }
@@ -522,14 +522,10 @@ function v_hien_thi_menu_admin(hienThi) {
     if (mn1) mn1.style.display = kieu;
     if (mnCha) {
         mnCha.style.display = kieu;
-        // Không tự động mở submenu, giữ nguyên trạng thái đóng (display: none)
-        // Tuy nhiên, nếu muốn đảm bảo submenu đóng khi hiển thị menu cha, ta set:
-       submenu.style.display = hienThi ? "none" : "none"; // vẫn là none
-        // Mũi tên vẫn hiển thị hướng xuống ▼ (thu gọn)
+       submenu.style.display = hienThi ? "none" : "none";
         const arrowSpan = mnCha.querySelector('span:last-child');
         if (arrowSpan) arrowSpan.innerHTML = '▼';
     }
-    // Các mục con vẫn giữ style của riêng chúng, nhưng đã nằm trong submenu nên không cần set lại
     let mn2 = document.getElementById("menu-tieu-chi-gv-c1");
     let mn3 = document.getElementById("menu-tieu-chi-gv-c2");
     let mn4 = document.getElementById("menu-tieu-chi-nv");
@@ -545,6 +541,30 @@ async function fetchAPI(url) {
         return JSON.parse(text);
     } catch (e) {
         throw new Error("LỖI 500: URL Máy chủ Google Apps Script bị sai, HOẶC đồng chí chưa Triển khai phiên bản mới (New Version) đúng chuẩn.");
+    }
+}
+
+// HÀM MỚI: Lấy mẫu tiêu chí từ CHITIEU tương ứng với nhóm (không phụ thuộc sheet riêng)
+async function loadMauTieuChi(nhom) {
+    const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+    try {
+        // Gọi API lấy mẫu tiêu chí (endpoint giả định: z_p_a=get_mau_tieu_chi)
+        // Nếu backend chưa có endpoint này, fallback sang cơ chế cũ (từ file HTML đã tải)
+        let response = await fetchAPI(`${z_y_a}?z_p_a=get_mau_tieu_chi&z_p_c=${nhom}&_t=${Date.now()}`);
+        if (response.status === 'success' && Array.isArray(response.y_d)) {
+            return response.y_d;
+        } else {
+            throw new Error("Khong co mau tu API");
+        }
+    } catch (e) {
+        console.warn("Không lấy được mẫu từ API, thử dùng dữ liệu từ file HTML mẫu", e);
+        // Fallback: dùng mảng tiêu chí mẫu từ các file đã tải (nếu được định nghĩa toàn cục)
+        // Giả sử mỗi file định nghĩa window.MAU_TIEU_CHI_GV_C1, ...
+        if (nhom === 'giaovienc1' && window.MAU_TIEU_CHI_GV_C1) return window.MAU_TIEU_CHI_GV_C1;
+        if (nhom === 'giaovienc2' && window.MAU_TIEU_CHI_GV_C2) return window.MAU_TIEU_CHI_GV_C2;
+        if (nhom === 'nhanvien' && window.MAU_TIEU_CHI_NV) return window.MAU_TIEU_CHI_NV;
+        // Nếu không có, trả về mảng rỗng và hiển thị lỗi
+        return [];
     }
 }
 
@@ -579,7 +599,7 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
@@ -886,7 +906,30 @@ async function f_x_d() {
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            f_x_e(t_k.y_d);
+            // ----- KIỂM TRA NĂM HỌC CỦA SHEET RIÊNG -----
+            // So sánh năm học lấy từ A1 (t_k.y_namhoc) với năm học hiện hành (lấy từ cột D, ở đây giả sử là biến toàn cục currentYear hoặc từ config)
+            let currentYear = "";
+            if (typeof DG_NAM_HOC_HIEN_TAI !== 'undefined') currentYear = DG_NAM_HOC_HIEN_TAI;
+            else if (typeof window.currentSchoolYear !== 'undefined') currentYear = window.currentSchoolYear;
+            else currentYear = v_nam_hoc_hien_tai; // fallback
+
+            let namHocKhac = (currentYear && v_nam_hoc_hien_tai && currentYear !== v_nam_hoc_hien_tai);
+
+            if (namHocKhac || !t_k.y_d || t_k.y_d.length === 0) {
+                // Năm học không khớp hoặc sheet riêng không có dữ liệu → load từ CHITIEU
+                console.log("Năm học không khớp hoặc không có dữ liệu, chuyển sang tải mẫu từ CHITIEU");
+                const mauTieuChi = await loadMauTieuChi(p_n);
+                if (mauTieuChi && mauTieuChi.length > 0) {
+                    f_x_e(mauTieuChi);
+                } else {
+                    // vẫn giữ dữ liệu cũ nếu có
+                    f_x_e(t_k.y_d);
+                }
+            } else {
+                // Năm học khớp, dùng dữ liệu từ sheet riêng
+                f_x_e(t_k.y_d);
+            }
+
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
             if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
