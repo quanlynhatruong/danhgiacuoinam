@@ -201,7 +201,7 @@
                 <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên
             </span>
             <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
-                <span class="b-tuong">💼</span> Tiêu chí xếp loại Nhân viên
+                <span class="b-tuong">💼</span> Tiêu chí xếp loại nhân viên
             </span>
             <span class="the-chuyen" id="menu-tro-giup" onclick="moKhungChatAI()">
                 <span class="b-tuong">💡</span> Trợ giúp
@@ -377,10 +377,9 @@ function khoiDongHeThong() {
         f_x_k('CapQuyen.html'),
         f_x_k('KetQua.html'),
         f_x_k('tieuchiGVC1.html'),
-        f_x_k('tieuchiNhanVien.html')   // BỔ SUNG: tải module tiêu chí nhân viên
+        f_x_k('tieuchiNhanVien.html')
     ]).catch(e => console.log(e));
     
-    // Gán sự kiện cho menu tiêu chí sau khi đã tải DOM
     setTimeout(function() {
         const menuTieuChiGv = document.getElementById("menu-tieu-chi-gv");
         if (menuTieuChiGv) {
@@ -525,7 +524,7 @@ async function f_x_load_guest_template(p_n) {
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
-        if(tbg) tbg.innerHTML = `<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
+        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
     }
 }
 
@@ -648,7 +647,6 @@ function f_x_mo_quan_ly_quyen() {
     }
 }
 
-// ================= MODULE TIÊU CHÍ GIÁO VIÊN =================
 function f_x_mo_tieu_chi_gv() {
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
@@ -673,7 +671,6 @@ function f_x_mo_tieu_chi_gv() {
     }
 }
 
-// ================= MODULE TIÊU CHÍ NHÂN VIÊN (BỔ SUNG) =================
 function f_x_mo_tieu_chi_nv() {
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
@@ -697,7 +694,6 @@ function f_x_mo_tieu_chi_nv() {
         hienThiThongBaoUI("Module quản lý tiêu chí nhân viên chưa được tải xong.");
     }
 }
-// ================= KẾT THÚC BỔ SUNG =================
 
 function f_x_c() {
     let vungQuyen = document.getElementById("cap-quyen-ui");
