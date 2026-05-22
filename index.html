@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đang tải hệ thống...</title>
+    <title>Hệ thống Đánh giá - Trang chủ</title>
     
     <style>
         :root { --mau-c: #0056b3; --mau-n: #f4f7f6; --mau-t: #333333; }
@@ -17,11 +17,9 @@
         .khung-logo img { width: 85px; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
         .ten-truong-trai { color: #ffffff; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 5px; line-height: 1.4; padding: 0 15px; text-transform: uppercase; border-bottom: 1px dashed rgba(255, 255, 255, 0.4); padding-bottom: 15px; width: 85%;}
         
-        /* CSS chuyển từ KetQua.html */
-        .thong-tin-user { text-align: center; color: #ffffff; font-size: 13px; margin-top: 15px; margin-bottom: 15px; border: 1px solid #ffc107; background-color: rgba(0, 0, 0, 0.15); border-radius: 6px; padding: 15px 10px; width: 85%; line-height: 1.6; box-sizing: border-box; }
+        /* Chuyển khối thông tin User từ KetQua sang Index */
+        .thong-tin-user { text-align: center; color: #ffffff; font-size: 13px; margin-top: 15px; margin-bottom: 20px; border: 1px solid #ffc107; background-color: rgba(0, 0, 0, 0.15); border-radius: 6px; padding: 15px 10px; width: 85%; line-height: 1.6; box-sizing: border-box; }
         .thong-tin-user .hl-text { color: #ffc107; font-weight: bold; font-size: 14px; text-transform: uppercase; }
-        .the-chuyen.active { background-color: rgba(255, 255, 255, 0.2); font-weight: bold; color: #ffc107; }
-        /* -------------------------- */
 
         .danh-muc-trai { width: 100%; display: flex; flex-direction: column; padding: 0; box-sizing: border-box;}
         .the-chuyen { color: #ffffff; font-size: 16px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-decoration: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); box-sizing: border-box;}
@@ -32,8 +30,8 @@
         .k-ngoai { flex: 1; background: white; padding: 0 30px 25px 30px; border-radius: 0 5px 5px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; width: 100%; box-sizing: border-box; margin: 0;}
         
         .k-header-sticky { position: sticky; top: 0; background: #ffffff; z-index: 1000; padding-top: 15px; padding-bottom: 0px; display: flex; flex-direction: column; align-items: center;}
-        .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
-        .n-dx:hover { background: #c82333; }
+        .n-dx { position: absolute; top: 15px; right: 0; padding: 6px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold;}
+        .n-dx:hover { background: #5a6268; }
 
         .k-dau { text-align: center; margin-bottom: 0px; border-bottom: 2px solid var(--mau-c); padding-bottom: 10px; width: 100%;}
         .k-dau h2 { font-size: 16px; font-weight: bold; margin: 0; color: #555; }
@@ -54,7 +52,7 @@
         
         table { width: 100%; border-collapse: collapse; margin-top: 0px; }
         th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: middle; }
-        th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 15px; font-weight: bold; text-transform: uppercase;}
+        th { background: #e9ecef; color: var(--mau-c); text-align: center; font-size: 15px;}
         .o-n-bang { width: 100%; border: 1px solid #ddd; padding: 6px; box-sizing: border-box; font-family: inherit; font-size: 15px; transition: 0.3s;}
         
         .k-phu { background: #f8fbff; border: 1px solid #b8daff; padding: 10px; border-radius: 4px; }
@@ -165,18 +163,6 @@
         </div>
         <div class="ten-truong-trai app-school-name">ĐANG TẢI...</div>
         
-        <div id="vungThongTin" style="display: none; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.2); width: 99%; padding: 0px 0px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; text-align: center;">
-            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 0px;">Dữ liệu:</div>
-            <div id="theHienChinh" style="color: #ffc107; font-weight: bold; text-transform: uppercase; font-size: 14px; margin-bottom: 4px; line-height: 1.3;"></div>
-            
-            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 4px;">
-                Phân loại: <span id="hienThiNhom" style="color: #ffc107; font-weight: bold; text-transform: uppercase;"></span>
-            </div>
-            <div style="font-size: 13px; color: #e0e0e0; margin-bottom: 0px;">
-                Năm học: <span id="hienThiNamHoc" style="color: #ffc107; font-weight: bold;"></span>
-            </div>
-        </div>
-
         <div class="thong-tin-user" id="vungThongTinUser" style="display: none;">
             <div style="opacity: 0.9; margin-bottom: 2px;">Xin chào đồng chí:</div>
             <div class="hl-text" id="ui-ten-hien-thi">...</div>
@@ -185,11 +171,12 @@
             <div style="opacity: 0.9; margin-top: 3px;">Phân loại: <span class="hl-text" style="font-size: 13px;" id="ui-phan-loai">...</span></div>
             <div style="opacity: 0.9; margin-top: 3px;">Năm học: <span class="hl-text" style="font-size: 13px;" id="ui-nam-hoc">...</span></div>
         </div>
+
         <div class="danh-muc-trai">
-            <a href="javascript:void(0)" onclick="chuyenTab('danh-gia'); return false;" class="the-chuyen active" id="menu-danh-gia">
+            <a href="javascript:void(0)" onclick="f_x_c(); return false;" class="the-chuyen" id="menu-danh-gia" style="background-color: rgba(255, 255, 255, 0.15); font-weight: bold; text-decoration: none;">
                 <span class="b-tuong">📝</span> Đánh giá
             </a>
-            <a href="javascript:void(0)" onclick="chuyenTab('ket-qua'); return false;" class="the-chuyen" id="menu-ket-qua">
+            <a href="KetQua.html" class="the-chuyen" id="menu-ket-qua" style="text-decoration: none;">
                 <span class="b-tuong">📈</span> Kết quả
             </a>
             <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;">
@@ -212,16 +199,9 @@
             <button class="n-dx" onclick="f_x_logout()">Đăng xuất</button>
             <div class="k-dau">
                 <h2><span class="app-school-name-up">ĐANG TẢI...</span></h2>
-                <h1 class="app-title-name-up" data-original-text="ĐANG TẢI...">ĐANG TẢI...</h1>
+                <h1 class="app-title-name-up">ĐANG TẢI...</h1>
                 
                 <div id="vungHienThiNamHoc"><p><i>(Áp dụng từ năm học 2025-2026)</i></p></div>
-                
-                <div id="vungLocNamHoc" style="display: none; margin-top: 10px; align-items: center; justify-content: center; background: #e9ecef; padding: 5px 15px; border-radius: 20px; width: fit-content; margin-left: auto; margin-right: auto;">
-                    <label for="locNamHoc" style="font-weight: bold; color: var(--mau-c); margin-right: 10px; font-size: 15px;">Năm học:</label>
-                    <select id="locNamHoc" style="padding: 5px 15px; border-radius: 15px; border: 1px solid #ced4da; font-family: inherit; font-size: 15px; color: #dc3545; font-weight: bold; outline: none; cursor: pointer;">
-                        <option value="">-- Chọn năm học --</option>
-                    </select>
-                </div>
                 <div id="vungChonAdmin" style="display: none; margin-top: 8px;">
                     <select id="oChonUserAdmin" onchange="f_x_admin_chon_user()" class="o-c-kieu" style="width: auto; min-width: 320px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-color: var(--mau-c);">
                         <option value="">-- Quản trị viên: Chọn nhân sự để tra cứu/đánh giá --</option>
@@ -267,23 +247,6 @@
                 <button id="btnXuatPDF" class="n-bam n-cam" style="flex: 1; margin-top: 0; font-size: 18px; padding: 12px;" onclick="f_x_xuat_pdf()">XUẤT BẢN PDF</button>
             </div>
         </div>
-
-        <div id="h-dang-tai-kq" style="display: none; text-align: center; color: var(--mau-c); font-style: italic; margin: 30px; font-size: 16px;">Đang tiến hành trích xuất và sắp xếp dữ liệu...</div>
-        <div id="vungKetQua" style="display: none;">
-            <table>
-                <thead>
-                    <tr>
-                        <th width="5%">STT</th>
-                        <th width="35%">Họ và tên</th>
-                        <th width="20%">Phân loại</th>
-                        <th width="40%">Kết quả xếp loại</th>
-                    </tr>
-                </thead>
-                <tbody id="bang-ket-qua">
-                </tbody>
-            </table>
-        </div>
-
     </div>
 </div>
 
@@ -332,7 +295,6 @@ let v_che_do_khach = false;
 let danhSachVienChucAdmin = [];
 let v_bo_nho_dem_admin = {}; 
 let v_l_c = {};
-let v_dl_toan_bo = []; // Chuyển từ KetQua.html sang
 
 function hienThiNutGoogle() {
     document.getElementById("vungXacThucGoogle").style.display = "block";
@@ -357,12 +319,6 @@ window.addEventListener('DOMContentLoaded', () => {
         alert("Hệ thống bảo mật từ chối nạp cấu hình. Vui lòng kiểm tra lại đường dẫn tệp ketnoi.js!");
     };
     document.head.appendChild(ketnoiScript);
-
-    // Xử lý kiện lọc năm của Tab Kết quả
-    const selectNam = document.getElementById("locNamHoc");
-    if(selectNam) {
-        selectNam.addEventListener('change', locDuLieuTheoNam);
-    }
 });
 
 function khoiDongHeThong() {
@@ -444,67 +400,18 @@ function decodeJwtResponse(chuoi_ma) {
 function showMainUI(d_danh) {
     document.getElementById('khung-xac-thuc').style.display = 'none';
     document.getElementById('bo-cuc-he-thong').style.display = 'flex'; 
-
-    const objNhom = document.getElementById('oChonNhom');
-    if(document.getElementById('hienThiNhom')) {
-        let tenHienThi = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
-        document.getElementById('hienThiNhom').innerText = tenHienThi;
+    
+    let mKq = document.getElementById("menu-ket-qua");
+    if (mKq) {
+        mKq.style.display = "flex";
+        if (mKq.hasAttribute("data-href-goc")) {
+            mKq.setAttribute("href", mKq.getAttribute("data-href-goc"));
+        }
+        mKq.onclick = null;
     }
+
     const oNhap = document.getElementById('oNhapChinh');
     if (oNhap) { oNhap.value = d_danh; f_x_d(); }
-    
-    // Tải thông tin người dùng lên bảng bên trái (logic mới)
-    dienThongTinNguoiDung();
-}
-
-// Hàm xử lý việc chuyển TAB thay vì tải trang mới
-function chuyenTab(tab) {
-    if (v_che_do_khach && tab === 'ket-qua') {
-        hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); 
-        return;
-    }
-
-    document.getElementById('menu-danh-gia').classList.remove('active');
-    document.getElementById('menu-ket-qua').classList.remove('active');
-    document.getElementById('menu-' + tab).classList.add('active');
-
-    const kDauH1 = document.querySelector('.k-dau h1');
-
-    if (tab === 'danh-gia') {
-        document.getElementById('vungLocNamHoc').style.display = 'none';
-        document.getElementById('vungKetQua').style.display = 'none';
-        document.getElementById('h-dang-tai-kq').style.display = 'none';
-        
-        document.getElementById('vungThuHai').classList.remove('a-di');
-        document.getElementById('vungThuNhat').classList.add('a-di');
-        
-        kDauH1.innerText = kDauH1.getAttribute('data-original-text') || "ĐANG TẢI...";
-        
-        if (sessionStorage.getItem("HTDG_IS_ADMIN") === "true") {
-            if(document.getElementById('vungChonAdmin')) document.getElementById('vungChonAdmin').style.display = 'block';
-            if(document.getElementById('vungHienThiNamHoc')) document.getElementById('vungHienThiNamHoc').style.display = 'none';
-        } else {
-            if(document.getElementById('vungHienThiNamHoc')) document.getElementById('vungHienThiNamHoc').style.display = 'block';
-        }
-
-    } else if (tab === 'ket-qua') {
-        if (!kDauH1.hasAttribute('data-original-text')) {
-            kDauH1.setAttribute('data-original-text', kDauH1.innerText);
-        }
-        kDauH1.innerText = "KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC";
-        
-        document.getElementById('vungThuHai').classList.add('a-di');
-        document.getElementById('vungThuNhat').classList.add('a-di');
-        
-        if(document.getElementById('vungChonAdmin')) document.getElementById('vungChonAdmin').style.display = 'none';
-        if(document.getElementById('vungHienThiNamHoc')) document.getElementById('vungHienThiNamHoc').style.display = 'none';
-
-        document.getElementById('vungLocNamHoc').style.display = 'inline-flex';
-        document.getElementById('h-dang-tai-kq').style.display = 'block';
-        document.getElementById('vungKetQua').style.display = 'none';
-        
-        taiDuLieuKetQua();
-    }
 }
 
 function v_hien_thi_menu_admin(hienThi) {
@@ -575,13 +482,18 @@ async function f_x_vao_khach() {
 
     document.getElementById('khung-xac-thuc').style.display = 'none';
     document.getElementById('bo-cuc-he-thong').style.display = 'flex';
-    document.getElementById('theHienChinh').innerText = "KHÁCH THAM QUAN";
     
     const p_n = objNhom.value;
-    document.getElementById('hienThiNhom').innerText = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
+    let phanLoaiText = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
     
-    document.getElementById("vungThongTin").style.display = "flex";
-    document.getElementById("vungThongTinUser").style.display = "none";
+    // Nạp UI Khách
+    document.getElementById("vungThongTinUser").style.display = "block";
+    document.getElementById("ui-ten-hien-thi").innerText = "KHÁCH THAM QUAN";
+    document.getElementById("ui-phan-loai").innerText = phanLoaiText;
+    document.getElementById("ui-nam-hoc").innerText = "2025-2026";
+    document.getElementById("ui-xep-loai").innerText = "--";
+    document.getElementById("ui-dung-thu").innerText = "--";
+
     document.getElementById("vungThuNhat").classList.add("a-di");
     document.getElementById("vungThuHai").classList.remove("a-di");
     
@@ -589,6 +501,19 @@ async function f_x_vao_khach() {
     if (nutLuu) nutLuu.style.display = "none";
     
     v_hien_thi_menu_admin(false);
+    
+    let mKq = document.getElementById("menu-ket-qua");
+    if (mKq) {
+        mKq.style.display = "flex";
+        if (!mKq.hasAttribute("data-href-goc")) {
+            mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
+        }
+        mKq.setAttribute("href", "javascript:void(0)");
+        mKq.onclick = function() { 
+            hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); 
+            return false; 
+        };
+    }
     
     f_x_j(true);
     await f_x_load_guest_template(p_n);
@@ -598,7 +523,12 @@ async function f_x_vao_khach() {
 }
 
 function f_x_logout() {
-    sessionStorage.clear();
+    sessionStorage.removeItem("HTDG_ACCOUNT_ID");
+    sessionStorage.removeItem("HTDG_NHOM_ID");
+    sessionStorage.removeItem("HTDG_IS_ADMIN");
+    sessionStorage.removeItem("HTDG_USER_NAME");
+    sessionStorage.removeItem("HTDG_USER_ROLE");
+    sessionStorage.removeItem("HTDG_USER_YEAR");
     v_bo_nho_dem_admin = {}; 
     location.reload();
 }
@@ -638,10 +568,8 @@ async function f_x_d() {
         if (t_k.status === 'success') {
             v_che_do_khach = false; 
             v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e || {}; v_l_d = t_k.y_c || ""; 
-            document.getElementById("theHienChinh").innerText = t_k.y_b || v_l_b;
             
             v_nam_hoc_hien_tai = t_k.y_namhoc || "";
-            if(document.getElementById("hienThiNamHoc")) document.getElementById("hienThiNamHoc").innerText = v_nam_hoc_hien_tai;
 
             let roleStr = t_k.y_role ? t_k.y_role.toLowerCase() : "";
             let quyenAdmin = roleStr.includes('admin');
@@ -649,6 +577,11 @@ async function f_x_d() {
             
             sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
             sessionStorage.setItem("HTDG_IS_ADMIN_VIP", quyenAdminVip ? "true" : "false"); 
+            
+            // Lưu SessionStorage cho các Tab con (KetQua.html) đọc không cần gọi lại API
+            sessionStorage.setItem("HTDG_USER_NAME", t_k.y_b || v_l_b);
+            sessionStorage.setItem("HTDG_USER_ROLE", t_k.y_role || "");
+            sessionStorage.setItem("HTDG_USER_YEAR", t_k.y_namhoc || "");
             
             v_hien_thi_menu_admin(quyenAdminVip);
 
@@ -661,11 +594,17 @@ async function f_x_d() {
                 document.getElementById("vungHienThiNamHoc").style.display = "block";
             }
 
+            // Hiển thị khung thông tin cá nhân
+            document.getElementById("vungThongTinUser").style.display = "block";
+            document.getElementById("ui-ten-hien-thi").innerText = t_k.y_b || v_l_b;
+            document.getElementById("ui-phan-loai").innerText = t_k.y_role || "";
+            document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || "";
+            document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
+            document.getElementById("ui-dung-thu").innerText = "--";
+
             f_x_e(t_k.y_d);
             document.getElementById("vungThuNhat").classList.add("a-di");
             document.getElementById("vungThuHai").classList.remove("a-di");
-            document.getElementById("vungThongTin").style.display = "flex";
-            document.getElementById("vungThongTinUser").style.display = "block"; // Hiển thị tab thông tin
             
             if (typeof f_x_h === "function") f_x_h();
             
@@ -682,15 +621,26 @@ async function f_x_d() {
             return;
         } else { 
             v_che_do_khach = true;
-            document.getElementById('theHienChinh').innerText = "Tài khoản không hợp lệ";
-            document.getElementById("vungThongTin").style.display = "flex";
-            document.getElementById("vungThongTinUser").style.display = "none";
+            document.getElementById("vungThongTinUser").style.display = "block";
+            document.getElementById("ui-ten-hien-thi").innerText = "TÀI KHOẢN KHÔNG HỢP LỆ";
+            document.getElementById("ui-phan-loai").innerText = "--";
+            document.getElementById("ui-nam-hoc").innerText = "--";
+            
             document.getElementById("vungThuNhat").classList.add("a-di");
             document.getElementById("vungThuHai").classList.remove("a-di");
             let nutLuu = document.getElementById("vungNutBam");
             if (nutLuu) nutLuu.style.display = "none";
 
             v_hien_thi_menu_admin(false);
+            
+            let mKq = document.getElementById("menu-ket-qua");
+            if (mKq) {
+                mKq.style.display = "flex";
+                if (!mKq.hasAttribute("data-href-goc")) mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
+                mKq.setAttribute("href", "javascript:void(0)");
+                mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
+            }
+            
             await f_x_load_guest_template(p_n);
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
@@ -699,194 +649,6 @@ async function f_x_d() {
     }
     f_x_j(false);
 }
-
-// ================= CÁC HÀM XỬ LÝ CHO TAB KẾT QUẢ VÀ THÔNG TIN ================= //
-async function dienThongTinNguoiDung() {
-    let d_danh = sessionStorage.getItem("HTDG_ACCOUNT_ID");
-    let nhom = sessionStorage.getItem("HTDG_NHOM_ID") || "giaovien";
-    
-    if (!d_danh) {
-        document.getElementById("ui-ten-hien-thi").innerText = "KHÁCH";
-        return;
-    }
-
-    try {
-        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        const res = await fetch(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(d_danh)}&z_p_c=${nhom}`);
-        const t_k = await res.json();
-        
-        if (t_k.status === 'success') {
-            let ten = t_k.y_b || "CHƯA RÕ";
-            document.getElementById("ui-ten-hien-thi").innerText = ten;
-            document.getElementById("ui-phan-loai").innerText = t_k.y_role || "CHƯA RÕ";
-            document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || "CHƯA RÕ";
-            
-            capNhatXepLoaiMenuTrai(ten);
-        }
-    } catch (e) {
-        console.error("Lỗi đồng bộ dữ liệu người dùng:", e);
-    }
-}
-
-function capNhatXepLoaiMenuTrai(tenGoi) {
-    let selectNam = document.getElementById("locNamHoc");
-    let namChon = selectNam ? selectNam.value : "";
-    
-    if (!namChon) {
-        namChon = document.getElementById("ui-nam-hoc").innerText;
-    } else {
-        document.getElementById("ui-nam-hoc").innerText = namChon;
-    }
-
-    if (tenGoi === "..." || tenGoi === "KHÁCH") return;
-
-    let xepLoai = "CHƯA ĐÁNH GIÁ";
-    let phanLoai = document.getElementById("ui-phan-loai").innerText;
-    let dungThu = "--"; 
-
-    if (v_dl_toan_bo && v_dl_toan_bo.length > 0) {
-        let danhSachTheoNam = v_dl_toan_bo.filter(item => {
-            let checkNam = item.n_hoc ? item.n_hoc.trim() : "";
-            return checkNam === namChon;
-        });
-        
-        danhSachTheoNam.sort((a, b) => {
-            let parseA = phanTichXepLoai(a.x_l_q || "");
-            let parseB = phanTichXepLoai(b.x_l_q || "");
-            if (parseA.muc !== parseB.muc) {
-                return parseB.muc - parseA.muc;
-            } else {
-                return parseB.diem - parseA.diem;
-            }
-        });
-
-        let userIndex = danhSachTheoNam.findIndex(item => item.t_v_c === tenGoi);
-        
-        if (userIndex !== -1) {
-            let userRecord = danhSachTheoNam[userIndex];
-            xepLoai = userRecord.x_l_q || "CHƯA ĐÁNH GIÁ";
-            phanLoai = userRecord.p_l || phanLoai;
-            dungThu = userIndex + 1; 
-        } else {
-            let userAnyYear = v_dl_toan_bo.find(item => item.t_v_c === tenGoi);
-            if (userAnyYear && userAnyYear.p_l) {
-                phanLoai = userAnyYear.p_l;
-            }
-        }
-    }
-    
-    document.getElementById("ui-xep-loai").innerText = xepLoai;
-    document.getElementById("ui-dung-thu").innerText = dungThu;
-    document.getElementById("ui-phan-loai").innerText = phanLoai;
-}
-
-async function taiDuLieuKetQua() {
-    try {
-        const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        const res = await fetch(`${z_y_a}?z_p_a=l_k_q`);
-        const t_k = await res.json();
-        if (t_k.status === 'success') {
-            v_dl_toan_bo = t_k.d_l_k;
-            napDropdownNamHoc(v_dl_toan_bo);
-            document.getElementById("h-dang-tai-kq").style.display = "none";
-            document.getElementById("vungKetQua").style.display = "block";
-            locDuLieuTheoNam();
-        } else {
-            document.getElementById("h-dang-tai-kq").innerText = "Chưa có dữ liệu trên hệ thống.";
-        }
-    } catch (err) {
-        document.getElementById("h-dang-tai-kq").innerText = "Lỗi kết nối máy chủ. Chưa tải được dữ liệu.";
-    }
-}
-
-function napDropdownNamHoc(d_l) {
-    const selectNam = document.getElementById("locNamHoc");
-    selectNam.innerHTML = '<option value="">-- Chọn năm học --</option>';
-    let cacNam = new Set();
-    d_l.forEach(item => {
-        if (item.n_hoc && item.n_hoc.trim() !== "") cacNam.add(item.n_hoc.trim());
-    });
-    let mangNam = Array.from(cacNam).sort().reverse();
-    mangNam.forEach(nam => {
-        let opt = document.createElement("option");
-        opt.value = nam;
-        opt.textContent = nam;
-        selectNam.appendChild(opt);
-    });
-    if(mangNam.length > 0) {
-        selectNam.value = mangNam[0];
-    }
-}
-
-function locDuLieuTheoNam() {
-    const selectObj = document.getElementById("locNamHoc");
-    if (!selectObj) return;
-    const namChon = selectObj.value.trim();
-    const k_b = document.getElementById("bang-ket-qua");
-    
-    if (!namChon) {
-        k_b.innerHTML = `<tr><td colspan="4" style="text-align:center; font-style: italic; color: #555;">Vui lòng chọn năm học để xem kết quả</td></tr>`;
-        return;
-    }
-    
-    let duLieuLoc = v_dl_toan_bo.filter(item => {
-        let checkNam = item.n_hoc ? item.n_hoc.trim() : "";
-        return checkNam === namChon;
-    });
-    
-    hienThiBangKetQua(duLieuLoc);
-
-    let ten = document.getElementById("ui-ten-hien-thi").innerText;
-    capNhatXepLoaiMenuTrai(ten);
-}
-
-function hienThiBangKetQua(d_l) {
-    d_l.sort((a, b) => {
-        let parseA = phanTichXepLoai(a.x_l_q || "");
-        let parseB = phanTichXepLoai(b.x_l_q || "");
-        if (parseA.muc !== parseB.muc) {
-            return parseB.muc - parseA.muc;
-        } else {
-            return parseB.diem - parseA.diem;
-        }
-    });
-
-    const k_b = document.getElementById("bang-ket-qua");
-    let html = "";
-    d_l.forEach((item, index) => {
-        let colorCode = "#333";
-        let rawStr = item.x_l_q ? item.x_l_q.toLowerCase() : "";
-        if (rawStr.includes("xuất sắc")) colorCode = "#dc3545";
-        else if (rawStr.includes("tốt")) colorCode = "#0056b3";
-        
-        html += `<tr>
-            <td style="text-align: center; font-weight: bold;">${index + 1}</td>
-            <td style="font-weight: bold; color: #1e1e1e;">${item.t_v_c || ""}</td>
-            <td style="text-align: center; color: #555; font-weight: 500;">${item.p_l || ""}</td>
-            <td style="color: ${colorCode}; font-weight: 500; white-space: pre-line;">${item.x_l_q || ""}</td>
-        </tr>`;
-    });
-    if (html === "") html = `<tr><td colspan="4" style="text-align:center;">Chưa có viên chức nào nộp đánh giá trong năm học này</td></tr>`;
-    k_b.innerHTML = html;
-}
-
-function phanTichXepLoai(chuoi) {
-    let str = chuoi ? chuoi.toLowerCase() : "";
-    let muc = 0;
-    if (str.includes("xuất sắc")) muc = 4;
-    else if (str.includes("tốt")) muc = 3;
-    else if (str.includes("chưa hoàn thành")) muc = 1;
-    else if (str.includes("hoàn thành")) muc = 2;
-    
-    let diem = 0;
-    let match = str.match(/([0-9]+[.,]?[0-9]*)\s*điểm/);
-    if (match) {
-        diem = parseFloat(match[1].replace(',', '.'));
-    }
-    return { muc: muc, diem: diem };
-}
-// ========================================================================= //
-
 
 async function f_x_load_users() {
     try {
@@ -934,8 +696,8 @@ async function f_x_admin_chon_user() {
     
     if (isNv && !isGv) { nhomXacDinh = 'nhanvien'; }
 
-    document.getElementById("theHienChinh").innerText = selectedName;
-    document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
+    document.getElementById("ui-ten-hien-thi").innerText = selectedName;
+    document.getElementById("ui-phan-loai").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
     document.getElementById("oChonNhom").value = nhomXacDinh; 
 
     if (v_bo_nho_dem_admin[selectedId]) {
@@ -984,7 +746,7 @@ async function f_x_i() {
     });
     
     document.getElementById("o-luu-overlay").style.display = "flex";
-    const ten_tren_web = document.getElementById("theHienChinh").innerText || v_l_b;
+    const ten_tren_web = document.getElementById("ui-ten-hien-thi").innerText || v_l_b;
     
     try {
         await fetch(z_y_a, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ w_a: v_l_a, w_b: v_l_b, w_f: ten_tren_web, w_c: m_k, w_d: v_l_e, w_e: v_l_f, w_g: v_nam_hoc_hien_tai }) });
@@ -1236,7 +998,7 @@ async function f_x_xuat_pdf() {
         if (!element) { alert("Không tìm thấy vùng dữ liệu đánh giá."); return; }
 
         let tenNV = "VienChuc";
-        const eTen = document.getElementById("theHienChinh");
+        const eTen = document.getElementById("ui-ten-hien-thi");
         if (eTen) tenNV = eTen.innerText.trim();
         
         const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
