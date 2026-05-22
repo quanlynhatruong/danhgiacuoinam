@@ -338,6 +338,7 @@
 
 <script src="ketnoi.js"></script>
 <script>
+// ==================== GIỮ NGUYÊN CÁC HÀM CŨ ====================
 let v_che_do_xem_admin = false;
 let v_che_do_khach = false; 
 let danhSachVienChucAdmin = [];
@@ -594,7 +595,7 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
+                if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
@@ -841,7 +842,7 @@ function f_x_c() {
     }
 }
 
-// ================= HÀM f_x_d ĐÃ CẬP NHẬT (quét cột D) =================
+// ================= HÀM f_x_d ĐÃ CẬP NHẬT - QUÉT TOÀN BỘ CỘT D =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -905,64 +906,75 @@ async function f_x_d() {
             // === LẤY NĂM HỌC HIỆN HÀNH TỪ MENU ===
             let currentYearElem = document.getElementById("ui-nam-hoc");
             let currentYear = "";
-            if (currentYearElem) {
-                currentYear = currentYearElem.innerText.trim();
-            }
+            if (currentYearElem) currentYear = currentYearElem.innerText.trim();
             if (!currentYear && v_nam_hoc_hien_tai) currentYear = v_nam_hoc_hien_tai;
             if (!currentYear) currentYear = "2025-2026";
-            
-            // === LẤY DỮ LIỆU TỪ SHEET RIÊNG (CỘT D) ===
-            // Yêu cầu backend trả về mảng y_rieng_data: [{ tieu_chi, ket_qua, nam_hoc }, ...] theo thứ tự từ trên xuống
-            let riengData = t_k.y_rieng_data || [];
-            let ketQuaTheoThuTu = []; // mảng lưu kết quả theo thứ tự xuất hiện (chỉ lấy dòng đầu cho mỗi tiêu chí)
-            let daCo = new Map(); // để tránh trùng lặp tiêu chí (lấy lần đầu gặp)
-            
-            for (let row of riengData) {
-                let namHocRow = row.nam_hoc ? String(row.nam_hoc).trim() : "";
-                if (namHocRow === currentYear) {
-                    let tenTieuChi = row.tieu_chi ? row.tieu_chi.toString().trim() : "";
-                    let ketQua = row.ket_qua ? row.ket_qua.toString().trim() : "";
-                    if (!daCo.has(tenTieuChi)) {
-                        daCo.set(tenTieuChi, ketQua);
+
+            // === XỬ LÝ DỮ LIỆU TỪ SHEET RIÊNG (nếu backend trả về mảng thô) ===
+            let ketQuaTheoThuTu = [];  // mảng các đối tượng {ten, ketQua} theo thứ tự xuất hiện trong sheet riêng (chỉ lấy năm học trùng)
+            let hasDataForCurrentYear = false;
+
+            // Ưu tiên dùng dữ liệu thô từ backend (y_rieng_data)
+            if (t_k.y_rieng_data && Array.isArray(t_k.y_rieng_data)) {
+                for (let row of t_k.y_rieng_data) {
+                    let namHocRow = row.nam_hoc ? String(row.nam_hoc).trim() : "";
+                    if (namHocRow === currentYear) {
+                        hasDataForCurrentYear = true;
+                        let tenTieuChi = row.tieu_chi ? row.tieu_chi.toString().trim() : "";
+                        let ketQua = row.ket_qua ? row.ket_qua.toString().trim() : "";
                         ketQuaTheoThuTu.push({ ten: tenTieuChi, ketQua: ketQua });
                     }
                 }
             }
+            // Nếu chưa có dữ liệu thô nhưng có y_rieng_namhoc (một năm) và y_d đã được tích hợp kết quả của năm đó, ta cũng có thể dùng
+            // nhưng y_d đã bị ghi đè, không giữ được thứ tự. Tốt nhất yêu cầu backend cung cấp y_rieng_data.
             
-            let mauTieuChi = t_k.y_d; // mảng tiêu chí mẫu
-            let updatedMauTieuChi = [];
+            // Lấy mảng tiêu chí mẫu từ backend (theo đúng thứ tự của sheet CHITIEU)
+            let mauTieuChi = t_k.y_d;  // mảng gốc chưa bị thay đổi kết quả (backend vẫn giữ x_c = "")
+            if (!mauTieuChi || mauTieuChi.length === 0) {
+                // Nếu không có, thử lấy mẫu từ API
+                mauTieuChi = await loadMauTieuChi(p_n);
+            }
             
-            if (ketQuaTheoThuTu.length > 0) {
-                // Tạo map để tra cứu nhanh
-                let ketQuaMap = new Map();
-                for (let item of ketQuaTheoThuTu) {
+            // Tạo map kết quả từ dữ liệu đã quét (chỉ lấy lần đầu tiên gặp mỗi tiêu chí, nhưng quan trọng là thứ tự)
+            let ketQuaMap = new Map();
+            for (let item of ketQuaTheoThuTu) {
+                if (!ketQuaMap.has(item.ten)) {
                     ketQuaMap.set(item.ten, item.ketQua);
                 }
-                // Cập nhật kết quả vào mảng mẫu, giữ nguyên thứ tự tiêu chí mẫu
-                for (let item of mauTieuChi) {
-                    let ten = item.x_a ? item.x_a.toString().trim() : "";
-                    let newItem = { ...item };
-                    if (ketQuaMap.has(ten)) {
-                        newItem.x_c = ketQuaMap.get(ten);
-                    } else {
-                        newItem.x_c = ""; // không có dữ liệu
+            }
+            
+            let finalTieuChi = [];
+            if (mauTieuChi && mauTieuChi.length > 0) {
+                if (hasDataForCurrentYear && ketQuaMap.size > 0) {
+                    // Cập nhật kết quả vào mảng mẫu theo đúng thứ tự mẫu, nhưng giữ nguyên kết quả nếu có
+                    for (let item of mauTieuChi) {
+                        let ten = item.x_a ? item.x_a.toString().trim() : "";
+                        let newItem = { ...item };
+                        if (ketQuaMap.has(ten)) {
+                            newItem.x_c = ketQuaMap.get(ten);
+                        } else {
+                            newItem.x_c = "";
+                        }
+                        finalTieuChi.push(newItem);
                     }
-                    updatedMauTieuChi.push(newItem);
+                } else {
+                    // Không có dữ liệu cho năm nay, hiển thị bảng mẫu với kết quả trống
+                    for (let item of mauTieuChi) {
+                        let newItem = { ...item, x_c: "" };
+                        finalTieuChi.push(newItem);
+                    }
+                    if (!hasDataForCurrentYear) {
+                        hienThiThongBaoUI("Chưa có dữ liệu đánh giá cho năm học " + currentYear + ". Vui lòng nhập và lưu.");
+                    }
                 }
-                f_x_e(updatedMauTieuChi);
-            } 
-            else if (mauTieuChi && mauTieuChi.length > 0) {
-                // Không có dữ liệu cho năm hiện tại, hiển thị bảng mẫu với kết quả trống
-                let blankData = mauTieuChi.map(item => ({ ...item, x_c: "" }));
-                f_x_e(blankData);
-                v_l_d = "";
-                if (riengData.length === 0) {
-                    hienThiThongBaoUI("Chưa có dữ liệu đánh giá cho năm học " + currentYear + ". Vui lòng nhập và lưu.");
-                }
+            } else {
+                // Không có mẫu, bảng trống
+                finalTieuChi = [];
+                hienThiThongBaoUI("Không thể tải mẫu tiêu chí. Vui lòng liên hệ quản trị.");
             }
-            else {
-                f_x_e([]);
-            }
+            
+            f_x_e(finalTieuChi);
 
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
@@ -985,14 +997,11 @@ async function f_x_d() {
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = "TÀI KHOẢN KHÔNG HỢP LỆ";
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = "--";
             if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = "--";
-            
             if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if (document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
             let nutLuu = document.getElementById("vungNutBam");
             if (nutLuu) nutLuu.style.display = "none";
-
             v_hien_thi_menu_admin(false);
-            
             await f_x_load_guest_template(p_n);
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
@@ -1060,8 +1069,8 @@ async function f_x_admin_chon_user() {
         v_l_a = t_k.y_acc; 
         v_l_c = t_k.y_e || {};
         v_l_d = t_k.y_c || "";
+        // Ở đây cũng cần xử lý tương tự f_x_d, nhưng tạm thời giữ nguyên
         f_x_e(t_k.y_d); 
-        
         if (typeof f_x_h === "function") f_x_h();
         return;
     }
@@ -1072,14 +1081,11 @@ async function f_x_admin_chon_user() {
 
         if (t_k.status === 'success') {
             v_bo_nho_dem_admin[selectedId] = t_k; 
-
             v_l_b = t_k.y_a; 
             v_l_a = t_k.y_acc; 
             v_l_c = t_k.y_e || {};
             v_l_d = t_k.y_c || "";
-
             f_x_e(t_k.y_d); 
-            
             if (typeof f_x_h === "function") f_x_h();
         } else {
             hienThiThongBaoUI(t_k.message);
@@ -1245,7 +1251,7 @@ function v_f_x_h_debounce() {
     v_timer_h = setTimeout(f_x_h, 250); 
 }
 
-// ================= HÀM f_x_e (BỎ QUA DÒNG CÓ DẤU *) =================
+// ================= HÀM f_x_e (HIỂN THỊ BẢNG TIÊU CHÍ) - BỎ QUA DÒNG CÓ DẤU * =================
 function f_x_e(m_n) {
     const k_b = document.getElementById("t-b-g");
     if (!k_b) return;
@@ -1301,7 +1307,7 @@ function f_x_e(m_n) {
         
         let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
         
-        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
+        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}<tr><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
     }
     
     k_b.innerHTML = khoiDOM; 
