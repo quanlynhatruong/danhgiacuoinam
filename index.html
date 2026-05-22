@@ -261,7 +261,7 @@
             <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
             <div id="vungThuHai" class="a-di">
-                <td>
+                <table>
                     <thead>
                         <tr>
                             <th width="5%">STT</th>
@@ -338,7 +338,6 @@
 
 <script src="ketnoi.js"></script>
 <script>
-// ==================== GIỮ NGUYÊN CÁC HÀM CŨ ====================
 let v_che_do_xem_admin = false;
 let v_che_do_khach = false; 
 let danhSachVienChucAdmin = [];
@@ -595,11 +594,11 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
+                if(tbg) tbg.innerHTML = "</td><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
-            if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu. jonzon";
+            if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu. jonzon";
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
@@ -842,7 +841,7 @@ function f_x_c() {
     }
 }
 
-// ================= HÀM f_x_d CẬP NHẬT: QUÉT TOÀN BỘ CỘT D =================
+// ================= HÀM f_x_d ĐÃ CẬP NHẬT =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -903,74 +902,37 @@ async function f_x_d() {
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            // === LẤY NĂM HỌC HIỆN HÀNH TỪ MENU ===
+            // === LẤY NĂM HỌC TỪ MENU ===
             let currentYearElem = document.getElementById("ui-nam-hoc");
             let currentYear = "";
-            if (currentYearElem) currentYear = currentYearElem.innerText.trim();
+            if (currentYearElem) {
+                currentYear = currentYearElem.innerText.trim();
+            }
             if (!currentYear && v_nam_hoc_hien_tai) currentYear = v_nam_hoc_hien_tai;
             if (!currentYear) currentYear = "2025-2026";
             
-            // === QUÉT TOÀN BỘ CỘT D (y_rieng_data) ===
-            let ketQuaTheoThuTu = [];  // mảng các đối tượng {ten, ketQua} theo thứ tự xuất hiện trong sheet riêng (chỉ lấy năm học trùng)
-            let hasDataForCurrentYear = false;
-
-            // Kiểm tra nếu backend trả về mảng dữ liệu thô từ sheet riêng (y_rieng_data)
-            if (t_k.y_rieng_data && Array.isArray(t_k.y_rieng_data)) {
-                for (let row of t_k.y_rieng_data) {
-                    let namHocRow = row.nam_hoc ? String(row.nam_hoc).trim() : "";
-                    if (namHocRow === currentYear) {
-                        hasDataForCurrentYear = true;
-                        let tenTieuChi = row.tieu_chi ? row.tieu_chi.toString().trim() : "";
-                        let ketQua = row.ket_qua ? row.ket_qua.toString().trim() : "";
-                        ketQuaTheoThuTu.push({ ten: tenTieuChi, ketQua: ketQua });
-                    }
-                }
-            }
+            // === LẤY NĂM HỌC THỰC TẾ TỪ SHEET RIÊNG ===
+            let sheetYear = (t_k.y_rieng_namhoc ? String(t_k.y_rieng_namhoc).trim() : "");
+            let hasSheetData = t_k.y_d && t_k.y_d.length > 0;
             
-            // Lấy mảng tiêu chí mẫu từ backend (theo đúng thứ tự của sheet CHITIEU)
-            let mauTieuChi = t_k.y_d;
-            if (!mauTieuChi || mauTieuChi.length === 0) {
-                mauTieuChi = await loadMauTieuChi(p_n);
-            }
+            let useSheet = hasSheetData && sheetYear !== "" && currentYear !== "" && sheetYear === currentYear;
             
-            // Tạo map kết quả từ dữ liệu đã quét (chỉ lấy lần đầu tiên gặp mỗi tiêu chí, nhưng quan trọng là thứ tự)
-            let ketQuaMap = new Map();
-            for (let item of ketQuaTheoThuTu) {
-                if (!ketQuaMap.has(item.ten)) {
-                    ketQuaMap.set(item.ten, item.ketQua);
-                }
-            }
+            console.log("DEBUG - Năm học trên menu:", currentYear, "| Năm học sheet riêng:", sheetYear, "| Dùng sheet riêng:", useSheet);
             
-            let finalTieuChi = [];
-            if (mauTieuChi && mauTieuChi.length > 0) {
-                if (hasDataForCurrentYear && ketQuaMap.size > 0) {
-                    // Cập nhật kết quả vào mảng mẫu theo đúng thứ tự mẫu
-                    for (let item of mauTieuChi) {
-                        let ten = item.x_a ? item.x_a.toString().trim() : "";
-                        let newItem = { ...item };
-                        if (ketQuaMap.has(ten)) {
-                            newItem.x_c = ketQuaMap.get(ten);
-                        } else {
-                            newItem.x_c = "";
-                        }
-                        finalTieuChi.push(newItem);
-                    }
+            if (!useSheet) {
+                console.log("Tải mẫu tiêu chí mới cho nhóm:", p_n);
+                const mauTieuChi = await loadMauTieuChi(p_n);
+                if (mauTieuChi && mauTieuChi.length > 0) {
+                    f_x_e(mauTieuChi);
+                    v_l_d = ""; // Xóa kết quả xếp loại cũ
                 } else {
-                    // Không có dữ liệu cho năm nay, hiển thị bảng mẫu với kết quả trống
-                    for (let item of mauTieuChi) {
-                        let newItem = { ...item, x_c: "" };
-                        finalTieuChi.push(newItem);
-                    }
-                    if (!hasDataForCurrentYear) {
-                        hienThiThongBaoUI("Chưa có dữ liệu đánh giá cho năm học " + currentYear + ". Vui lòng nhập và lưu.");
-                    }
+                    f_x_e([]);
+                    hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới. Vui lòng kiểm tra kết nối hoặc liên hệ quản trị.");
                 }
             } else {
-                finalTieuChi = [];
-                hienThiThongBaoUI("Không thể tải mẫu tiêu chí. Vui lòng liên hệ quản trị.");
+                console.log("Sử dụng dữ liệu từ sheet riêng (năm học", sheetYear, ")");
+                f_x_e(t_k.y_d);
             }
-            
-            f_x_e(finalTieuChi);
 
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
@@ -982,6 +944,7 @@ async function f_x_d() {
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai chức vụ!<br>Chức vụ của đồng chí là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để chọn đúng chức vụ của mình.", f_x_logout);
             f_x_j(false);
             return;
+            
         } else if (t_k_khac.status === 'success') {
             let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac.includes('giaovien')) ? "GIÁO VIÊN" : "NHÂN VIÊN");
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai đối tượng đánh giá!<br>Chức vụ của đồng chí trên hệ thống là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
@@ -993,11 +956,14 @@ async function f_x_d() {
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = "TÀI KHOẢN KHÔNG HỢP LỆ";
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = "--";
             if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = "--";
+            
             if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if (document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
             let nutLuu = document.getElementById("vungNutBam");
             if (nutLuu) nutLuu.style.display = "none";
+
             v_hien_thi_menu_admin(false);
+            
             await f_x_load_guest_template(p_n);
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
@@ -1066,6 +1032,7 @@ async function f_x_admin_chon_user() {
         v_l_c = t_k.y_e || {};
         v_l_d = t_k.y_c || "";
         f_x_e(t_k.y_d); 
+        
         if (typeof f_x_h === "function") f_x_h();
         return;
     }
@@ -1076,11 +1043,14 @@ async function f_x_admin_chon_user() {
 
         if (t_k.status === 'success') {
             v_bo_nho_dem_admin[selectedId] = t_k; 
+
             v_l_b = t_k.y_a; 
             v_l_a = t_k.y_acc; 
             v_l_c = t_k.y_e || {};
             v_l_d = t_k.y_c || "";
+
             f_x_e(t_k.y_d); 
+            
             if (typeof f_x_h === "function") f_x_h();
         } else {
             hienThiThongBaoUI(t_k.message);
@@ -1246,7 +1216,7 @@ function v_f_x_h_debounce() {
     v_timer_h = setTimeout(f_x_h, 250); 
 }
 
-// ================= HÀM f_x_e (HIỂN THỊ BẢNG TIÊU CHÍ) - BỎ QUA DÒNG CÓ DẤU * =================
+// Hàm f_x_e đã được cập nhật: bỏ qua dòng tiêu chí có dấu * ở đầu
 function f_x_e(m_n) {
     const k_b = document.getElementById("t-b-g");
     if (!k_b) return;
@@ -1265,9 +1235,10 @@ function f_x_e(m_n) {
 
     for (let index = 0; index < m_n.length; index++) {
         const item = m_n[index];
+        // Kiểm tra nếu tên tiêu chí bắt đầu bằng dấu * thì bỏ qua (không hiển thị)
         let tenTieuChi = item.x_a ? item.x_a.toString().trim() : "";
         if (tenTieuChi.startsWith("*")) {
-            continue;
+            continue; // bỏ qua dòng này
         }
 
         let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
