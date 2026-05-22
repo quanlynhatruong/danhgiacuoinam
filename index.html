@@ -583,7 +583,7 @@ async function f_x_load_guest_template(p_n) {
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
-        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
+        if(tbg) tbg.innerHTML = `</table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
     }
 }
 
@@ -822,7 +822,7 @@ function f_x_c() {
     }
 }
 
-// HÀM LẤY NĂM HỌC HIỆN HÀNH TỪ SHEET MẪU (ô A1)
+// === BỔ SUNG HÀM LẤY NĂM HỌC HIỆN HÀNH TỪ SHEET MẪU ===
 async function getCurrentYearFromMau(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
@@ -836,7 +836,7 @@ async function getCurrentYearFromMau(nhom) {
     return "";
 }
 
-// HÀM LẤY MẪU TIÊU CHÍ TỪ SHEET CHITIEU
+// === BỔ SUNG HÀM LẤY MẪU TIÊU CHÍ TỪ SHEET MẪU ===
 async function loadMauTieuChi(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
@@ -844,17 +844,16 @@ async function loadMauTieuChi(nhom) {
         if (response.status === 'success' && Array.isArray(response.y_d)) {
             return response.y_d;
         } else {
-            throw new Error("Khong co mau tu API");
+            throw new Error("Không nhận được dữ liệu mẫu từ API");
         }
     } catch (e) {
-        console.warn("Không lấy được mẫu từ API, thử dùng dữ liệu từ file HTML mẫu", e);
-        if (nhom === 'giaovienc1' && window.MAU_TIEU_CHI_GV_C1) return window.MAU_TIEU_CHI_GV_C1;
-        if (nhom === 'giaovienc2' && window.MAU_TIEU_CHI_GV_C2) return window.MAU_TIEU_CHI_GV_C2;
-        if (nhom === 'nhanvien' && window.MAU_TIEU_CHI_NV) return window.MAU_TIEU_CHI_NV;
+        console.error("Lỗi loadMauTieuChi:", e);
+        hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới từ máy chủ. Vui lòng liên hệ quản trị.");
         return [];
     }
 }
 
+// ================= f_x_d ĐÃ ĐƯỢC SỬA THEO YÊU CẦU =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -915,35 +914,34 @@ async function f_x_d() {
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            // --- LOGIC SO SÁNH NĂM HỌC CHÍNH XÁC ---
+            // === LOGIC CHÍNH ===
             let sheetYear = (v_nam_hoc_hien_tai ? String(v_nam_hoc_hien_tai).trim() : "");
-            let currentYear = await getCurrentYearFromMau(p_n);  // gọi API lấy năm học từ sheet mẫu
+            let currentYear = await getCurrentYearFromMau(p_n);  // lấy từ ô A1 của sheet mẫu
             let hasSheetData = t_k.y_d && t_k.y_d.length > 0;
+            
+            // Nếu có dữ liệu sheet riêng và năm học trùng khớp → dùng sheet riêng
             let useSheet = hasSheetData && sheetYear !== "" && currentYear !== "" && sheetYear === currentYear;
             
-            console.log("DEBUG: useSheet =", useSheet, "| sheetYear =", sheetYear, "| currentYear =", currentYear);
-            
             if (!useSheet) {
-                // Bắt buộc tải mẫu mới từ CHITIEU
-                console.log("Sử dụng mẫu tiêu chí từ CHITIEU cho nhóm:", p_n);
+                // Năm học không khớp hoặc chưa có sheet riêng → load mẫu mới
+                console.log(`Năm học không khớp (sheet: ${sheetYear}, hiện tại: ${currentYear}). Tải mẫu mới cho nhóm ${p_n}`);
                 const mauTieuChi = await loadMauTieuChi(p_n);
                 if (mauTieuChi && mauTieuChi.length > 0) {
                     f_x_e(mauTieuChi);
                 } else {
                     f_x_e([]);
-                    hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới. Vui lòng kiểm tra kết nối.");
+                    hienThiThongBaoUI("Chưa có dữ liệu tiêu chí cho năm học mới. Vui lòng liên hệ quản trị.");
                 }
             } else {
-                // Năm học khớp, dùng dữ liệu từ sheet riêng
-                console.log("Sử dụng dữ liệu từ sheet riêng (năm học", sheetYear, ")");
+                // Năm học khớp, dùng dữ liệu đã lưu
+                console.log(`Sử dụng dữ liệu từ sheet riêng (năm học ${sheetYear})`);
                 f_x_e(t_k.y_d);
             }
-            // ------------------------------------
+            // ================================
 
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
             if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
-            
             if (typeof f_x_h === "function") f_x_h();
             
         } else if (t_k.status === 'wrong_role' || t_k_khac.status === 'wrong_role') {
