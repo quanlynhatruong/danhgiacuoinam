@@ -575,7 +575,7 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                if(tbg) tbg.innerHTML = "</table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
@@ -583,7 +583,7 @@ async function f_x_load_guest_template(p_n) {
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
-        if(tbg) tbg.innerHTML = `</table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
+        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
     }
 }
 
@@ -827,11 +827,15 @@ async function getCurrentYearFromMau(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
         let response = await fetchAPI(`${z_y_a}?z_p_a=get_current_year&z_p_c=${nhom}&_t=${Date.now()}`);
-        if (response.status === 'success' && response.year) {
+        if (response.status === 'success' && response.year && response.year.trim() !== "") {
             return String(response.year).trim();
         }
     } catch(e) {
-        console.warn("Lỗi lấy năm học từ sheet mẫu:", e);
+        console.warn("Lỗi gọi API get_current_year, fallback sang biến cấu hình", e);
+    }
+    // Fallback: lấy từ biến DG_NAM_HOC_HIEN_TAI (nếu có trong ketnoi.js)
+    if (typeof DG_NAM_HOC_HIEN_TAI !== 'undefined' && DG_NAM_HOC_HIEN_TAI) {
+        return String(DG_NAM_HOC_HIEN_TAI).trim();
     }
     return "";
 }
@@ -841,19 +845,18 @@ async function loadMauTieuChi(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
         let response = await fetchAPI(`${z_y_a}?z_p_a=get_mau_tieu_chi&z_p_c=${nhom}&_t=${Date.now()}`);
-        if (response.status === 'success' && Array.isArray(response.y_d)) {
+        if (response.status === 'success' && Array.isArray(response.y_d) && response.y_d.length > 0) {
             return response.y_d;
         } else {
-            throw new Error("Không nhận được dữ liệu mẫu từ API");
+            throw new Error("API trả về dữ liệu rỗng hoặc không hợp lệ");
         }
     } catch (e) {
         console.error("Lỗi loadMauTieuChi:", e);
-        hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới từ máy chủ. Vui lòng liên hệ quản trị.");
         return [];
     }
 }
 
-// ================= f_x_d ĐÃ ĐƯỢC SỬA THEO YÊU CẦU =================
+// ================= f_x_d ĐÃ ĐƯỢC SỬA =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -914,30 +917,42 @@ async function f_x_d() {
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            // === LOGIC CHÍNH ===
+            // === LOGIC CHÍNH: SO SÁNH NĂM HỌC ===
             let sheetYear = (v_nam_hoc_hien_tai ? String(v_nam_hoc_hien_tai).trim() : "");
             let currentYear = await getCurrentYearFromMau(p_n);  // lấy từ ô A1 của sheet mẫu
             let hasSheetData = t_k.y_d && t_k.y_d.length > 0;
             
-            // Nếu có dữ liệu sheet riêng và năm học trùng khớp → dùng sheet riêng
+            // In ra console để debug
+            console.log("DEBUG: sheetYear =", sheetYear, "| currentYear =", currentYear, "| hasSheetData =", hasSheetData);
+            
+            // Điều kiện sử dụng sheet riêng:
+            // - Phải có dữ liệu sheet riêng
+            // - sheetYear KHÔNG được rỗng
+            // - currentYear KHÔNG được rỗng
+            // - hai năm phải bằng nhau
             let useSheet = hasSheetData && sheetYear !== "" && currentYear !== "" && sheetYear === currentYear;
             
+            console.log("DEBUG: useSheet =", useSheet);
+            
             if (!useSheet) {
-                // Năm học không khớp hoặc chưa có sheet riêng → load mẫu mới
-                console.log(`Năm học không khớp (sheet: ${sheetYear}, hiện tại: ${currentYear}). Tải mẫu mới cho nhóm ${p_n}`);
+                // Không dùng sheet riêng -> load mẫu mới từ CHITIEU
+                console.log("Chuyển sang tải mẫu tiêu chí mới cho nhóm:", p_n);
                 const mauTieuChi = await loadMauTieuChi(p_n);
                 if (mauTieuChi && mauTieuChi.length > 0) {
                     f_x_e(mauTieuChi);
+                    // Xóa kết quả xếp loại cũ
+                    v_l_d = "";
                 } else {
+                    // Không có mẫu -> bảng trống
                     f_x_e([]);
-                    hienThiThongBaoUI("Chưa có dữ liệu tiêu chí cho năm học mới. Vui lòng liên hệ quản trị.");
+                    hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới. Vui lòng kiểm tra kết nối hoặc liên hệ quản trị.");
                 }
             } else {
-                // Năm học khớp, dùng dữ liệu đã lưu
-                console.log(`Sử dụng dữ liệu từ sheet riêng (năm học ${sheetYear})`);
+                // Dùng sheet riêng (năm học khớp)
+                console.log("Sử dụng dữ liệu từ sheet riêng (năm học", sheetYear, ")");
                 f_x_e(t_k.y_d);
             }
-            // ================================
+            // =========================================
 
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
@@ -949,7 +964,6 @@ async function f_x_d() {
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai chức vụ!<br>Chức vụ của đồng chí là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để chọn đúng chức vụ của mình.", f_x_logout);
             f_x_j(false);
             return;
-            
         } else if (t_k_khac.status === 'success') {
             let chucVuDung = t_k_khac.y_role ? t_k_khac.y_role : ((p_n_khac.includes('giaovien')) ? "GIÁO VIÊN" : "NHÂN VIÊN");
             hienThiThongBaoUI("<b>ĐĂNG NHẬP THẤT BẠI</b><br><br>Đồng chí đã chọn sai đối tượng đánh giá!<br>Chức vụ của đồng chí trên hệ thống là: <b>" + chucVuDung.toUpperCase() + "</b>.<br>Vui lòng ấn Đóng để hệ thống quay lại giao diện xác thực.", f_x_logout);
