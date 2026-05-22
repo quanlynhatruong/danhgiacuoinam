@@ -261,7 +261,7 @@
             <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
             <div id="vungThuHai" class="a-di">
-                <table>
+                <td>
                     <thead>
                         <tr>
                             <th width="5%">STT</th>
@@ -842,7 +842,7 @@ function f_x_c() {
     }
 }
 
-// ================= HÀM f_x_d ĐÃ CẬP NHẬT - QUÉT TOÀN BỘ CỘT D =================
+// ================= HÀM f_x_d CẬP NHẬT: QUÉT TOÀN BỘ CỘT D =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -909,12 +909,12 @@ async function f_x_d() {
             if (currentYearElem) currentYear = currentYearElem.innerText.trim();
             if (!currentYear && v_nam_hoc_hien_tai) currentYear = v_nam_hoc_hien_tai;
             if (!currentYear) currentYear = "2025-2026";
-
-            // === XỬ LÝ DỮ LIỆU TỪ SHEET RIÊNG (nếu backend trả về mảng thô) ===
+            
+            // === QUÉT TOÀN BỘ CỘT D (y_rieng_data) ===
             let ketQuaTheoThuTu = [];  // mảng các đối tượng {ten, ketQua} theo thứ tự xuất hiện trong sheet riêng (chỉ lấy năm học trùng)
             let hasDataForCurrentYear = false;
 
-            // Ưu tiên dùng dữ liệu thô từ backend (y_rieng_data)
+            // Kiểm tra nếu backend trả về mảng dữ liệu thô từ sheet riêng (y_rieng_data)
             if (t_k.y_rieng_data && Array.isArray(t_k.y_rieng_data)) {
                 for (let row of t_k.y_rieng_data) {
                     let namHocRow = row.nam_hoc ? String(row.nam_hoc).trim() : "";
@@ -926,13 +926,10 @@ async function f_x_d() {
                     }
                 }
             }
-            // Nếu chưa có dữ liệu thô nhưng có y_rieng_namhoc (một năm) và y_d đã được tích hợp kết quả của năm đó, ta cũng có thể dùng
-            // nhưng y_d đã bị ghi đè, không giữ được thứ tự. Tốt nhất yêu cầu backend cung cấp y_rieng_data.
             
             // Lấy mảng tiêu chí mẫu từ backend (theo đúng thứ tự của sheet CHITIEU)
-            let mauTieuChi = t_k.y_d;  // mảng gốc chưa bị thay đổi kết quả (backend vẫn giữ x_c = "")
+            let mauTieuChi = t_k.y_d;
             if (!mauTieuChi || mauTieuChi.length === 0) {
-                // Nếu không có, thử lấy mẫu từ API
                 mauTieuChi = await loadMauTieuChi(p_n);
             }
             
@@ -947,7 +944,7 @@ async function f_x_d() {
             let finalTieuChi = [];
             if (mauTieuChi && mauTieuChi.length > 0) {
                 if (hasDataForCurrentYear && ketQuaMap.size > 0) {
-                    // Cập nhật kết quả vào mảng mẫu theo đúng thứ tự mẫu, nhưng giữ nguyên kết quả nếu có
+                    // Cập nhật kết quả vào mảng mẫu theo đúng thứ tự mẫu
                     for (let item of mauTieuChi) {
                         let ten = item.x_a ? item.x_a.toString().trim() : "";
                         let newItem = { ...item };
@@ -969,7 +966,6 @@ async function f_x_d() {
                     }
                 }
             } else {
-                // Không có mẫu, bảng trống
                 finalTieuChi = [];
                 hienThiThongBaoUI("Không thể tải mẫu tiêu chí. Vui lòng liên hệ quản trị.");
             }
@@ -1069,7 +1065,6 @@ async function f_x_admin_chon_user() {
         v_l_a = t_k.y_acc; 
         v_l_c = t_k.y_e || {};
         v_l_d = t_k.y_c || "";
-        // Ở đây cũng cần xử lý tương tự f_x_d, nhưng tạm thời giữ nguyên
         f_x_e(t_k.y_d); 
         if (typeof f_x_h === "function") f_x_h();
         return;
@@ -1307,7 +1302,7 @@ function f_x_e(m_n) {
         
         let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
         
-        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}<tr><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
+        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
     }
     
     k_b.innerHTML = khoiDOM; 
