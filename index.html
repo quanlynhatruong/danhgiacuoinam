@@ -176,7 +176,7 @@
             <a href="javascript:void(0)" onclick="f_x_c(); return false;" class="the-chuyen active" id="menu-danh-gia">
                 <span class="b-tuong">📝</span> Đánh giá
             </a>
-            <a href="javascript:void(0)" class="the-chuyen" id="menu-ket-qua">
+            <a href="javascript:void(0)" onclick="f_x_mo_ket_qua(); return false;" class="the-chuyen" id="menu-ket-qua">
                 <span class="b-tuong">📈</span> Kết quả
             </a>
             <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;" onclick="f_x_mo_quan_ly_quyen()">
@@ -352,7 +352,6 @@ function khoiDongHeThong() {
         });
     }
     
-   // ĐÃ BỔ SUNG FILE KetQua.html VÀO TRÌNH TẢI MODULE
    Promise.all([
         f_x_k('danhgiaGVC1.html'),
         f_x_k('danhgiaGVC2.html'),
@@ -419,15 +418,6 @@ function showMainUI(d_danh) {
     let f2 = document.getElementById('bo-cuc-he-thong');
     if(f1) f1.style.display = 'none';
     if(f2) f2.style.display = 'flex'; 
-    
-    let mKq = document.getElementById("menu-ket-qua");
-    if (mKq) {
-        mKq.style.display = "flex";
-        if (mKq.hasAttribute("data-href-goc")) {
-            mKq.setAttribute("href", mKq.getAttribute("data-href-goc"));
-        }
-        mKq.onclick = null;
-    }
 
     const objNhom = document.getElementById('oChonNhom');
     let hienNhom = document.getElementById('hienThiNhom');
@@ -449,7 +439,8 @@ function v_hien_thi_menu_admin(hienThi) {
     if (mn3) mn3.style.display = kieu;
 }
 
-const fetchAPI = async (url) => {
+// KHẮC PHỤC LỖI MODULE KHÔNG TẢI ĐƯỢC API BẰNG CÁCH KHAI BÁO HÀM CHUẨN
+async function fetchAPI(url) {
     const response = await fetch(url);
     const text = await response.text();
     try {
@@ -457,7 +448,7 @@ const fetchAPI = async (url) => {
     } catch (e) {
         throw new Error("LỖI 500: URL Máy chủ Google Apps Script bị sai, HOẶC đồng chí chưa Triển khai phiên bản mới (New Version) đúng chuẩn.");
     }
-};
+}
 
 async function f_x_load_guest_template(p_n) {
     try {
@@ -533,19 +524,6 @@ async function f_x_vao_khach() {
     
     v_hien_thi_menu_admin(false);
     
-    let mKq = document.getElementById("menu-ket-qua");
-    if (mKq) {
-        mKq.style.display = "flex";
-        if (!mKq.hasAttribute("data-href-goc")) {
-            mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
-        }
-        mKq.setAttribute("href", "javascript:void(0)");
-        mKq.onclick = function() { 
-            hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); 
-            return false; 
-        };
-    }
-    
     f_x_j(true);
     await f_x_load_guest_template(p_n);
     f_x_j(false);
@@ -567,8 +545,48 @@ function f_x_logout() {
 let v_l_a = "", v_l_b = "", v_l_d = "", v_l_e = "", v_l_f = "";
 let v_nam_hoc_hien_tai = ""; 
 
+// HÀM XỬ LÝ SỰ KIỆN MỞ KẾT QUẢ ĐƯỢC BỔ SUNG ĐỂ KÍCH HOẠT NÚT
+function f_x_mo_ket_qua() {
+    if (typeof v_che_do_khach !== 'undefined' && v_che_do_khach) {
+        hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa.");
+        return;
+    }
+
+    if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
+    if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
+    if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
+    if(document.getElementById("cap-quyen-ui")) document.getElementById("cap-quyen-ui").style.display = "none";
+    if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "none";
+    if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
+    if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
+    
+    document.querySelectorAll('.the-chuyen').forEach(el => el.classList.remove('active'));
+    
+    let mKq = document.getElementById("menu-ket-qua");
+    if (mKq) { mKq.classList.add("active"); }
+
+    let kDauH1 = document.querySelector('.k-dau h1');
+    if (kDauH1) {
+        if (!kDauH1.hasAttribute('data-original-text')) {
+            kDauH1.setAttribute('data-original-text', kDauH1.innerText);
+        }
+        kDauH1.innerText = "KẾT QUẢ ĐÁNH GIÁ VIÊN CHỨC";
+    }
+    
+    let vungKq = document.getElementById("ket-qua-ui");
+    if (vungKq) {
+        vungKq.style.display = "block";
+        if (typeof kq_TaiDuLieu === "function") {
+            if (typeof kq_DuLieuToanBo !== "undefined" && kq_DuLieuToanBo.length === 0) {
+                kq_TaiDuLieu();
+            }
+        }
+    } else {
+        hienThiThongBaoUI("Hệ thống chưa tải xong module Kết quả!");
+    }
+}
+
 function f_x_mo_quan_ly_quyen() {
-    // Ẩn các Module Không liên quan
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
     if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "none";
@@ -577,37 +595,36 @@ function f_x_mo_quan_ly_quyen() {
     if(document.getElementById("vungChonAdmin")) document.getElementById("vungChonAdmin").style.display = "none";
     if(document.getElementById("h-dang-tai")) document.getElementById("h-dang-tai").style.display = "none";
     
-    // Gỡ Active toàn bộ Menu
     document.querySelectorAll('.the-chuyen').forEach(el => el.classList.remove('active'));
     
-    // Active lại Menu Quyền
     let mQuyen = document.getElementById("menu-quan-ly-quyen");
     if (mQuyen) { mQuyen.classList.add("active"); }
     
-    // Khởi động module Quyền
     let vungQuyen = document.getElementById("cap-quyen-ui");
     if (vungQuyen) {
         vungQuyen.style.display = "block";
         if (typeof cq_TaiDuLieu === "function") cq_TaiDuLieu();
     } else {
-        if (typeof hienThiThongBaoUI === "function") hienThiThongBaoUI("Hệ thống chưa tải xong module Quản lý quyền!");
+        hienThiThongBaoUI("Hệ thống chưa tải xong module Quản lý quyền!");
     }
 }
 
 function f_x_c() {
-    // Ẩn module phụ
     let vungQuyen = document.getElementById("cap-quyen-ui");
     if (vungQuyen) vungQuyen.style.display = "none";
     if (document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
     
-    // Mở module chính
     if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
     if (document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
 
-    // Xử lý Active CSS
     document.querySelectorAll('.the-chuyen').forEach(el => el.classList.remove('active'));
     let mDanhGia = document.getElementById("menu-danh-gia");
     if (mDanhGia) { mDanhGia.classList.add("active"); }
+
+    let kDauH1 = document.querySelector('.k-dau h1');
+    if (kDauH1 && kDauH1.hasAttribute('data-original-text')) {
+        kDauH1.innerText = kDauH1.getAttribute('data-original-text');
+    }
 
     let vungThuHai = document.getElementById("vungThuHai");
     let oNhap = document.getElementById("oNhapChinh");
@@ -676,7 +693,6 @@ async function f_x_d() {
                 if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "block";
             }
 
-            // GHI DỮ LIỆU VÀO KHỐI THÔNG TIN BÊN TRÁI
             if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = t_k.y_b || v_l_b;
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = t_k.y_role || "";
@@ -716,19 +732,11 @@ async function f_x_d() {
 
             v_hien_thi_menu_admin(false);
             
-            let mKq = document.getElementById("menu-ket-qua");
-            if (mKq) {
-                mKq.style.display = "flex";
-                if (!mKq.hasAttribute("data-href-goc")) mKq.setAttribute("data-href-goc", mKq.getAttribute("href"));
-                mKq.setAttribute("href", "javascript:void(0)");
-                mKq.onclick = function() { hienThiThongBaoUI("CHẾ ĐỘ KHÁCH:<br>Chức năng xem Kết quả đã bị vô hiệu hóa."); return false; };
-            }
-            
             await f_x_load_guest_template(p_n);
             hienThiThongBaoUI(t_k.message + "<br><br><b>Hệ thống tự động chuyển sang chế độ Khách (Chỉ xem). Các chức năng tương tác đã bị khóa.</b>");
         }
     } catch (err) { 
-        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Cấu hình module menudoc.html chưa tải. Vui lòng kiểm tra file Mã.gs. Lỗi gốc: ${err.message}</span>`, f_x_logout); 
+        hienThiThongBaoUI(`<b>Kết nối máy chủ bị lỗi gián đoạn!</b><br><br><span style="font-size:14px;color:#666">Lỗi gốc: ${err.message}</span>`, f_x_logout); 
     }
     f_x_j(false);
 }
