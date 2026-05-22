@@ -1,7 +1,7 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Sửa lỗi: Ẩn thanh cuộn textarea, load năm học từ ô A1 sheet.
+ * Sửa lỗi triệt để: Ẩn thanh cuộn textarea, load năm học từ A1.
  */
 (function() {
     if (document.getElementById('tieuchi-gvc1-ui')) return;
@@ -32,7 +32,7 @@
         .table-tieuchi th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; text-align: center; }
         .table-tieuchi td { text-align: left; }
         
-        /* Textarea - ẩn hoàn toàn thanh cuộn, vẫn auto resize */
+        /* Khử thanh cuộn textarea triệt để */
         .table-tieuchi textarea {
             width: 100%;
             border: none;
@@ -44,14 +44,16 @@
             padding: 4px 0;
             margin: 0;
             resize: none;
-            overflow: hidden;       /* Ẩn thanh cuộn dọc */
+            overflow: hidden !important;
             box-sizing: border-box;
             height: auto;
             min-height: 38px;
-            scrollbar-width: none;  /* Firefox: ẩn thanh cuộn */
+            scrollbar-width: none !important;
         }
         .table-tieuchi textarea::-webkit-scrollbar {
-            display: none;          /* Chrome/Safari: ẩn thanh cuộn */
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
         .table-tieuchi textarea:focus {
             background: #fef9e6;
@@ -126,14 +128,15 @@ async function tcgvc1_TaiDuLieu() {
         const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
         if (response.status === 'success') {
             tcgvc1_DuLieuGoc = response.data || [];
-            // Bắt buộc lấy năm học từ response (backend đã được cập nhật trả về nam_hoc từ ô A1)
-            if (response.nam_hoc) {
+            // BẮT BUỘC lấy năm học từ response (phải có nam_hoc)
+            if (response.nam_hoc !== undefined && response.nam_hoc !== null) {
                 tcgvc1_NamHocGoc = response.nam_hoc;
                 const inpNam = document.getElementById('tcgvc1-namhoc');
                 if (inpNam) inpNam.value = response.nam_hoc;
             } else {
-                // Fallback an toàn: gọi API riêng (nếu backend hỗ trợ)
-                await tcgvc1_TaiNamHoc();
+                // Nếu backend chưa trả về, thông báo lỗi rõ ràng
+                console.warn("API get_tieuchi_gvc1 không trả về nam_hoc. Vui lòng cập nhật backend.");
+                hienThiThongBaoUI("Lỗi: Hệ thống không đọc được năm học từ sheet. Vui lòng nhập tay hoặc kiểm tra backend.");
             }
             tcgvc1_HienThiBang();
         } else {
@@ -145,19 +148,6 @@ async function tcgvc1_TaiDuLieu() {
     if (typeof f_x_j === 'function') f_x_j(false);
 }
 
-// Fallback: đọc năm học từ API riêng (nếu backend có hỗ trợ)
-async function tcgvc1_TaiNamHoc() {
-    try {
-        const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        const res = await fetchAPI(gasUrl + "?z_p_a=get_namhoc_gvc1");
-        if (res.status === 'success' && res.nam_hoc) {
-            tcgvc1_NamHocGoc = res.nam_hoc;
-            const inpNam = document.getElementById('tcgvc1-namhoc');
-            if (inpNam) inpNam.value = res.nam_hoc;
-        }
-    } catch (e) { /* im lặng */ }
-}
-
 function tcgvc1_HienThiBang() {
     const tbody = document.getElementById('tcgvc1-tbody');
     if (!tbody) return;
@@ -165,7 +155,10 @@ function tcgvc1_HienThiBang() {
     tcgvc1_DuLieuGoc.forEach((item, idx) => {
         tbody.insertAdjacentHTML('beforeend', tcgvc1_TaoDong(idx, item));
     });
+    // Đảm bảo resize ngay lập tức và không có thanh cuộn
     tcgvc1_AutoResizeTextarea();
+    // Dùng setTimeout để chắc chắn DOM đã render xong
+    setTimeout(tcgvc1_AutoResizeTextarea, 50);
 }
 
 function tcgvc1_TaoDong(index, item) {
@@ -192,13 +185,22 @@ function tcgvc1_TaoDong(index, item) {
 
 function tcgvc1_AutoResizeTextarea() {
     document.querySelectorAll('#tcgvc1-tbody textarea').forEach(ta => {
+        // Ép overflow hidden lần nữa
+        ta.style.overflow = 'hidden';
         ta.style.height = 'auto';
-        ta.style.height = (ta.scrollHeight) + 'px';
-        ta.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
+        let newHeight = ta.scrollHeight;
+        ta.style.height = newHeight + 'px';
+        // Loại bỏ sự kiện cũ để tránh trùng lặp
+        ta.removeEventListener('input', tcgvc1_ResizeHandler);
+        ta.addEventListener('input', tcgvc1_ResizeHandler);
     });
+}
+
+function tcgvc1_ResizeHandler(e) {
+    const ta = e.target;
+    ta.style.overflow = 'hidden';
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
 }
 
 function tcgvc1_ThemDong() {
@@ -213,6 +215,7 @@ function tcgvc1_XoaDong(btn) {
     if (confirm("Xóa tiêu chí này khỏi danh sách?")) {
         btn.closest('tr').remove();
         tcgvc1_CapNhatSTT();
+        tcgvc1_AutoResizeTextarea();
     }
 }
 
