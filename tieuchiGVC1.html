@@ -1,13 +1,11 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Dựa trên cấu trúc CapQuyen, chuyên biệt cho sheet "CHITIEUGVC1"
+ * Cập nhật: Thêm ô nhập Năm học (lưu vào A1 sheet), dùng textarea tự động giãn, bỏ khung chữ.
  */
 (function() {
-    // 0. CHỐT CHẶN NẠP ĐÚP
     if (document.getElementById('tieuchi-gvc1-ui')) return;
 
-    // 1. NHÚNG CSS RIÊNG
     const style = document.createElement('style');
     style.textContent = `
         #tieuchi-gvc1-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
@@ -24,14 +22,35 @@
         }
         
         .tc-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
-        .tc-hanh-dong { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tc-hanh-dong { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .tc-nam-hoc { display: flex; align-items: center; gap: 8px; background: #f1f3f5; padding: 5px 12px; border-radius: 6px; }
+        .tc-nam-hoc label { font-weight: bold; color: var(--mau-c); margin: 0; }
+        .tc-nam-hoc input { border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; font-family: inherit; width: 130px; text-align: center; }
         
         .table-tieuchi { width: 100%; border-collapse: collapse; margin-top: 0; }
-        .table-tieuchi th, .table-tieuchi td { border: 1px solid #dee2e6; padding: 8px 10px; vertical-align: middle; }
+        .table-tieuchi th, .table-tieuchi td { border: 1px solid #dee2e6; padding: 8px 10px; vertical-align: top; }
         .table-tieuchi th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; text-align: center; }
         .table-tieuchi td { text-align: left; }
-        .table-tieuchi input, .table-tieuchi select { width: 100%; border: 1px solid #ddd; padding: 7px; box-sizing: border-box; font-family: inherit; font-size: 14px; border-radius: 4px; transition: border-color 0.3s; }
-        .table-tieuchi input:focus, .table-tieuchi select:focus { border-color: var(--mau-c); outline: none; }
+        
+        /* Textarea giãn tự động, không khung */
+        .table-tieuchi textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 6px 0;
+            margin: 0;
+            resize: vertical;
+            min-height: 45px;
+            overflow: auto;
+            box-sizing: border-box;
+        }
+        .table-tieuchi textarea:focus {
+            background: #fef9e6;
+        }
         
         .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .btn-xoa-dong:hover { background: #c82333; }
@@ -39,21 +58,22 @@
         .btn-them-moi:hover { background: #218838; }
         .btn-cap-nhat { background: var(--mau-c); color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
         .btn-cap-nhat:hover { background: #004494; transform: translateY(-1px); }
-        
-        /* Giãn dòng tự động */
-        .table-tieuchi textarea, 
-        .table-tieuchi input[type="text"] { min-height: 40px; line-height: 1.4; }
     `;
     document.head.appendChild(style);
 
-    // 2. KHUNG HTML
     const tieuchiHTML = `
         <div id="tieuchi-gvc1-ui">
             <div class="tc-header-sticky">
                 <h3 class="tc-tieu-de">TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN TIỂU HỌC</h3>
                 <div class="tc-hanh-dong">
-                    <button class="btn-them-moi" onclick="tcgvc1_ThemDong()">+ Thêm mới</button>
-                    <button class="btn-cap-nhat" onclick="tcgvc1_LuuCapNhat()">CẬP NHẬT (LƯU THAY ĐỔI)</button>
+                    <div class="tc-nam-hoc">
+                        <label>📅 Năm học:</label>
+                        <input type="text" id="tcgvc1-namhoc" placeholder="VD: 2025-2026" value="">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-them-moi" onclick="tcgvc1_ThemDong()">+ Thêm mới</button>
+                        <button class="btn-cap-nhat" onclick="tcgvc1_LuuCapNhat()">CẬP NHẬT (LƯU THAY ĐỔI)</button>
+                    </div>
                 </div>
             </div>
             <div style="overflow-x: auto;">
@@ -69,7 +89,7 @@
     const mainUi = document.getElementById('main-ui');
     if (mainUi) mainUi.insertAdjacentHTML('beforeend', tieuchiHTML);
 
-    // 3. OBSERVER ĐỒNG BỘ STICKY HEADER
+    // Observer đồng bộ header
     const uiNode = document.getElementById('tieuchi-gvc1-ui');
     if (uiNode) {
         const observer = new MutationObserver(function(mutations) {
@@ -92,16 +112,27 @@
     }
 })();
 
-// 4. BIẾN TOÀN CỤC VÀ HÀM XỬ LÝ
+// Biến toàn cục
 var tcgvc1_DuLieuGoc = [];
+var tcgvc1_NamHocGoc = "";
 
 async function tcgvc1_TaiDuLieu() {
     if (typeof f_x_j === 'function') f_x_j(true);
     try {
         const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        // Lấy danh sách tiêu chí (bao gồm năm học nếu backend trả về)
         const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
         if (response.status === 'success') {
             tcgvc1_DuLieuGoc = response.data || [];
+            // Nếu backend có trả thêm nam_hoc thì dùng, nếu không thì để trống
+            if (response.nam_hoc) {
+                tcgvc1_NamHocGoc = response.nam_hoc;
+                const inpNam = document.getElementById('tcgvc1-namhoc');
+                if (inpNam) inpNam.value = response.nam_hoc;
+            } else {
+                // Thử đọc năm học từ một API riêng (tương thích cũ)
+                await tcgvc1_TaiNamHoc();
+            }
             tcgvc1_HienThiBang();
         } else {
             hienThiThongBaoUI("Lỗi tải tiêu chí: " + (response.message || "Không xác định"));
@@ -112,6 +143,19 @@ async function tcgvc1_TaiDuLieu() {
     if (typeof f_x_j === 'function') f_x_j(false);
 }
 
+// Hàm riêng tải năm học (nếu backend chưa tích hợp sẵn trong get_tieuchi_gvc1)
+async function tcgvc1_TaiNamHoc() {
+    try {
+        const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        const res = await fetchAPI(gasUrl + "?z_p_a=get_namhoc_gvc1");
+        if (res.status === 'success' && res.nam_hoc) {
+            tcgvc1_NamHocGoc = res.nam_hoc;
+            const inpNam = document.getElementById('tcgvc1-namhoc');
+            if (inpNam) inpNam.value = res.nam_hoc;
+        }
+    } catch (e) { /* bỏ qua, không báo lỗi */ }
+}
+
 function tcgvc1_HienThiBang() {
     const tbody = document.getElementById('tcgvc1-tbody');
     if (!tbody) return;
@@ -119,10 +163,11 @@ function tcgvc1_HienThiBang() {
     tcgvc1_DuLieuGoc.forEach((item, idx) => {
         tbody.insertAdjacentHTML('beforeend', tcgvc1_TaoDong(idx, item));
     });
+    tcgvc1_AutoResizeTextarea();
 }
 
 function tcgvc1_TaoDong(index, item) {
-    // Hỗ trợ cấu trúc dữ liệu: { tieu_chi, thang_gia_tri, quy_diem, xuat_sac, htt, hoan_thanh, cht }
+    // Sử dụng textarea thay vì input
     const tieu_chi = escapeHtml(item.tieu_chi || '');
     const thang_gia_tri = escapeHtml(item.thang_gia_tri || '');
     const quy_diem = escapeHtml(item.quy_diem || '');
@@ -134,14 +179,26 @@ function tcgvc1_TaoDong(index, item) {
     return `<tr>
         <td style="text-align:center"><button class="btn-xoa-dong" onclick="tcgvc1_XoaDong(this)">Xóa</button></td>
         <td class="tcgvc1-stt" style="text-align:center">${index+1}</td>
-        <td><input type="text" class="tcgvc1-tieuchi" value="${tieu_chi}" placeholder="Nhập tiêu chí"></td>
-        <td><input type="text" class="tcgvc1-thang" value="${thang_gia_tri}" placeholder="VD: 0-10"></td>
-        <td><input type="text" class="tcgvc1-quydiem" value="${quy_diem}" placeholder="Điểm tối đa"></td>
-        <td><input type="text" class="tcgvc1-xuatsac" value="${xuat_sac}" placeholder="Mức xuất sắc"></td>
-        <td><input type="text" class="tcgvc1-htt" value="${htt}" placeholder="HTT"></td>
-        <td><input type="text" class="tcgvc1-hoanthanh" value="${hoan_thanh}" placeholder="Hoàn thành"></td>
-        <td><input type="text" class="tcgvc1-cht" value="${cht}" placeholder="CHT"></td>
+        <td><textarea class="tcgvc1-tieuchi" rows="1" placeholder="Nhập tiêu chí">${tieu_chi}</textarea></td>
+        <td><textarea class="tcgvc1-thang" rows="1" placeholder="VD: 0-10">${thang_gia_tri}</textarea></td>
+        <td><textarea class="tcgvc1-quydiem" rows="1" placeholder="Điểm tối đa">${quy_diem}</textarea></td>
+        <td><textarea class="tcgvc1-xuatsac" rows="1" placeholder="Mức xuất sắc">${xuat_sac}</textarea></td>
+        <td><textarea class="tcgvc1-htt" rows="1" placeholder="HTT">${htt}</textarea></td>
+        <td><textarea class="tcgvc1-hoanthanh" rows="1" placeholder="Hoàn thành">${hoan_thanh}</textarea></td>
+        <td><textarea class="tcgvc1-cht" rows="1" placeholder="CHT">${cht}</textarea></td>
     </tr>`;
+}
+
+// Tự động resize textarea theo nội dung
+function tcgvc1_AutoResizeTextarea() {
+    document.querySelectorAll('#tcgvc1-tbody textarea').forEach(ta => {
+        ta.style.height = 'auto';
+        ta.style.height = (ta.scrollHeight) + 'px';
+        ta.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
 }
 
 function tcgvc1_ThemDong() {
@@ -149,6 +206,7 @@ function tcgvc1_ThemDong() {
     const emptyItem = { tieu_chi: '', thang_gia_tri: '', quy_diem: '', xuat_sac: '', htt: '', hoan_thanh: '', cht: '' };
     tbody.insertAdjacentHTML('afterbegin', tcgvc1_TaoDong(0, emptyItem));
     tcgvc1_CapNhatSTT();
+    tcgvc1_AutoResizeTextarea();
 }
 
 function tcgvc1_XoaDong(btn) {
@@ -170,25 +228,31 @@ function tcgvc1_CapNhatSTT() {
 async function tcgvc1_LuuCapNhat() {
     const tbody = document.getElementById('tcgvc1-tbody');
     const newData = [];
-    let hasError = false;
     
     Array.from(tbody.children).forEach(tr => {
         const tieu_chi = tr.querySelector('.tcgvc1-tieuchi')?.value.trim() || '';
-        const thang_gia_tri = tr.querySelector('.tcgvc1-thang')?.value.trim() || '';
-        const quy_diem = tr.querySelector('.tcgvc1-quydiem')?.value.trim() || '';
-        const xuat_sac = tr.querySelector('.tcgvc1-xuatsac')?.value.trim() || '';
-        const htt = tr.querySelector('.tcgvc1-htt')?.value.trim() || '';
-        const hoan_thanh = tr.querySelector('.tcgvc1-hoanthanh')?.value.trim() || '';
-        const cht = tr.querySelector('.tcgvc1-cht')?.value.trim() || '';
-        
-        // Chỉ thêm dòng có ít nhất tiêu chí không rỗng (hoặc tất cả đều trống thì bỏ qua)
+        // Chỉ thêm dòng có tiêu chí không rỗng
         if (tieu_chi !== '') {
-            newData.push({ tieu_chi, thang_gia_tri, quy_diem, xuat_sac, htt, hoan_thanh, cht });
+            newData.push({
+                tieu_chi: tieu_chi,
+                thang_gia_tri: tr.querySelector('.tcgvc1-thang')?.value.trim() || '',
+                quy_diem: tr.querySelector('.tcgvc1-quydiem')?.value.trim() || '',
+                xuat_sac: tr.querySelector('.tcgvc1-xuatsac')?.value.trim() || '',
+                htt: tr.querySelector('.tcgvc1-htt')?.value.trim() || '',
+                hoan_thanh: tr.querySelector('.tcgvc1-hoanthanh')?.value.trim() || '',
+                cht: tr.querySelector('.tcgvc1-cht')?.value.trim() || ''
+            });
         }
     });
     
-    // So sánh với dữ liệu gốc (bỏ qua thứ tự, so sánh nội dung)
-    if (JSON.stringify(tcgvc1_DuLieuGoc) === JSON.stringify(newData)) {
+    // Lấy năm học từ ô nhập
+    const namHocMoi = document.getElementById('tcgvc1-namhoc')?.value.trim() || '';
+    
+    // Kiểm tra thay đổi
+    const dataChanged = JSON.stringify(tcgvc1_DuLieuGoc) !== JSON.stringify(newData);
+    const yearChanged = tcgvc1_NamHocGoc !== namHocMoi;
+    
+    if (!dataChanged && !yearChanged) {
         hienThiThongBaoUI("Không có thay đổi nào để lưu.");
         return;
     }
@@ -197,17 +261,20 @@ async function tcgvc1_LuuCapNhat() {
     if (overlay) overlay.style.display = "flex";
     try {
         const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        // Gửi dữ liệu dạng POST (chú ý mode no-cors như trong CapQuyen gốc)
+        // Gửi cả danh sách tiêu chí và năm học
         await fetch(gasUrl, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({ action: 'luu_tieuchi_gvc1', data: newData })
+            body: JSON.stringify({ 
+                action: 'luu_tieuchi_gvc1', 
+                data: newData,
+                nam_hoc: namHocMoi
+            })
         });
-        // Giả lập thành công (do no-cors không đọc response)
         setTimeout(() => {
             if (overlay) overlay.style.display = "none";
-            tcgvc1_ThongBaoThanhCong("Đã cập nhật bảng tiêu chí đánh giá thành công!");
-            tcgvc1_TaiDuLieu();
+            tcgvc1_ThongBaoThanhCong("Đã cập nhật bảng tiêu chí và năm học thành công!");
+            tcgvc1_TaiDuLieu(); // tải lại để đồng bộ
         }, 1500);
     } catch (err) {
         if (overlay) overlay.style.display = "none";
@@ -239,7 +306,6 @@ function tcgvc1_ThongBaoThanhCong(noiDung) {
     }
 }
 
-// Hàm bảo vệ XSS nhẹ
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -247,13 +313,10 @@ function escapeHtml(str) {
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
         return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
     });
 }
 
-// Tự động tải dữ liệu khi module được mở (bạn sẽ gọi từ menu chính)
-// Để tương thích, có thể thêm lệnh khởi tạo:
+// Gắn vào window
 if (typeof window.tcgvc1_TaiDuLieu === 'undefined') {
     window.tcgvc1_TaiDuLieu = tcgvc1_TaiDuLieu;
     window.tcgvc1_ThemDong = tcgvc1_ThemDong;
