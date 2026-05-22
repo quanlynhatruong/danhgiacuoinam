@@ -157,12 +157,43 @@
 </div>
 
 <div id="bo-cuc-he-thong" class="bo-cuc-tong" style="display: none;">
-    
-    <?!= include('menudoc'); ?>
-
-    <div class="k-ngoai" id="main-ui">
+    <div class="khung-trai">
+        <div class="khung-logo">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="app-logo" alt="Logo">
+        </div>
+        <div class="ten-truong-trai app-school-name">ĐANG TẢI...</div>
         
-        <?!= include('ketqua'); ?>
+        <div class="thong-tin-user" id="vungThongTinUser" style="display: none;">
+            <div style="opacity: 0.9; margin-bottom: 2px;">Xin chào đồng chí:</div>
+            <div class="hl-text" id="ui-ten-hien-thi">...</div>
+            <div style="opacity: 0.9; margin-top: 5px;">Xếp loại: <span class="hl-text" style="font-size: 13px;" id="ui-xep-loai">...</span></div>
+            <div style="opacity: 0.9; margin-top: 3px;">Đứng thứ: <span class="hl-text" style="font-size: 14px;" id="ui-dung-thu">...</span></div>
+            <div style="opacity: 0.9; margin-top: 3px;">Phân loại: <span class="hl-text" style="font-size: 13px;" id="ui-phan-loai">...</span></div>
+            <div style="opacity: 0.9; margin-top: 3px;">Năm học: <span class="hl-text" style="font-size: 13px;" id="ui-nam-hoc">...</span></div>
+        </div>
+
+        <div class="danh-muc-trai">
+            <a href="javascript:void(0)" onclick="f_x_c(); return false;" class="the-chuyen active" id="menu-danh-gia">
+                <span class="b-tuong">📝</span> Đánh giá
+            </a>
+            <a href="javascript:void(0)" class="the-chuyen" id="menu-ket-qua">
+                <span class="b-tuong">📈</span> Kết quả
+            </a>
+            <span class="the-chuyen" id="menu-quan-ly-quyen" style="display: none;" onclick="f_x_mo_quan_ly_quyen()">
+                <span class="b-tuong">👥</span> Quản lý quyền
+            </span>
+            <span class="the-chuyen" id="menu-tieu-chi-gv" style="display: none;">
+                <span class="b-tuong">🏫</span> Tiêu chí xếp loại giáo viên
+            </span>
+            <span class="the-chuyen" id="menu-tieu-chi-nv" style="display: none;">
+                <span class="b-tuong">💼</span> Tiêu chí xếp loại nhân viên
+            </span>
+            <span class="the-chuyen" id="menu-tro-giup" onclick="moKhungChatAI()">
+                <span class="b-tuong">💡</span> Trợ giúp
+            </span>
+        </div>
+    </div>
+    <div class="k-ngoai" id="main-ui">
 
         <div id="vung-danh-gia-ui" style="display: block; width: 100%;">
             <div class="k-header-sticky">
@@ -292,21 +323,6 @@ window.addEventListener('DOMContentLoaded', () => {
         alert("Hệ thống bảo mật từ chối nạp cấu hình. Vui lòng kiểm tra lại đường dẫn tệp ketnoi.js!");
     };
     document.head.appendChild(ketnoiScript);
-
-    // Bổ sung Lắng nghe sự kiện click cho các Menu (Vì HTML Menu được nhúng từ menudoc)
-    document.body.addEventListener('click', function(e) {
-        let theQuyen = e.target.closest('#menu-quan-ly-quyen');
-        if (theQuyen) {
-            e.preventDefault();
-            f_x_mo_quan_ly_quyen();
-        }
-
-        let theDanhGia = e.target.closest('#menu-danh-gia');
-        if (theDanhGia) {
-            e.preventDefault();
-            f_x_c(); // Hàm mở lại tab Đánh giá
-        }
-    });
 });
 
 function khoiDongHeThong() {
@@ -336,12 +352,14 @@ function khoiDongHeThong() {
         });
     }
     
+   // ĐÃ BỔ SUNG FILE KetQua.html VÀO TRÌNH TẢI MODULE
    Promise.all([
         f_x_k('danhgiaGVC1.html'),
         f_x_k('danhgiaGVC2.html'),
         f_x_k('danhgiaNV.html'), 
         f_x_k('tieuchinv.html'),
-        f_x_k('CapQuyen.html') 
+        f_x_k('CapQuyen.html'),
+        f_x_k('KetQua.html') 
     ]).catch(e => console.log(e));
 }
 
@@ -496,14 +514,16 @@ async function f_x_vao_khach() {
     if (document.getElementById('khung-xac-thuc')) document.getElementById('khung-xac-thuc').style.display = 'none';
     if (document.getElementById('bo-cuc-he-thong')) document.getElementById('bo-cuc-he-thong').style.display = 'flex';
     
-    let theHien = document.getElementById('theHienChinh');
+    let theHien = document.getElementById('ui-ten-hien-thi');
     if (theHien) theHien.innerText = "KHÁCH THAM QUAN";
     
     const p_n = objNhom.value;
-    let hienNhom = document.getElementById('hienThiNhom');
+    let hienNhom = document.getElementById('ui-phan-loai');
     if (hienNhom) hienNhom.innerText = objNhom.options[objNhom.selectedIndex].text.replace(/\s*\(CẤP\s*[12]\)/gi, '').trim();
+    let namHoc = document.getElementById('ui-nam-hoc');
+    if (namHoc) namHoc.innerText = "2025-2026";
     
-    if (document.getElementById("vungThongTin")) document.getElementById("vungThongTin").style.display = "flex";
+    if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
     if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if (document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
     if (document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
@@ -537,6 +557,9 @@ function f_x_logout() {
     sessionStorage.removeItem("HTDG_ACCOUNT_ID");
     sessionStorage.removeItem("HTDG_NHOM_ID");
     sessionStorage.removeItem("HTDG_IS_ADMIN");
+    sessionStorage.removeItem("HTDG_USER_NAME");
+    sessionStorage.removeItem("HTDG_USER_ROLE");
+    sessionStorage.removeItem("HTDG_USER_YEAR");
     v_bo_nho_dem_admin = {}; 
     location.reload();
 }
@@ -578,7 +601,7 @@ function f_x_c() {
     if (document.getElementById("ket-qua-ui")) document.getElementById("ket-qua-ui").style.display = "none";
     
     // Mở module chính
-    if (document.getElementById("vungThongTin")) document.getElementById("vungThongTin").style.display = "flex";
+    if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
     if (document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
 
     // Xử lý Active CSS
@@ -630,12 +653,7 @@ async function f_x_d() {
             v_che_do_khach = false; 
             v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e || {}; v_l_d = t_k.y_c || ""; 
             
-            let elTheHien = document.getElementById("theHienChinh");
-            if (elTheHien) elTheHien.innerText = t_k.y_b || v_l_b;
-            
             v_nam_hoc_hien_tai = t_k.y_namhoc || "";
-            let elNamHoc = document.getElementById("hienThiNamHoc");
-            if(elNamHoc) elNamHoc.innerText = v_nam_hoc_hien_tai;
 
             let roleStr = t_k.y_role ? t_k.y_role.toLowerCase() : "";
             let quyenAdmin = roleStr.includes('admin');
@@ -643,6 +661,9 @@ async function f_x_d() {
             
             sessionStorage.setItem("HTDG_IS_ADMIN", quyenAdmin ? "true" : "false"); 
             sessionStorage.setItem("HTDG_IS_ADMIN_VIP", quyenAdminVip ? "true" : "false"); 
+            sessionStorage.setItem("HTDG_USER_NAME", t_k.y_b || v_l_b);
+            sessionStorage.setItem("HTDG_USER_ROLE", t_k.y_role || "");
+            sessionStorage.setItem("HTDG_USER_YEAR", t_k.y_namhoc || "");
             
             v_hien_thi_menu_admin(quyenAdminVip);
 
@@ -655,10 +676,18 @@ async function f_x_d() {
                 if(document.getElementById("vungHienThiNamHoc")) document.getElementById("vungHienThiNamHoc").style.display = "block";
             }
 
+            // GHI DỮ LIỆU VÀO KHỐI THÔNG TIN BÊN TRÁI
+            if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
+            if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = t_k.y_b || v_l_b;
+            if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = t_k.y_role || "";
+            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || "";
+            if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
+            if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
+
             f_x_e(t_k.y_d);
             if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
-            if(document.getElementById("vungThongTin")) document.getElementById("vungThongTin").style.display = "flex";
+            if(document.getElementById("vung-danh-gia-ui")) document.getElementById("vung-danh-gia-ui").style.display = "block";
             
             if (typeof f_x_h === "function") f_x_h();
             
@@ -675,9 +704,11 @@ async function f_x_d() {
             return;
         } else { 
             v_che_do_khach = true;
-            let elTheHien = document.getElementById('theHienChinh');
-            if (elTheHien) elTheHien.innerText = "Tài khoản không hợp lệ";
-            if (document.getElementById("vungThongTin")) document.getElementById("vungThongTin").style.display = "flex";
+            if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
+            if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = "TÀI KHOẢN KHÔNG HỢP LỆ";
+            if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = "--";
+            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = "--";
+            
             if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if (document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
             let nutLuu = document.getElementById("vungNutBam");
@@ -750,8 +781,8 @@ async function f_x_admin_chon_user() {
     
     if (isNv && !isGv) { nhomXacDinh = 'nhanvien'; }
 
-    if (document.getElementById("theHienChinh")) document.getElementById("theHienChinh").innerText = selectedName;
-    if (document.getElementById("hienThiNhom")) document.getElementById("hienThiNhom").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
+    if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = selectedName;
+    if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
     if (document.getElementById("oChonNhom")) document.getElementById("oChonNhom").value = nhomXacDinh; 
 
     if (v_bo_nho_dem_admin[selectedId]) {
@@ -801,7 +832,7 @@ async function f_x_i() {
     
     if (document.getElementById("o-luu-overlay")) document.getElementById("o-luu-overlay").style.display = "flex";
     
-    let elTheHien = document.getElementById("theHienChinh");
+    let elTheHien = document.getElementById("ui-ten-hien-thi");
     const ten_tren_web = (elTheHien ? elTheHien.innerText : null) || v_l_b;
     
     try {
@@ -1068,7 +1099,7 @@ async function f_x_xuat_pdf() {
         if (!element) { alert("Không tìm thấy vùng dữ liệu đánh giá."); return; }
 
         let tenNV = "VienChuc";
-        const eTen = document.getElementById("theHienChinh");
+        const eTen = document.getElementById("ui-ten-hien-thi");
         if (eTen) tenNV = eTen.innerText.trim();
         
         const namHoc = (typeof v_nam_hoc_hien_tai !== 'undefined' && v_nam_hoc_hien_tai) ? v_nam_hoc_hien_tai : "2025-2026";
