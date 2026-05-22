@@ -16,13 +16,13 @@
         /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) */
         .cq-header-sticky { 
             position: sticky; 
-            top: 77px; 
+            top: 77px; /* Sẽ được thuật toán bên dưới tính toán lại chính xác tuyệt đối */
             background: #fff; 
             z-index: 990; 
             padding-top: 5px;
             padding-bottom: 10px; 
             margin-bottom: 10px;  
-            border-bottom: 2px solid red; 
+            border-bottom: 2px solid red; /* Dòng kẻ đỏ theo đúng yêu cầu */
         }
         
         .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
@@ -74,10 +74,11 @@
         </div>
     `;
     
+    // Đảm bảo chèn an toàn vào DOM
     const mainUi = document.getElementById('main-ui');
     if (mainUi) mainUi.insertAdjacentHTML('beforeend', capQuyenHTML);
 
-    // 3. THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN (Observer)
+    // 3. THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN (Bản vá chống lỗi triệt để bằng Observer)
     const uiNode = document.getElementById('cap-quyen-ui');
     if (uiNode) {
         const observer = new MutationObserver(function(mutations) {
@@ -90,15 +91,17 @@
 
                     if (isVisible) {
                         if (kDau) {
-                            kDau.style.borderBottom = 'none';
-                            kDau.style.paddingBottom = '0px';
+                            kDau.style.borderBottom = 'none'; // Giấu kẻ xanh
+                            kDau.style.paddingBottom = '0px'; // Bỏ đệm dưới
                             kDau.style.marginBottom = '0px'; 
                         }
                         if (sysHeader && cqHeader) {
+                            // Neo chặt tọa độ chống rung
                             cqHeader.style.top = sysHeader.offsetHeight + 'px';
                         }
                     } else {
                         if (kDau) {
+                            // Trả lại nguyên trạng cho hệ thống mẹ khi đóng menu
                             kDau.style.borderBottom = '';
                             kDau.style.paddingBottom = '';
                             kDau.style.marginBottom = '';
@@ -111,20 +114,14 @@
     }
 })();
 
-// 4. Hàm logic xử lý dữ liệu
+// 4. Hàm logic xử lý dữ liệu (Sử dụng var để tránh lỗi Crash bộ nhớ đệm GAS)
 var cq_DuLieuGoc = [];
 
 async function cq_TaiDuLieu() {
     f_x_j(true); 
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        
-        // ======================================================================================
-        // SỬA LỖI TẠI ĐÂY: Thay "TÊN_LỆNH_TẢI_QUYỀN_CỦA_ĐỒNG_CHÍ" bằng lệnh gốc trong file Mã.gs
-        // (Ví dụ: l_d_q, load_quyen, get_quyen_truy_cap...)
-        const response = await fetchAPI(z_y_a + "?z_p_a=TÊN_LỆNH_TẢI_QUYỀN_CỦA_ĐỒNG_CHÍ"); 
-        // ======================================================================================
-        
+        const response = await fetchAPI(z_y_a + "?z_p_a=get_quyen");
         if (response.status === 'success') {
             cq_DuLieuGoc = response.data;
             cq_HienThiBang();
@@ -285,16 +282,11 @@ async function cq_LuuCapNhat() {
     document.getElementById("o-luu-overlay").style.display = "flex";
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        
-        // ======================================================================================
-        // SỬA LỖI TẠI ĐÂY: Thay "TÊN_LỆNH_LƯU_QUYỀN_CỦA_ĐỒNG_CHÍ" bằng lệnh cập nhật quyền trong Mã.gs
-        // Cấu trúc chuỗi JSON gửi đi có thể cần điều chỉnh nếu Mã.gs quy định tham số khác 'data'
         const response = await fetch(z_y_a, {
             method: 'POST',
             mode: 'no-cors', 
-            body: JSON.stringify({ action: 'TÊN_LỆNH_LƯU_QUYỀN_CỦA_ĐỒNG_CHÍ', data: m_d })
+            body: JSON.stringify({ action: 'luu_quyen', data: m_d })
         });
-        // ======================================================================================
         
         setTimeout(() => {
             document.getElementById("o-luu-overlay").style.display = "none";
