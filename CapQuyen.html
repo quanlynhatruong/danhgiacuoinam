@@ -4,19 +4,37 @@
  * Thiết kế và phát triển: Hoàng Ngọc Lâm
  */
 (function() {
+    // 0. CHỐT CHẶN AN TOÀN: Ngăn chặn nạp đúp module gây lỗi tê liệt menu
     if (document.getElementById('cap-quyen-ui')) return;
 
+    // 1. Khởi tạo và nhúng CSS riêng biệt cho module
     const style = document.createElement('style');
     style.textContent = `
+        /* Đã thu hẹp tối đa khoảng đệm (padding) */
         #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
-        .cq-header-sticky { position: sticky; top: 77px; background: #fff; z-index: 990; padding-top: 5px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 2px solid red; }
+        
+        /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) */
+        .cq-header-sticky { 
+            position: sticky; 
+            top: 77px; 
+            background: #fff; 
+            z-index: 990; 
+            padding-top: 5px;
+            padding-bottom: 10px; 
+            margin-bottom: 10px;  
+            border-bottom: 2px solid red; 
+        }
+        
         .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
         .cq-hanh-dong { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* CẤU TRÚC BẢNG VÀ NÚT BẤM */
         .table-quyen { width: 100%; border-collapse: collapse; margin-top: 0; }
         .table-quyen th, .table-quyen td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: center; vertical-align: middle; }
         .table-quyen th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; }
         .table-quyen input, .table-quyen select { width: 100%; border: 1px solid #ddd; padding: 7px; box-sizing: border-box; font-family: inherit; font-size: 15px; border-radius: 4px; transition: border-color 0.3s; }
         .table-quyen input:focus, .table-quyen select:focus { border-color: var(--mau-c); outline: none; }
+        
         .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .btn-xoa-dong:hover { background: #c82333; }
         .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
@@ -26,6 +44,7 @@
     `;
     document.head.appendChild(style);
 
+    // 2. Nhúng bộ khung HTML vào vùng nội dung chính
     const capQuyenHTML = `
         <div id="cap-quyen-ui">
             <div class="cq-header-sticky">
@@ -58,6 +77,7 @@
     const mainUi = document.getElementById('main-ui');
     if (mainUi) mainUi.insertAdjacentHTML('beforeend', capQuyenHTML);
 
+    // 3. THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN (Observer)
     const uiNode = document.getElementById('cap-quyen-ui');
     if (uiNode) {
         const observer = new MutationObserver(function(mutations) {
@@ -91,15 +111,22 @@
     }
 })();
 
+// 4. Hàm logic xử lý dữ liệu
 var cq_DuLieuGoc = [];
 
 async function cq_TaiDuLieu() {
     f_x_j(true); 
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        const response = await fetchAPI(z_y_a + "?z_p_a=get_quyen");
+        
+        // ======================================================================================
+        // SỬA LỖI TẠI ĐÂY: Thay "TÊN_LỆNH_TẢI_QUYỀN_CỦA_ĐỒNG_CHÍ" bằng lệnh gốc trong file Mã.gs
+        // (Ví dụ: l_d_q, load_quyen, get_quyen_truy_cap...)
+        const response = await fetchAPI(z_y_a + "?z_p_a=TÊN_LỆNH_TẢI_QUYỀN_CỦA_ĐỒNG_CHÍ"); 
+        // ======================================================================================
+        
         if (response.status === 'success') {
-            cq_DuLieuGoc = response.data || [];
+            cq_DuLieuGoc = response.data;
             cq_HienThiBang();
         } else {
             hienThiThongBaoUI("Lỗi truy xuất hệ thống phân quyền: " + response.message);
@@ -112,15 +139,10 @@ async function cq_TaiDuLieu() {
 
 function cq_HienThiBang() {
     const tbody = document.getElementById('tbody-quyen');
-    if (!tbody) return;
     tbody.innerHTML = '';
-    if (Array.isArray(cq_DuLieuGoc)) {
-        cq_DuLieuGoc.forEach((item, index) => {
-            tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
-        });
-    } else {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Lỗi cấu trúc dữ liệu trả về từ máy chủ.</td></tr>';
-    }
+    cq_DuLieuGoc.forEach((item, index) => {
+        tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
+    });
 }
 
 function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
@@ -263,11 +285,16 @@ async function cq_LuuCapNhat() {
     document.getElementById("o-luu-overlay").style.display = "flex";
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+        
+        // ======================================================================================
+        // SỬA LỖI TẠI ĐÂY: Thay "TÊN_LỆNH_LƯU_QUYỀN_CỦA_ĐỒNG_CHÍ" bằng lệnh cập nhật quyền trong Mã.gs
+        // Cấu trúc chuỗi JSON gửi đi có thể cần điều chỉnh nếu Mã.gs quy định tham số khác 'data'
         const response = await fetch(z_y_a, {
             method: 'POST',
             mode: 'no-cors', 
-            body: JSON.stringify({ action: 'luu_quyen', data: m_d })
+            body: JSON.stringify({ action: 'TÊN_LỆNH_LƯU_QUYỀN_CỦA_ĐỒNG_CHÍ', data: m_d })
         });
+        // ======================================================================================
         
         setTimeout(() => {
             document.getElementById("o-luu-overlay").style.display = "none";
