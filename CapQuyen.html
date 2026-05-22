@@ -4,37 +4,19 @@
  * Thiết kế và phát triển: Hoàng Ngọc Lâm
  */
 (function() {
-    // 0. CHỐT CHẶN AN TOÀN: Ngăn chặn nạp đúp module gây lỗi tê liệt menu
     if (document.getElementById('cap-quyen-ui')) return;
 
-    // 1. Khởi tạo và nhúng CSS riêng biệt cho module
     const style = document.createElement('style');
     style.textContent = `
-        /* Đã thu hẹp tối đa khoảng đệm (padding) */
         #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
-        
-        /* CỤM ĐẦU TRANG CỐ ĐỊNH (STICKY HEADER) */
-        .cq-header-sticky { 
-            position: sticky; 
-            top: 77px; /* Sẽ được thuật toán bên dưới tính toán lại chính xác tuyệt đối */
-            background: #fff; 
-            z-index: 990; 
-            padding-top: 5px;
-            padding-bottom: 10px; 
-            margin-bottom: 10px;  
-            border-bottom: 2px solid red; /* Dòng kẻ đỏ theo đúng yêu cầu */
-        }
-        
+        .cq-header-sticky { position: sticky; top: 77px; background: #fff; z-index: 990; padding-top: 5px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 2px solid red; }
         .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
         .cq-hanh-dong { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* CẤU TRÚC BẢNG VÀ NÚT BẤM */
         .table-quyen { width: 100%; border-collapse: collapse; margin-top: 0; }
         .table-quyen th, .table-quyen td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: center; vertical-align: middle; }
         .table-quyen th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; }
         .table-quyen input, .table-quyen select { width: 100%; border: 1px solid #ddd; padding: 7px; box-sizing: border-box; font-family: inherit; font-size: 15px; border-radius: 4px; transition: border-color 0.3s; }
         .table-quyen input:focus, .table-quyen select:focus { border-color: var(--mau-c); outline: none; }
-        
         .btn-xoa-dong { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .btn-xoa-dong:hover { background: #c82333; }
         .btn-them-moi { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; margin: 0; }
@@ -44,7 +26,6 @@
     `;
     document.head.appendChild(style);
 
-    // 2. Nhúng bộ khung HTML vào vùng nội dung chính
     const capQuyenHTML = `
         <div id="cap-quyen-ui">
             <div class="cq-header-sticky">
@@ -74,11 +55,9 @@
         </div>
     `;
     
-    // Đảm bảo chèn an toàn vào DOM
     const mainUi = document.getElementById('main-ui');
     if (mainUi) mainUi.insertAdjacentHTML('beforeend', capQuyenHTML);
 
-    // 3. THUẬT TOÁN ĐỒNG BỘ GIAO DIỆN (Bản vá chống lỗi triệt để bằng Observer)
     const uiNode = document.getElementById('cap-quyen-ui');
     if (uiNode) {
         const observer = new MutationObserver(function(mutations) {
@@ -91,17 +70,15 @@
 
                     if (isVisible) {
                         if (kDau) {
-                            kDau.style.borderBottom = 'none'; // Giấu kẻ xanh
-                            kDau.style.paddingBottom = '0px'; // Bỏ đệm dưới
+                            kDau.style.borderBottom = 'none';
+                            kDau.style.paddingBottom = '0px';
                             kDau.style.marginBottom = '0px'; 
                         }
                         if (sysHeader && cqHeader) {
-                            // Neo chặt tọa độ chống rung
                             cqHeader.style.top = sysHeader.offsetHeight + 'px';
                         }
                     } else {
                         if (kDau) {
-                            // Trả lại nguyên trạng cho hệ thống mẹ khi đóng menu
                             kDau.style.borderBottom = '';
                             kDau.style.paddingBottom = '';
                             kDau.style.marginBottom = '';
@@ -114,35 +91,36 @@
     }
 })();
 
-// 4. Hàm logic xử lý dữ liệu (Sử dụng var để tránh lỗi Crash bộ nhớ đệm GAS)
 var cq_DuLieuGoc = [];
 
 async function cq_TaiDuLieu() {
     f_x_j(true); 
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        // SỬA: dùng fetchAPI thay vì fetch trực tiếp để xử lý CORS và parsing JSON
         const response = await fetchAPI(z_y_a + "?z_p_a=get_quyen");
         if (response.status === 'success') {
-            cq_DuLieuGoc = response.data;
+            cq_DuLieuGoc = response.data || [];
             cq_HienThiBang();
         } else {
-            hienThiThongBaoUI("Lỗi truy xuất hệ thống phân quyền: " + (response.message || "Không xác định"));
+            hienThiThongBaoUI("Lỗi truy xuất hệ thống phân quyền: " + response.message);
         }
     } catch (err) {
-        console.error("Lỗi tải quyền:", err);
-        hienThiThongBaoUI("Gián đoạn kết nối khi lấy dữ liệu danh sách quyền. Chi tiết: " + err.message);
+        hienThiThongBaoUI("Gián đoạn kết nối khi lấy dữ liệu danh sách quyền.");
     }
     f_x_j(false);
 }
 
 function cq_HienThiBang() {
     const tbody = document.getElementById('tbody-quyen');
-    if (!tbody) return; // thêm kiểm tra an toàn
+    if (!tbody) return;
     tbody.innerHTML = '';
-    cq_DuLieuGoc.forEach((item, index) => {
-        tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
-    });
+    if (Array.isArray(cq_DuLieuGoc)) {
+        cq_DuLieuGoc.forEach((item, index) => {
+            tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
+        });
+    } else {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Lỗi cấu trúc dữ liệu trả về từ máy chủ.</td></tr>';
+    }
 }
 
 function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
@@ -197,10 +175,8 @@ function cq_XoaDong(btn) {
 
 function cq_CapNhatSTT() {
     const tbody = document.getElementById('tbody-quyen');
-    if (!tbody) return;
     Array.from(tbody.children).forEach((tr, index) => {
-        let sttCell = tr.querySelector('.cq-stt');
-        if (sttCell) sttCell.innerText = index + 1;
+        tr.querySelector('.cq-stt').innerText = index + 1;
     });
 }
 
@@ -287,8 +263,7 @@ async function cq_LuuCapNhat() {
     document.getElementById("o-luu-overlay").style.display = "flex";
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
-        // Giữ nguyên mode no-cors như cũ
-        await fetch(z_y_a, {
+        const response = await fetch(z_y_a, {
             method: 'POST',
             mode: 'no-cors', 
             body: JSON.stringify({ action: 'luu_quyen', data: m_d })
