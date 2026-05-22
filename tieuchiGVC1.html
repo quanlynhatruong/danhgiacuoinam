@@ -1,7 +1,7 @@
 <script>
 /**
  * MODULE: QUẢN LÝ TIÊU CHÍ ĐÁNH GIÁ GIÁO VIÊN CẤP 1
- * Cập nhật: Bỏ thanh trượt dọc, load năm học từ A1 sheet.
+ * Sửa lỗi: Ẩn thanh cuộn textarea, load năm học từ ô A1 sheet.
  */
 (function() {
     if (document.getElementById('tieuchi-gvc1-ui')) return;
@@ -32,7 +32,7 @@
         .table-tieuchi th { background: #e9ecef; color: var(--mau-c); font-size: 15px; font-weight: bold; text-align: center; }
         .table-tieuchi td { text-align: left; }
         
-        /* Textarea không icon resize, không khung */
+        /* Textarea - ẩn hoàn toàn thanh cuộn, vẫn auto resize */
         .table-tieuchi textarea {
             width: 100%;
             border: none;
@@ -44,10 +44,14 @@
             padding: 4px 0;
             margin: 0;
             resize: none;
-            overflow: auto;
+            overflow: hidden;       /* Ẩn thanh cuộn dọc */
             box-sizing: border-box;
             height: auto;
             min-height: 38px;
+            scrollbar-width: none;  /* Firefox: ẩn thanh cuộn */
+        }
+        .table-tieuchi textarea::-webkit-scrollbar {
+            display: none;          /* Chrome/Safari: ẩn thanh cuộn */
         }
         .table-tieuchi textarea:focus {
             background: #fef9e6;
@@ -77,7 +81,7 @@
                     </div>
                 </div>
             </div>
-            <div style="overflow-x: auto; overflow-y: visible;"> <!-- Bỏ thanh trượt dọc -->
+            <div style="overflow-x: auto; overflow-y: visible;">
                 <table class="table-tieuchi">
                     <thead>
                         <tr><th width="6%">Sửa</th><th width="5%">TT</th><th width="30%">Tiêu chí</th><th width="12%">Thang giá trị</th><th width="10%">Quy điểm</th><th width="10%">Xuất sắc</th><th width="10%">HTT</th><th width="10%">Hoàn thành</th><th width="7%">CHT</th></tr>
@@ -122,13 +126,13 @@ async function tcgvc1_TaiDuLieu() {
         const response = await fetchAPI(gasUrl + "?z_p_a=get_tieuchi_gvc1");
         if (response.status === 'success') {
             tcgvc1_DuLieuGoc = response.data || [];
-            // Load năm học từ response (bắt buộc backend trả về)
+            // Bắt buộc lấy năm học từ response (backend đã được cập nhật trả về nam_hoc từ ô A1)
             if (response.nam_hoc) {
                 tcgvc1_NamHocGoc = response.nam_hoc;
                 const inpNam = document.getElementById('tcgvc1-namhoc');
                 if (inpNam) inpNam.value = response.nam_hoc;
             } else {
-                // Fallback: thử gọi API riêng nếu backend chưa tích hợp
+                // Fallback an toàn: gọi API riêng (nếu backend hỗ trợ)
                 await tcgvc1_TaiNamHoc();
             }
             tcgvc1_HienThiBang();
@@ -141,7 +145,7 @@ async function tcgvc1_TaiDuLieu() {
     if (typeof f_x_j === 'function') f_x_j(false);
 }
 
-// Hàm riêng đọc năm học (nếu cần)
+// Fallback: đọc năm học từ API riêng (nếu backend có hỗ trợ)
 async function tcgvc1_TaiNamHoc() {
     try {
         const gasUrl = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
@@ -151,7 +155,7 @@ async function tcgvc1_TaiNamHoc() {
             const inpNam = document.getElementById('tcgvc1-namhoc');
             if (inpNam) inpNam.value = res.nam_hoc;
         }
-    } catch (e) { /* không báo lỗi */ }
+    } catch (e) { /* im lặng */ }
 }
 
 function tcgvc1_HienThiBang() {
@@ -183,7 +187,7 @@ function tcgvc1_TaoDong(index, item) {
         <td><textarea class="tcgvc1-htt" rows="1" placeholder="HTT">${htt}</textarea></td>
         <td><textarea class="tcgvc1-hoanthanh" rows="1" placeholder="Hoàn thành">${hoan_thanh}</textarea></td>
         <td><textarea class="tcgvc1-cht" rows="1" placeholder="CHT">${cht}</textarea></td>
-    </table>`;
+    </tr>`;
 }
 
 function tcgvc1_AutoResizeTextarea() {
