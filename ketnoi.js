@@ -2,7 +2,6 @@
    TỆP CẤU HÌNH GIAO DIỆN (ketnoi.js)
    CHỨC NĂNG: LƯU TRỮ VÀ ĐỒNG BỘ TOÀN BỘ CÁC THÔNG SỐ ĐỊNH DANH HỆ THỐNG
    ========================================================================== */
-//var DG_NAM_HOC_HIEN_TAI = "2026-2027";
 // 🔁 SAU KHI TRIỂN KHAI GOOGLE APPS SCRIPT, HÃY CẬP NHẬT URL NÀY
 var DG_CONFIG_GAS_URL = "https://script.google.com/macros/s/AKfycbyfW0HDpryuXX9HqqEAS7Ggec1iXbSdcUGjMxcZMvnREjhD5CkJuVZFvII899dKwrcV/exec";
 
