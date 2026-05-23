@@ -27,6 +27,7 @@
         .the-chuyen.active { background-color: rgba(255, 255, 255, 0.2); font-weight: bold; color: #ffc107; }
         .b-tuong { margin-right: 12px; font-size: 18px; display: inline-block; width: 24px; text-align: center; }
         
+        /* Submenu styling */
         .submenu-tieu-chi {
             display: flex;
             flex-direction: column;
@@ -213,6 +214,7 @@
                 <span class="b-tuong">👥</span> Quản lý quyền
             </span>
             
+            <!-- Tab mẹ Tiêu chí đánh giá -->
             <span class="the-chuyen" id="menu-tieu-chi-cha" style="display: none;" onclick="toggleSubmenuTieuChi(event)">
                 <span class="b-tuong">📋</span> Tiêu chí đánh giá
                 <span style="margin-left: auto; font-size: 14px;">▼</span>
@@ -542,6 +544,7 @@ async function fetchAPI(url) {
     }
 }
 
+// ================= HÀM LẤY MẪU TIÊU CHÍ MỚI =================
 async function loadMauTieuChi(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
@@ -591,15 +594,15 @@ async function f_x_load_guest_template(p_n) {
                 if (typeof f_x_h === "function") f_x_h();
             } else {
                 let tbg = document.getElementById("t-b-g");
-                if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu.</td></tr>";
+                if(tbg) tbg.innerHTML = "</td><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Lỗi tải cấu trúc mẫu. jonzon";
             }
         } else {
             let tbg = document.getElementById("t-b-g");
-            if(tbg) tbg.innerHTML = "<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu.</td></tr>";
+            if(tbg) tbg.innerHTML = "<table><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>CHẾ ĐỘ KHÁCH: Hệ thống chưa có nhân sự nhóm này để mượn cấu trúc mẫu. jonzon";
         }
     } catch (e) {
         let tbg = document.getElementById("t-b-g");
-        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message}</td></tr>`;
+        if(tbg) tbg.innerHTML = `<tr><td colspan='4' style='text-align: center; color: #dc3545; font-weight: bold; padding: 20px;'>${e.message} jonzon`;
     }
 }
 
@@ -724,6 +727,7 @@ function f_x_mo_quan_ly_quyen() {
     }
 }
 
+// ================= MODULE TIÊU CHÍ =================
 function f_x_mo_tieu_chi_gv_c1() {
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
@@ -798,6 +802,7 @@ function f_x_mo_tieu_chi_nv() {
         hienThiThongBaoUI("Module quản lý tiêu chí nhân viên chưa được tải xong.");
     }
 }
+// ================= KẾT THÚC MODULE TIÊU CHÍ =================
 
 function f_x_c() {
     let vungQuyen = document.getElementById("cap-quyen-ui");
@@ -836,7 +841,7 @@ function f_x_c() {
     }
 }
 
-// ================= HÀM f_x_d ĐÃ CẬP NHẬT (không ghi đè năm học) =================
+// ================= HÀM f_x_d ĐÃ CẬP NHẬT =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -854,29 +859,21 @@ async function f_x_d() {
         return;
     }
     
-    let currentYearElem = document.getElementById("ui-nam-hoc");
-    let currentYear = currentYearElem ? currentYearElem.innerText.trim() : "";
-    if (!currentYear || currentYear === "..." || currentYear === "") {
-        currentYear = v_nam_hoc_hien_tai || "2025-2026";
-    }
-    console.log("Client: Năm học sẽ dùng để lọc sheet riêng =", currentYear);
-    
     f_x_j(true);
     try {
         const p_n_khac = (p_n.includes('giaovien')) ? 'nhanvien' : 'giaovienc1';
         
         const [t_k, t_k_khac] = await Promise.all([
-            fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}&z_p_e=${encodeURIComponent(currentYear)}`),
-            fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}&z_p_e=${encodeURIComponent(currentYear)}`)
+            fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}`),
+            fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}`)
         ]);
         
         if (t_k.status === 'success') {
             v_che_do_khach = false; 
             v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e || {}; v_l_d = t_k.y_c || ""; 
             
-            let yearFromSheetMau = t_k.y_namhoc || currentYear;
-            v_nam_hoc_hien_tai = yearFromSheetMau;
-            
+            v_nam_hoc_hien_tai = t_k.y_namhoc || "";
+
             let roleStr = t_k.y_role ? t_k.y_role.toLowerCase() : "";
             let quyenAdmin = roleStr.includes('admin');
             let quyenAdminVip = roleStr.includes('admin vip');
@@ -885,7 +882,7 @@ async function f_x_d() {
             sessionStorage.setItem("HTDG_IS_ADMIN_VIP", quyenAdminVip ? "true" : "false"); 
             sessionStorage.setItem("HTDG_USER_NAME", t_k.y_b || v_l_b);
             sessionStorage.setItem("HTDG_USER_ROLE", t_k.y_role || "");
-            sessionStorage.setItem("HTDG_USER_YEAR", yearFromSheetMau);
+            sessionStorage.setItem("HTDG_USER_YEAR", t_k.y_namhoc || "");
             
             v_hien_thi_menu_admin(quyenAdminVip);
 
@@ -901,27 +898,39 @@ async function f_x_d() {
             if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = t_k.y_b || v_l_b;
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = t_k.y_role || "";
-            // Không ghi đè năm học hiển thị nếu đã có
-            if (!document.getElementById("ui-nam-hoc").innerText || document.getElementById("ui-nam-hoc").innerText === "..." || document.getElementById("ui-nam-hoc").innerText === "") {
-                document.getElementById("ui-nam-hoc").innerText = yearFromSheetMau;
-            }
+            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || "";
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            let hasData = t_k.y_d && t_k.y_d.length > 0;
+            // === LẤY NĂM HỌC TỪ MENU ===
+            let currentYearElem = document.getElementById("ui-nam-hoc");
+            let currentYear = "";
+            if (currentYearElem) {
+                currentYear = currentYearElem.innerText.trim();
+            }
+            if (!currentYear && v_nam_hoc_hien_tai) currentYear = v_nam_hoc_hien_tai;
+            if (!currentYear) currentYear = "2025-2026";
             
-            if (!hasData) {
-                console.log("Không có dữ liệu sheet riêng cho năm", currentYear, "-> tải mẫu tiêu chí mới cho nhóm:", p_n);
+            // === LẤY NĂM HỌC THỰC TẾ TỪ SHEET RIÊNG ===
+            let sheetYear = (t_k.y_rieng_namhoc ? String(t_k.y_rieng_namhoc).trim() : "");
+            let hasSheetData = t_k.y_d && t_k.y_d.length > 0;
+            
+            let useSheet = hasSheetData && sheetYear !== "" && currentYear !== "" && sheetYear === currentYear;
+            
+            console.log("DEBUG - Năm học trên menu:", currentYear, "| Năm học sheet riêng:", sheetYear, "| Dùng sheet riêng:", useSheet);
+            
+            if (!useSheet) {
+                console.log("Tải mẫu tiêu chí mới cho nhóm:", p_n);
                 const mauTieuChi = await loadMauTieuChi(p_n);
                 if (mauTieuChi && mauTieuChi.length > 0) {
                     f_x_e(mauTieuChi);
-                    v_l_d = ""; 
+                    v_l_d = ""; // Xóa kết quả xếp loại cũ
                 } else {
                     f_x_e([]);
                     hienThiThongBaoUI("Không thể tải mẫu tiêu chí mới. Vui lòng kiểm tra kết nối hoặc liên hệ quản trị.");
                 }
             } else {
-                console.log("Sử dụng dữ liệu từ sheet riêng (năm học", currentYear, ")");
+                console.log("Sử dụng dữ liệu từ sheet riêng (năm học", sheetYear, ")");
                 f_x_e(t_k.y_d);
             }
 
@@ -946,7 +955,7 @@ async function f_x_d() {
             if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = "TÀI KHOẢN KHÔNG HỢP LỆ";
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = "--";
-            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = currentYear;
+            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = "--";
             
             if (document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
             if (document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.remove("a-di");
@@ -1016,12 +1025,6 @@ async function f_x_admin_chon_user() {
     if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
     if (document.getElementById("oChonNhom")) document.getElementById("oChonNhom").value = nhomXacDinh; 
 
-    let currentYearAdmin = document.getElementById("ui-nam-hoc") ? document.getElementById("ui-nam-hoc").innerText.trim() : "";
-    if (!currentYearAdmin || currentYearAdmin === "..." || currentYearAdmin === "") {
-        currentYearAdmin = v_nam_hoc_hien_tai || "2025-2026";
-    }
-    console.log("Admin: Năm học sẽ dùng để lọc sheet riêng =", currentYearAdmin);
-
     if (v_bo_nho_dem_admin[selectedId]) {
         let t_k = v_bo_nho_dem_admin[selectedId];
         v_l_b = t_k.y_a; 
@@ -1036,7 +1039,7 @@ async function f_x_admin_chon_user() {
 
     f_x_j(true);
     try {
-        const t_k = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(selectedId)}&z_p_c=${nhomXacDinh}&z_p_e=${encodeURIComponent(currentYearAdmin)}`);
+        const t_k = await fetchAPI(`${z_y_a}?z_p_a=admin_load&z_p_b=${encodeURIComponent(selectedId)}&z_p_c=${nhomXacDinh}`);
 
         if (t_k.status === 'success') {
             v_bo_nho_dem_admin[selectedId] = t_k; 
@@ -1213,6 +1216,7 @@ function v_f_x_h_debounce() {
     v_timer_h = setTimeout(f_x_h, 250); 
 }
 
+// Hàm f_x_e đã được cập nhật: bỏ qua dòng tiêu chí có dấu * ở đầu
 function f_x_e(m_n) {
     const k_b = document.getElementById("t-b-g");
     if (!k_b) return;
@@ -1231,9 +1235,10 @@ function f_x_e(m_n) {
 
     for (let index = 0; index < m_n.length; index++) {
         const item = m_n[index];
+        // Kiểm tra nếu tên tiêu chí bắt đầu bằng dấu * thì bỏ qua (không hiển thị)
         let tenTieuChi = item.x_a ? item.x_a.toString().trim() : "";
         if (tenTieuChi.startsWith("*")) {
-            continue;
+            continue; // bỏ qua dòng này
         }
 
         let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
