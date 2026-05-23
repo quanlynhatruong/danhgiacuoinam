@@ -259,7 +259,7 @@
             <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
             <div id="vungThuHai" class="a-di">
-                 <table>
+                <table>
                     <thead>
                         <tr>
                             <th width="5%">STT</th>
@@ -269,7 +269,7 @@
                         </tr>
                     </thead>
                     <tbody id="t-b-g"></tbody>
-                 </table>
+                </table>
 
                 <div class="v-t-k">
                     <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #0056b3; font-size: 22px; line-height: 1.6;">
@@ -836,7 +836,7 @@ function f_x_c() {
     }
 }
 
-// ================= HÀM f_x_d ĐÃ CẬP NHẬT (gửi kèm năm học) =================
+// ================= HÀM f_x_d ĐÃ CẬP NHẬT (không ghi đè năm học) =================
 async function f_x_d() {
     v_che_do_xem_admin = false; 
     let elNhap = document.getElementById("oNhapChinh");
@@ -854,17 +854,17 @@ async function f_x_d() {
         return;
     }
     
-    // Lấy năm học hiện tại từ giao diện (nếu chưa có thì dùng mặc định)
     let currentYearElem = document.getElementById("ui-nam-hoc");
     let currentYear = currentYearElem ? currentYearElem.innerText.trim() : "";
-    if (!currentYear && v_nam_hoc_hien_tai) currentYear = v_nam_hoc_hien_tai;
-    if (!currentYear) currentYear = "2025-2026";
+    if (!currentYear || currentYear === "..." || currentYear === "") {
+        currentYear = v_nam_hoc_hien_tai || "2025-2026";
+    }
+    console.log("Client: Năm học sẽ dùng để lọc sheet riêng =", currentYear);
     
     f_x_j(true);
     try {
         const p_n_khac = (p_n.includes('giaovien')) ? 'nhanvien' : 'giaovienc1';
         
-        // Gọi API có gửi kèm năm học (z_p_e)
         const [t_k, t_k_khac] = await Promise.all([
             fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}&z_p_e=${encodeURIComponent(currentYear)}`),
             fetchAPI(`${z_y_a}?z_p_a=m_k_o&z_p_b=${encodeURIComponent(p_c)}&z_p_c=${p_n_khac}&z_p_d=${encodeURIComponent(p_chuc_vu_chon)}&z_p_e=${encodeURIComponent(currentYear)}`)
@@ -874,8 +874,9 @@ async function f_x_d() {
             v_che_do_khach = false; 
             v_l_a = p_c; v_l_b = t_k.y_a; v_l_c = t_k.y_e || {}; v_l_d = t_k.y_c || ""; 
             
-            v_nam_hoc_hien_tai = t_k.y_namhoc || currentYear;
-
+            let yearFromSheetMau = t_k.y_namhoc || currentYear;
+            v_nam_hoc_hien_tai = yearFromSheetMau;
+            
             let roleStr = t_k.y_role ? t_k.y_role.toLowerCase() : "";
             let quyenAdmin = roleStr.includes('admin');
             let quyenAdminVip = roleStr.includes('admin vip');
@@ -884,7 +885,7 @@ async function f_x_d() {
             sessionStorage.setItem("HTDG_IS_ADMIN_VIP", quyenAdminVip ? "true" : "false"); 
             sessionStorage.setItem("HTDG_USER_NAME", t_k.y_b || v_l_b);
             sessionStorage.setItem("HTDG_USER_ROLE", t_k.y_role || "");
-            sessionStorage.setItem("HTDG_USER_YEAR", t_k.y_namhoc || "");
+            sessionStorage.setItem("HTDG_USER_YEAR", yearFromSheetMau);
             
             v_hien_thi_menu_admin(quyenAdminVip);
 
@@ -900,11 +901,13 @@ async function f_x_d() {
             if (document.getElementById("vungThongTinUser")) document.getElementById("vungThongTinUser").style.display = "block";
             if (document.getElementById("ui-ten-hien-thi")) document.getElementById("ui-ten-hien-thi").innerText = t_k.y_b || v_l_b;
             if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = t_k.y_role || "";
-            if (document.getElementById("ui-nam-hoc")) document.getElementById("ui-nam-hoc").innerText = t_k.y_namhoc || currentYear;
+            // Không ghi đè năm học hiển thị nếu đã có
+            if (!document.getElementById("ui-nam-hoc").innerText || document.getElementById("ui-nam-hoc").innerText === "..." || document.getElementById("ui-nam-hoc").innerText === "") {
+                document.getElementById("ui-nam-hoc").innerText = yearFromSheetMau;
+            }
             if (document.getElementById("ui-xep-loai")) document.getElementById("ui-xep-loai").innerText = "Tra cứu bên Kết quả";
             if (document.getElementById("ui-dung-thu")) document.getElementById("ui-dung-thu").innerText = "--";
 
-            // Kiểm tra dữ liệu trả về từ server (đã được lọc theo năm)
             let hasData = t_k.y_d && t_k.y_d.length > 0;
             
             if (!hasData) {
@@ -1013,8 +1016,11 @@ async function f_x_admin_chon_user() {
     if (document.getElementById("ui-phan-loai")) document.getElementById("ui-phan-loai").innerText = (nhomXacDinh === 'nhanvien') ? "NHÂN VIÊN" : "GIÁO VIÊN";
     if (document.getElementById("oChonNhom")) document.getElementById("oChonNhom").value = nhomXacDinh; 
 
-    // Lấy năm học hiện tại để gửi lên server
-    let currentYearAdmin = document.getElementById("ui-nam-hoc") ? document.getElementById("ui-nam-hoc").innerText.trim() : (v_nam_hoc_hien_tai || "2025-2026");
+    let currentYearAdmin = document.getElementById("ui-nam-hoc") ? document.getElementById("ui-nam-hoc").innerText.trim() : "";
+    if (!currentYearAdmin || currentYearAdmin === "..." || currentYearAdmin === "") {
+        currentYearAdmin = v_nam_hoc_hien_tai || "2025-2026";
+    }
+    console.log("Admin: Năm học sẽ dùng để lọc sheet riêng =", currentYearAdmin);
 
     if (v_bo_nho_dem_admin[selectedId]) {
         let t_k = v_bo_nho_dem_admin[selectedId];
@@ -1262,7 +1268,7 @@ function f_x_e(m_n) {
         
         let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
         
-        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></table>`;
+        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
     }
     
     k_b.innerHTML = khoiDOM; 
