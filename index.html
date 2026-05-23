@@ -27,7 +27,6 @@
         .the-chuyen.active { background-color: rgba(255, 255, 255, 0.2); font-weight: bold; color: #ffc107; }
         .b-tuong { margin-right: 12px; font-size: 18px; display: inline-block; width: 24px; text-align: center; }
         
-        /* Submenu styling */
         .submenu-tieu-chi {
             display: flex;
             flex-direction: column;
@@ -214,7 +213,6 @@
                 <span class="b-tuong">👥</span> Quản lý quyền
             </span>
             
-            <!-- Tab mẹ Tiêu chí đánh giá -->
             <span class="the-chuyen" id="menu-tieu-chi-cha" style="display: none;" onclick="toggleSubmenuTieuChi(event)">
                 <span class="b-tuong">📋</span> Tiêu chí đánh giá
                 <span style="margin-left: auto; font-size: 14px;">▼</span>
@@ -261,7 +259,7 @@
             <div id="h-dang-tai">Đang tự động đối chiếu và tải dữ liệu...</div>
 
             <div id="vungThuHai" class="a-di">
-                <table>
+                 <table>
                     <thead>
                         <tr>
                             <th width="5%">STT</th>
@@ -271,7 +269,7 @@
                         </tr>
                     </thead>
                     <tbody id="t-b-g"></tbody>
-                </table>
+                 </table>
 
                 <div class="v-t-k">
                     <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; color: #0056b3; font-size: 22px; line-height: 1.6;">
@@ -544,7 +542,6 @@ async function fetchAPI(url) {
     }
 }
 
-// ================= HÀM LẤY MẪU TIÊU CHÍ MỚI =================
 async function loadMauTieuChi(nhom) {
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     try {
@@ -727,7 +724,6 @@ function f_x_mo_quan_ly_quyen() {
     }
 }
 
-// ================= MODULE TIÊU CHÍ =================
 function f_x_mo_tieu_chi_gv_c1() {
     if(document.getElementById("vungThuNhat")) document.getElementById("vungThuNhat").classList.add("a-di");
     if(document.getElementById("vungThuHai")) document.getElementById("vungThuHai").classList.add("a-di");
@@ -802,7 +798,6 @@ function f_x_mo_tieu_chi_nv() {
         hienThiThongBaoUI("Module quản lý tiêu chí nhân viên chưa được tải xong.");
     }
 }
-// ================= KẾT THÚC MODULE TIÊU CHÍ =================
 
 function f_x_c() {
     let vungQuyen = document.getElementById("cap-quyen-ui");
@@ -1212,7 +1207,6 @@ function v_f_x_h_debounce() {
     v_timer_h = setTimeout(f_x_h, 250); 
 }
 
-// Hàm f_x_e đã được cập nhật: bỏ qua dòng tiêu chí có dấu * ở đầu
 function f_x_e(m_n) {
     const k_b = document.getElementById("t-b-g");
     if (!k_b) return;
@@ -1231,10 +1225,9 @@ function f_x_e(m_n) {
 
     for (let index = 0; index < m_n.length; index++) {
         const item = m_n[index];
-        // Kiểm tra nếu tên tiêu chí bắt đầu bằng dấu * thì bỏ qua (không hiển thị)
         let tenTieuChi = item.x_a ? item.x_a.toString().trim() : "";
         if (tenTieuChi.startsWith("*")) {
-            continue; // bỏ qua dòng này
+            continue;
         }
 
         let tg = (item.x_b === "undefined" || !item.x_b) ? "" : item.x_b.toString().trim();
@@ -1269,7 +1262,7 @@ function f_x_e(m_n) {
         
         let attr = `data-qd="${item.q_d||''}" data-xs="${item.g_xs||''}" data-htt="${item.g_htt||''}" data-ht="${item.g_ht||''}" data-cht="${item.g_cht||''}"`;
         
-        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></tr>`;
+        khoiDOM += `<tr style="${l_p?'background:#f1f8ff;font-weight:bold;color:var(--mau-c);':''}"><td style="text-align: center; vertical-align: middle;">${l_p?"":h_s}</td><td class="m-cot-mot" ${attr} style="vertical-align: middle;">${item.x_a}</td><td style="text-align: center; vertical-align: middle;">${tg==='THANHTICH_HS_DONG'?'Quy chế':tg}</td><td style="vertical-align: middle;">${l_p?"":html}</td></table>`;
     }
     
     k_b.innerHTML = khoiDOM; 
