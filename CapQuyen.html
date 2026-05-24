@@ -259,7 +259,7 @@ function cq_ThongBaoThanhCong(noiDung) {
 }
 
 async function cq_LuuCapNhat() {
-    // Kiểm tra trùng ID toàn bộ - có hiển thị giá trị trùng
+    // Kiểm tra trùng ID toàn bộ
     const allIdInputs = document.querySelectorAll('#tbody-quyen .cq-id');
     let duplicateValue = null;
     let duplicateInputs = [];
@@ -358,7 +358,7 @@ async function cq_LuuCapNhat() {
     }
 }
 
-// =============== KIỂM TRA TRÙNG KHI BLUR (CÓ HIỂN THỊ GIÁ TRỊ) ===============
+// =============== KIỂM TRA TRÙNG NGAY KHI RỜI KHỎI Ô (FOCUSOUT) ===============
 function cq_KiemTraTrungID(inputElement) {
     const currentValue = inputElement.value.trim();
     if (currentValue === "") return true;
@@ -386,7 +386,7 @@ function cq_KiemTraTrungID(inputElement) {
     }
 }
 
-function cq_BlurHandler(event) {
+function cq_FocusOutHandler(event) {
     const target = event.target;
     if (target.classList && target.classList.contains('cq-id')) {
         cq_KiemTraTrungID(target);
@@ -396,7 +396,8 @@ function cq_BlurHandler(event) {
 function cq_GanKiemTraTrung() {
     const tbody = document.getElementById('tbody-quyen');
     if (!tbody) return;
-    tbody.removeEventListener('blur', cq_BlurHandler);
-    tbody.addEventListener('blur', cq_BlurHandler);
+    // Sử dụng focusout (bubble) thay vì blur
+    tbody.removeEventListener('focusout', cq_FocusOutHandler);
+    tbody.addEventListener('focusout', cq_FocusOutHandler);
 }
 </script>
