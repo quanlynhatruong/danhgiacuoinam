@@ -199,31 +199,26 @@ function cq_XoaDong(btn) {
     f_x_j(true);
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
 
-    fetch(z_y_a, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'xoa_sheet', id_sheet: idSheet })
-    })
+    fetch(`${z_y_a}?z_p_a=xoa_sheet&z_p_b=${encodeURIComponent(idSheet)}`)
     .then(response => response.json())
     .then(data => {
         f_x_j(false);
+        // Luôn xóa dòng trên web
+        row.remove();
+        cq_CapNhatSTT();
         if (data.status === 'success') {
-            // Chỉ xóa dòng khi server xóa sheet thành công
-            row.remove();
-            cq_CapNhatSTT();
             hienThiThongBaoUI(`Nguồn lưu trữ "${idSheet}" đã được xóa thành công.`);
-            if (typeof cq_TaiDuLieu === 'function') cq_TaiDuLieu();
-        } else if (data.status === 'error') {
-            // Không xóa dòng nếu có lỗi
-            if (data.message && data.message.includes('Không tìm thấy sheet')) {
-                hienThiThongBaoUI(`Nguồn Lưu có tên "${idSheet}" chưa được tạo lập.`);
-            } else {
-                hienThiThongBaoUI(`Lỗi: ${data.message}`);
-            }
+        } else {
+            hienThiThongBaoUI(`Nguồn Lưu có tên "${idSheet}" chưa được tạo lập.`);
         }
+        // Tải lại danh sách quyền để đồng bộ (tùy chọn)
+        if (typeof cq_TaiDuLieu === 'function') cq_TaiDuLieu();
     })
     .catch(err => {
         f_x_j(false);
+        // Vẫn xóa dòng khi lỗi kết nối (theo yêu cầu)
+        row.remove();
+        cq_CapNhatSTT();
         hienThiThongBaoUI("Lỗi kết nối: " + err.message);
     });
 }
