@@ -140,7 +140,6 @@ function cq_HienThiBang() {
     cq_DuLieuGoc.forEach((item, index) => {
         tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
     });
-    cq_GanKiemTraTrung();
 }
 
 function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
@@ -168,11 +167,12 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
     }
     selHTML += `</select>`;
 
+    // Gắn sự kiện blur để kiểm tra trùng và input để reset viền
     return `
         <tr>
             <td><button class="btn-xoa-dong" onclick="cq_XoaDong(this)">Xóa</button></td>
             <td class="cq-stt">${index + 1}</td>
-            <td><input type="text" class="cq-id" value="${id_sheet}"></td>
+            <td><input type="text" class="cq-id" value="${id_sheet}" onblur="cq_KiemTraTrungID(this)" oninput="cq_ResetBorder(this)"></td>
             <td><input type="text" class="cq-email" value="${email}"></td>
             <td><input type="text" class="cq-hoten" value="${ho_ten}"></td>
             <td>${selHTML}</td>
@@ -186,7 +186,6 @@ function cq_ThemDongMoi() {
     cq_CapNhatSTT();
     const firstIdInput = tbody.querySelector('.cq-id');
     if (firstIdInput) firstIdInput.focus();
-    cq_GanKiemTraTrung();
 }
 
 function cq_XoaDong(btn) {
@@ -358,10 +357,14 @@ async function cq_LuuCapNhat() {
     }
 }
 
-// =============== KIỂM TRA TRÙNG NGAY KHI RỜI KHỎI Ô (FOCUSOUT) ===============
+// =============== KIỂM TRA TRÙNG NGAY KHI RỜI KHỎI Ô (BLUR) ===============
 function cq_KiemTraTrungID(inputElement) {
     const currentValue = inputElement.value.trim();
-    if (currentValue === "") return true;
+    if (currentValue === "") {
+        inputElement.style.borderColor = "#ddd";
+        inputElement.style.borderWidth = "1px";
+        return true;
+    }
     
     const allIdInputs = document.querySelectorAll('#tbody-quyen .cq-id');
     let isDuplicate = false;
@@ -386,18 +389,9 @@ function cq_KiemTraTrungID(inputElement) {
     }
 }
 
-function cq_FocusOutHandler(event) {
-    const target = event.target;
-    if (target.classList && target.classList.contains('cq-id')) {
-        cq_KiemTraTrungID(target);
-    }
-}
-
-function cq_GanKiemTraTrung() {
-    const tbody = document.getElementById('tbody-quyen');
-    if (!tbody) return;
-    // Sử dụng focusout (bubble) thay vì blur
-    tbody.removeEventListener('focusout', cq_FocusOutHandler);
-    tbody.addEventListener('focusout', cq_FocusOutHandler);
+// Hàm reset border khi người dùng bắt đầu sửa (xóa viền đỏ)
+function cq_ResetBorder(inputElement) {
+    inputElement.style.borderColor = "#ddd";
+    inputElement.style.borderWidth = "1px";
 }
 </script>
