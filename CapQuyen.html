@@ -186,10 +186,35 @@ function cq_ThemDongMoi() {
 }
 
 function cq_XoaDong(btn) {
-    if (confirm("Đồng chí có chắc chắn muốn xóa quyền truy cập của nhân sự này khỏi CSDL?")) {
-        btn.closest('tr').remove();
-        cq_CapNhatSTT();
+    const row = btn.closest('tr');
+    const idSheet = row.querySelector('.cq-id').value.trim();
+    if (!idSheet) {
+        hienThiThongBaoUI("Không tìm thấy tên sheet để xóa.");
+        return;
     }
+    if (!confirm(`Đồng chí có chắc chắn muốn xóa sheet "${idSheet}" và toàn bộ dữ liệu đánh giá của nhân sự này không?\nHành động này không thể hoàn tác!`)) {
+        return;
+    }
+
+    f_x_j(true); // hiện loading (hàm toàn cục từ index.html)
+    const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
+
+    fetch(z_y_a, {
+        method: 'POST',
+        mode: 'no-cors', // giữ nguyên để tương thích với các gọi khác
+        body: JSON.stringify({ action: 'xoa_sheet', id_sheet: idSheet })
+    })
+    .then(() => {
+        // Xóa dòng trên giao diện web
+        row.remove();
+        cq_CapNhatSTT(); // cập nhật lại STT
+        f_x_j(false);
+        hienThiThongBaoUI(`Đã xóa sheet "${idSheet}". Nhấn "CẬP NHẬT" để đồng bộ danh sách quyền.`);
+    })
+    .catch(err => {
+        f_x_j(false);
+        hienThiThongBaoUI("Lỗi khi xóa sheet: " + err.message);
+    });
 }
 
 function cq_CapNhatSTT() {
