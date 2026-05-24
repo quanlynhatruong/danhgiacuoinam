@@ -9,16 +9,7 @@
     const style = document.createElement('style');
     style.textContent = `
         #cap-quyen-ui { display: none; margin-top: 0px; background: white; padding: 0px 20px 15px 20px; border-radius: 5px; box-sizing: border-box; }
-        .cq-header-sticky { 
-            position: sticky; 
-            top: 77px; 
-            background: #fff; 
-            z-index: 990; 
-            padding-top: 5px;
-            padding-bottom: 10px; 
-            margin-bottom: 10px;  
-            border-bottom: 2px solid red; 
-        }
+        .cq-header-sticky { position: sticky; top: 77px; background: #fff; z-index: 990; padding-top: 5px; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 2px solid red; }
         .cq-tieu-de { color: var(--mau-c); text-transform: uppercase; text-align: center; margin: 0 0 10px 0; padding: 0; font-size: 20px; font-weight: bold; }
         .cq-hanh-dong { display: flex; justify-content: space-between; align-items: center; }
         .table-quyen { width: 100%; border-collapse: collapse; margin-top: 0; }
@@ -47,21 +38,13 @@
             <div style="overflow-x: auto;">
                 <table class="table-quyen">
                     <thead>
-                        <tr>
-                            <th width="8%">Sửa</th>
-                            <th width="7%">STT</th>
-                            <th width="20%">Tên sheet (ID)</th>
-                            <th width="25%">Địa chỉ hộp thư (Email)</th>
-                            <th width="20%">Họ và tên</th>
-                            <th width="20%">Quyền</th>
-                        </tr>
+                        <tr><th width="8%">Sửa</th><th width="7%">STT</th><th width="20%">Tên sheet (ID)</th><th width="25%">Địa chỉ hộp thư (Email)</th><th width="20%">Họ và tên</th><th width="20%">Quyền</th></tr>
                     </thead>
                     <tbody id="tbody-quyen"></tbody>
                 </table>
             </div>
         </div>
     `;
-    
     const mainUi = document.getElementById('main-ui');
     if (mainUi) mainUi.insertAdjacentHTML('beforeend', capQuyenHTML);
 
@@ -75,20 +58,10 @@
                     const sysHeader = document.querySelector('.k-header-sticky');
                     const cqHeader = document.querySelector('.cq-header-sticky');
                     if (isVisible) {
-                        if (kDau) {
-                            kDau.style.borderBottom = 'none';
-                            kDau.style.paddingBottom = '0px';
-                            kDau.style.marginBottom = '0px';
-                        }
-                        if (sysHeader && cqHeader) {
-                            cqHeader.style.top = sysHeader.offsetHeight + 'px';
-                        }
+                        if (kDau) { kDau.style.borderBottom = 'none'; kDau.style.paddingBottom = '0px'; kDau.style.marginBottom = '0px'; }
+                        if (sysHeader && cqHeader) cqHeader.style.top = sysHeader.offsetHeight + 'px';
                     } else {
-                        if (kDau) {
-                            kDau.style.borderBottom = '';
-                            kDau.style.paddingBottom = '';
-                            kDau.style.marginBottom = '';
-                        }
+                        if (kDau) { kDau.style.borderBottom = ''; kDau.style.paddingBottom = ''; kDau.style.marginBottom = ''; }
                     }
                 }
             });
@@ -100,7 +73,7 @@
 var cq_DuLieuGoc = [];
 
 async function cq_TaiDuLieu() {
-    f_x_j(true); 
+    f_x_j(true);
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
         const response = await fetchAPI(z_y_a + "?z_p_a=get_quyen");
@@ -122,7 +95,6 @@ function cq_HienThiBang() {
     cq_DuLieuGoc.forEach((item, index) => {
         tbody.insertAdjacentHTML('beforeend', cq_TaoDHTMLDong(index, item.id_sheet, item.email, item.ho_ten, item.quyen));
     });
-    cq_GanKiemTraTrung();
 }
 
 function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
@@ -130,31 +102,16 @@ function cq_TaoDHTMLDong(index, id_sheet, email, ho_ten, quyen) {
     let selHTML = `<select class="cq-quyen">`;
     let found = false;
     let quyenChuan = quyen ? quyen.toString().trim() : ""; 
-    
     opts.forEach(opt => {
         let val = opt === "--Chọn quyền--" ? "" : opt; 
         let sel = (val.toLowerCase() === quyenChuan.toLowerCase()) ? "selected" : "";
-        if (quyenChuan === "" && val === "") {
-            sel = "selected";
-            found = true;
-        } else if (sel) found = true;
+        if (quyenChuan === "" && val === "") { sel = "selected"; found = true; }
+        else if (sel) found = true;
         selHTML += `<option value="${val}" ${sel}>${opt}</option>`;
     });
-    if (!found && quyenChuan !== "") {
-        selHTML += `<option value="${quyenChuan}" selected>${quyenChuan}</option>`;
-    }
+    if (!found && quyenChuan !== "") selHTML += `<option value="${quyenChuan}" selected>${quyenChuan}</option>`;
     selHTML += `</select>`;
-
-    return `
-        <tr>
-            <td><button class="btn-xoa-dong" onclick="cq_XoaDong(this)">Xóa</button></td>
-            <td class="cq-stt">${index + 1}</td>
-            <td><input type="text" class="cq-id" value="${id_sheet}"></td>
-            <td><input type="text" class="cq-email" value="${email}"></td>
-            <td><input type="text" class="cq-hoten" value="${ho_ten}"></td>
-            <td>${selHTML}</td>
-        </tr>
-    `;
+    return `<tr><td><button class="btn-xoa-dong" onclick="cq_XoaDong(this)">Xóa</button></td><td class="cq-stt">${index+1}</td><td><input type="text" class="cq-id" value="${id_sheet}" onblur="cq_KiemTraTrungID(this)" oninput="cq_ResetBorder(this)"></td><td><input type="text" class="cq-email" value="${email}"></td><td><input type="text" class="cq-hoten" value="${ho_ten}"><td>${selHTML}</td>`;
 }
 
 function cq_ThemDongMoi() {
@@ -163,7 +120,6 @@ function cq_ThemDongMoi() {
     cq_CapNhatSTT();
     const firstIdInput = tbody.querySelector('.cq-id');
     if (firstIdInput) firstIdInput.focus();
-    cq_GanKiemTraTrung();
 }
 
 function cq_XoaDong(btn) {
@@ -176,21 +132,23 @@ function cq_XoaDong(btn) {
     if (!confirm(`Đồng chí có chắc chắn muốn xóa sheet "${idSheet}" và toàn bộ dữ liệu đánh giá của nhân sự này không?\nHành động này không thể hoàn tác!`)) {
         return;
     }
-    f_x_j(true);
+
+    // Xóa dòng ngay lập tức trên giao diện
+    row.remove();
+    cq_CapNhatSTT();
+
+    // Gửi yêu cầu xóa sheet (không tải lại danh sách)
     const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
     fetch(`${z_y_a}?z_p_a=xoa_sheet&z_p_b=${encodeURIComponent(idSheet)}`)
     .then(response => response.json())
     .then(data => {
-        f_x_j(false);
-        row.remove();
-        cq_CapNhatSTT();
-        hienThiThongBaoUI(data.status === 'success' ? `Xóa thành công ${idSheet}` : `Chưa khởi tạo nơi lưu`);
-        if (typeof cq_TaiDuLieu === 'function') cq_TaiDuLieu();
+        if (data.status === 'success') {
+            hienThiThongBaoUI(`Xóa thành công ${idSheet}`);
+        } else {
+            hienThiThongBaoUI(`Chưa khởi tạo nơi lưu`);
+        }
     })
     .catch(err => {
-        f_x_j(false);
-        row.remove();
-        cq_CapNhatSTT();
         hienThiThongBaoUI("Lỗi kết nối: " + err.message);
     });
 }
@@ -227,6 +185,7 @@ function cq_ThongBaoThanhCong(noiDung) {
 }
 
 async function cq_LuuCapNhat() {
+    // Kiểm tra trùng ID toàn bộ
     const allIdInputs = document.querySelectorAll('#tbody-quyen .cq-id');
     let duplicateValue = null;
     let duplicateInputs = [];
@@ -255,37 +214,31 @@ async function cq_LuuCapNhat() {
     const tbody = document.getElementById('tbody-quyen');
     let m_d = [];
     let kiemTraHopLe = true;
-    
     Array.from(tbody.children).forEach(tr => {
         let id = tr.querySelector('.cq-id').value.trim();
         let email = tr.querySelector('.cq-email').value.trim();
         let hoten = tr.querySelector('.cq-hoten').value.trim();
         let theSelectQuyen = tr.querySelector('.cq-quyen');
         let quyen = theSelectQuyen.value.trim();
-        
         theSelectQuyen.style.borderColor = "#ddd";
         theSelectQuyen.style.borderWidth = "1px";
-        
         if (id !== "" || email !== "" || hoten !== "") {
             if (quyen === "") {
                 kiemTraHopLe = false;
-                theSelectQuyen.style.borderColor = "#dc3545"; 
+                theSelectQuyen.style.borderColor = "#dc3545";
                 theSelectQuyen.style.borderWidth = "2px";
             } else {
                 m_d.push({ id_sheet: id, email: email, ho_ten: hoten, quyen: quyen });
             }
         }
     });
-
     if (!kiemTraHopLe) {
         hienThiThongBaoUI("Đồng chí vui lòng chọn đầy đủ quyền cho các nhân sự trước khi Lưu thay đổi!");
-        return; 
+        return;
     }
-
     let isChanged = false;
-    if (m_d.length !== cq_DuLieuGoc.length) {
-        isChanged = true;
-    } else {
+    if (m_d.length !== cq_DuLieuGoc.length) isChanged = true;
+    else {
         for (let i = 0; i < m_d.length; i++) {
             let gocId = (cq_DuLieuGoc[i].id_sheet || "").toString().trim();
             let gocEmail = (cq_DuLieuGoc[i].email || "").toString().trim();
@@ -297,24 +250,22 @@ async function cq_LuuCapNhat() {
             }
         }
     }
-
     if (!isChanged) {
         hienThiThongBaoUI("Dữ liệu không có sự thay đổi nào để lưu!");
         return;
     }
-
     document.getElementById("o-luu-overlay").style.display = "flex";
     try {
         const z_y_a = (typeof DG_CONFIG_GAS_URL !== 'undefined') ? DG_CONFIG_GAS_URL : "";
         await fetch(z_y_a, {
             method: 'POST',
-            mode: 'no-cors', 
+            mode: 'no-cors',
             body: JSON.stringify({ action: 'luu_quyen', data: m_d })
         });
         setTimeout(() => {
             document.getElementById("o-luu-overlay").style.display = "none";
             cq_ThongBaoThanhCong("Hệ thống đã cập nhật danh sách Quyền Truy Cập thành công!");
-            cq_TaiDuLieu(); 
+            cq_TaiDuLieu();
         }, 1500);
     } catch (err) {
         document.getElementById("o-luu-overlay").style.display = "none";
@@ -322,10 +273,7 @@ async function cq_LuuCapNhat() {
     }
 }
 
-/* ========== KIỂM TRA TRÙNG TỨC THÌ KHI NHẬP VÀ KHI RỜI Ô ========== */
-
-// Hàm chỉ cập nhật trạng thái viền (dùng cho sự kiện input)
-function cq_CapNhatTrangThaiTrung(inputElement) {
+function cq_KiemTraTrungID(inputElement) {
     const currentValue = inputElement.value.trim();
     if (currentValue === "") {
         inputElement.style.borderColor = "#ddd";
@@ -344,6 +292,8 @@ function cq_CapNhatTrangThaiTrung(inputElement) {
     if (isDuplicate) {
         inputElement.style.borderColor = "#dc3545";
         inputElement.style.borderWidth = "2px";
+        hienThiThongBaoUI(`ID "${currentValue}" đã tồn tại`);
+        inputElement.focus();
         return false;
     } else {
         inputElement.style.borderColor = "#ddd";
@@ -352,42 +302,8 @@ function cq_CapNhatTrangThaiTrung(inputElement) {
     }
 }
 
-// Hàm kiểm tra trùng khi rời ô (focusout) – có thông báo và focus lại
-function cq_KiemTraTrungID(inputElement) {
-    const currentValue = inputElement.value.trim();
-    if (currentValue === "") return true;
-    const ketQua = cq_CapNhatTrangThaiTrung(inputElement);
-    if (!ketQua) {
-        hienThiThongBaoUI(`ID "${currentValue}" đã tồn tại`);
-        inputElement.focus();
-    }
-    return ketQua;
-}
-
-// Xử lý sự kiện input: chỉ cập nhật viền, không thông báo
-function cq_InputHandler(event) {
-    const target = event.target;
-    if (target.classList && target.classList.contains('cq-id')) {
-        cq_CapNhatTrangThaiTrung(target);
-    }
-}
-
-// Xử lý sự kiện focusout: kiểm tra đầy đủ
-function cq_FocusOutHandler(event) {
-    const target = event.target;
-    if (target.classList && target.classList.contains('cq-id')) {
-        cq_KiemTraTrungID(target);
-    }
-}
-
-function cq_GanKiemTraTrung() {
-    const tbody = document.getElementById('tbody-quyen');
-    if (!tbody) return;
-    // Gỡ bỏ listener cũ để tránh trùng lặp
-    tbody.removeEventListener('focusout', cq_FocusOutHandler);
-    tbody.removeEventListener('input', cq_InputHandler);
-    // Gắn mới
-    tbody.addEventListener('focusout', cq_FocusOutHandler);
-    tbody.addEventListener('input', cq_InputHandler);
+function cq_ResetBorder(inputElement) {
+    inputElement.style.borderColor = "#ddd";
+    inputElement.style.borderWidth = "1px";
 }
 </script>
