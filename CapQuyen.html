@@ -38,7 +38,7 @@
             <div style="overflow-x: auto;">
                 <table class="table-quyen">
                     <thead>
-                        <tr><th width="8%">Sửa</th><th width="7%">STT</th><th width="20%">(ID)</th><th width="25%">Địa chỉ hộp thư (Email)</th><th width="20%">Họ và tên</th><th width="20%">Quyền</th></tr>
+                        <tr><th width="8%">Sửa</th><th width="7%">STT</th><th width="20%">Tên sheet (ID)</th><th width="25%">Địa chỉ hộp thư (Email)</th><th width="20%">Họ và tên</th><th width="20%">Quyền</th></tr>
                     </thead>
                     <tbody id="tbody-quyen"></tbody>
                 </table>
@@ -127,10 +127,10 @@ function cq_XoaDong(btn) {
     const row = btn.closest('tr');
     const idSheet = row.querySelector('.cq-id').value.trim();
     if (!idSheet) {
-        hienThiThongBaoUI("Không tìm thấy tên ID để xóa.");
+        hienThiThongBaoUI("Không tìm thấy tên sheet để xóa.");
         return;
     }
-    if (!confirm(`Đồng chí có chắc chắn muốn xóa ID "${idSheet}" và toàn bộ dữ liệu đánh giá của nhân sự này không?\nHành động này không thể hoàn tác!`)) {
+    if (!confirm(`Đồng chí có chắc chắn muốn xóa sheet "${idSheet}" và toàn bộ dữ liệu đánh giá của nhân sự này không?\nHành động này không thể hoàn tác!`)) {
         return;
     }
 
