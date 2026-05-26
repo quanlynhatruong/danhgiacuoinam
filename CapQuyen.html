@@ -141,7 +141,7 @@
                 <tr>
                     <th style="width: 40px">Xóa</th>
                     <th style="width: 50px">STT</th>
-                    <th>ID sheet</th>
+                    <th>(ID)</th>
                     <th>Hộp thư (Email)</th>
                     <th>Tên hiển thị</th>
                     <th style="width: 130px">Quyền</th>
@@ -154,7 +154,7 @@
     </div>
     <div class="thong-bao-nho">
         <i class="bi bi-info-circle"></i> Ghi chú: 
-        <strong>ID sheet</strong> không được trùng nhau (không phân biệt hoa/thường).<br>
+        <strong>(ID)</strong> không được trùng nhau (không phân biệt hoa/thường).<br>
         Quyền <strong>x</strong> = Người giao việc, <strong>xx</strong> = Quản trị (có ô chọn GV), <strong>xxx</strong> = Quản trị cao cấp (có tab Cấp quyền).<br>
         <strong class="text-danger">Khi xóa một dòng, sheet riêng của người đó (nếu có) cũng sẽ bị xóa vĩnh viễn!</strong>
     </div>
@@ -301,7 +301,7 @@
                     return async function() {
                         var idSheet = currentList[idx].idSheet;
                         if (!idSheet) {
-                            alert('Không thể xóa: ID sheet trống.');
+                            alert('Không thể xóa: (ID) trống.');
                             return;
                         }
                         if (confirm('Bạn có chắc muốn xóa cán bộ "' + idSheet + '"?\n⚠️ Sheet riêng của người này (nếu có) sẽ bị xóa vĩnh viễn!')) {
@@ -388,7 +388,7 @@
                     var lowerNew = newVal.toLowerCase();
                     var duplicate = currentList.some(function(item, i) { return i !== idx && item.idSheet.toLowerCase() === lowerNew; });
                     if (duplicate) {
-                        showTempError(this, 'ID sheet đã tồn tại!');
+                        showTempError(this, '(ID) đã tồn tại!');
                         this.value = currentList[idx].idSheet;
                         return;
                     }
@@ -400,7 +400,7 @@
                     var lowerNew = newVal.toLowerCase();
                     var duplicate = currentList.some(function(item, i) { return i !== idx && item.idSheet.toLowerCase() === lowerNew; });
                     if (duplicate) {
-                        showTempError(this, 'ID sheet không được trùng!');
+                        showTempError(this, '(ID) không được trùng!');
                         this.value = currentList[idx].idSheet;
                     } else {
                         currentList[idx].idSheet = newVal;
@@ -441,12 +441,12 @@
             for (var i = 0; i < currentList.length; i++) {
                 var id = currentList[i].idSheet.trim();
                 if (id === '') {
-                    alert('Dòng thứ ' + (i+1) + ' chưa nhập ID sheet.');
+                    alert('Dòng thứ ' + (i+1) + ' chưa nhập (ID).');
                     return false;
                 }
                 var lower = id.toLowerCase();
                 if (map.has(lower)) {
-                    alert('ID sheet "' + id + '" bị trùng (dòng ' + (map.get(lower)+1) + ' và ' + (i+1) + ').');
+                    alert('(ID) "' + id + '" bị trùng (dòng ' + (map.get(lower)+1) + ' và ' + (i+1) + ').');
                     return false;
                 }
                 map.set(lower, i);
@@ -476,7 +476,7 @@
             btn.disabled = true;
             try {
                 await capNhatDanhSach(currentList);
-                alert('✅ Thành công\nĐã cập nhật năm học và dữ liệu quyền vào sheet KHAIBAO.');
+                alert('✅ Thành công\nĐã cập nhật năm học và dữ liệu quyền vào hệ thông.');
                 await taiLaiDuLieu();  // tải lại danh sách quyền (có thể có thay đổi từ server)
             } catch (err) {
                 alert('❌ Lỗi lưu danh sách quyền: ' + err.message);
