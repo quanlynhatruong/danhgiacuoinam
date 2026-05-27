@@ -237,6 +237,12 @@ async function cq_LuuCapNhat() {
         hienThiThongBaoUI("Đồng chí vui lòng chọn đầy đủ quyền cho các nhân sự trước khi Lưu thay đổi!");
         return;
     }
+    // Kiểm tra bắt buộc có ít nhất một Admin VIP
+    const hasAdminVip = m_d.some(item => item.quyen === "Admin VIP");
+    if (!hasAdminVip) {
+        hienThiThongBaoUI("Hệ thống yêu cầu phải có ít nhất một tài khoản với quyền 'Admin VIP' để quản trị. Vui lòng thêm hoặc sửa quyền một người dùng thành Admin VIP trước khi lưu.");
+        return;
+    }
     let isChanged = false;
     if (m_d.length !== cq_DuLieuGoc.length) isChanged = true;
     else {
